@@ -29,6 +29,11 @@ export class ChatController {
     return this.chatService.getMyRooms(user.id);
   }
 
+  @Get('rooms/:id')
+  getRoomById(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.chatService.getRoomById(user.id, id);
+  }
+
   @Get('rooms/:id/messages')
   getMessages(@CurrentUser() user: User, @Param('id') id: string) {
     return this.chatService.getMessages(user.id, id);

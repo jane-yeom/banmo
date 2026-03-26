@@ -31,8 +31,21 @@ export class ChatService {
   async getMyRooms(userId: string): Promise<ChatRoom[]> {
     return this.roomsRepository.find({
       where: [{ senderId: userId }, { receiverId: userId }],
+      relations: ['post'],
       order: { lastMessageAt: 'DESC' },
     });
+  }
+
+  async getRoomById(userId: string, roomId: string): Promise<ChatRoom> {
+    const room = await this.roomsRepository.findOne({
+      where: { id: roomId },
+      relations: ['post'],
+    });
+    if (!room) throw new NotFoundException('채팅방을 찾을 수 없습니다.');
+    if (room.senderId !== userId && room.receiverId !== userId) {
+      throw new ForbiddenException('접근 권한이 없습니다.');
+    }
+    return room;
   }
 
   async getMessages(userId: string, roomId: string): Promise<ChatMessage[]> {
