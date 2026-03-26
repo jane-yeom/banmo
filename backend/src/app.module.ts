@@ -5,6 +5,8 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { ChatModule } from './chat/chat.module';
+import { BoardModule } from './board/board.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { ChatModule } from './chat/chat.module';
     AuthModule,
     PostsModule,
     ChatModule,
+    BoardModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}
