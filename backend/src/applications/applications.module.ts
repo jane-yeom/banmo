@@ -5,9 +5,10 @@ import { Post } from '../posts/post.entity';
 import { ApplicationsService } from './applications.service';
 import { ApplicationsController } from './applications.controller';
 import { ChatModule } from '../chat/chat.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Application, Post]), ChatModule],
+  imports: [TypeOrmModule.forFeature([Application, Post]), ChatModule, UsersModule],
   providers: [ApplicationsService],
   controllers: [ApplicationsController],
 })

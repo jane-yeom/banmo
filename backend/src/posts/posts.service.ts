@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post, PayType, PostStatus } from './post.entity';
 import { CreatePostDto, PostFilterDto, UpdatePostDto } from './post.dto';
+import { TrustService, TrustEvent } from '../users/trust.service';
 
 const MIN_HOURLY_PAY = 10030; // 2024 최저시급
 
@@ -16,6 +17,7 @@ export class PostsService {
   constructor(
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
+    private readonly trustService: TrustService,
   ) {}
 
   async create(userId: string, dto: CreatePostDto): Promise<Post> {
@@ -27,7 +29,12 @@ export class PostsService {
       instruments: dto.instruments ?? [],
       imageUrls: dto.imageUrls ?? [],
     });
-    return this.postsRepository.save(post);
+    const saved = await this.postsRepository.save(post);
+
+    // 공고 작성 완료 → +2점
+    await this.trustService.applyEvent(userId, TrustEvent.POST_CREATED).catch(() => {});
+
+    return saved;
   }
 
   async findAll(filter: PostFilterDto): Promise<{ items: Post[]; total: number }> {

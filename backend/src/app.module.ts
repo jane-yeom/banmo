@@ -10,6 +10,7 @@ import { ReportsModule } from './reports/reports.module';
 import { AdminModule } from './admin/admin.module';
 import { MediaModule } from './media/media.module';
 import { ApplicationsModule } from './applications/applications.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ApplicationsModule } from './applications/applications.module';
     AdminModule,
     MediaModule,
     ApplicationsModule,
+    PaymentsModule,
   ],
 })
 export class AppModule {}

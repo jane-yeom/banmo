@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { Application, ApplicationStatus } from './application.entity';
 import { Post } from '../posts/post.entity';
 import { ChatService } from '../chat/chat.service';
+import { TrustService, TrustEvent } from '../users/trust.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -19,6 +20,7 @@ export class ApplicationsService {
     @InjectRepository(Post)
     private readonly postRepo: Repository<Post>,
     private readonly chatService: ChatService,
+    private readonly trustService: TrustService,
   ) {}
 
   async apply(
@@ -35,9 +37,7 @@ export class ApplicationsService {
       throw new BadRequestException('모집 중인 공고에만 지원할 수 있습니다.');
     }
 
-    const existing = await this.appRepo.findOne({
-      where: { postId, applicantId },
-    });
+    const existing = await this.appRepo.findOne({ where: { postId, applicantId } });
     if (existing) throw new ConflictException('이미 지원한 공고입니다.');
 
     const application = await this.appRepo.save(
@@ -82,10 +82,19 @@ export class ApplicationsService {
       relations: ['post'],
     });
     if (!app) throw new NotFoundException('지원 정보를 찾을 수 없습니다.');
-    if (app.post.authorId !== userId) {
-      throw new ForbiddenException('권한이 없습니다.');
-    }
+    if (app.post.authorId !== userId) throw new ForbiddenException('권한이 없습니다.');
+
     app.status = status;
-    return this.appRepo.save(app);
+    const saved = await this.appRepo.save(app);
+
+    // 합격 처리 시 → 지원자 +5점, 공고 작성자 +5점
+    if (status === ApplicationStatus.ACCEPTED) {
+      await Promise.all([
+        this.trustService.applyEvent(app.applicantId, TrustEvent.DEAL_ACCEPTED).catch(() => {}),
+        this.trustService.applyEvent(userId, TrustEvent.DEAL_ACCEPTED).catch(() => {}),
+      ]);
+    }
+
+    return saved;
   }
 }
