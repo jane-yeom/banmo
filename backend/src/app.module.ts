@@ -9,6 +9,7 @@ import { BoardModule } from './board/board.module';
 import { ReportsModule } from './reports/reports.module';
 import { AdminModule } from './admin/admin.module';
 import { MediaModule } from './media/media.module';
+import { ApplicationsModule } from './applications/applications.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { MediaModule } from './media/media.module';
     ReportsModule,
     AdminModule,
     MediaModule,
+    ApplicationsModule,
   ],
 })
 export class AppModule {}

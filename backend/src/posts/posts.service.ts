@@ -31,12 +31,17 @@ export class PostsService {
   }
 
   async findAll(filter: PostFilterDto): Promise<{ items: Post[]; total: number }> {
-    const { category, instrument, region, payMin, payMax, page = 1, limit = 20 } = filter;
+    const { authorId, category, instrument, region, payMin, payMax, page = 1, limit = 20 } = filter;
 
     const qb = this.postsRepository
       .createQueryBuilder('post')
-      .leftJoinAndSelect('post.author', 'author')
-      .where('post.status = :status', { status: PostStatus.ACTIVE });
+      .leftJoinAndSelect('post.author', 'author');
+
+    if (authorId) {
+      qb.where('post.authorId = :authorId', { authorId });
+    } else {
+      qb.where('post.status = :status', { status: PostStatus.ACTIVE });
+    }
 
     if (category) qb.andWhere('post.category = :category', { category });
     if (region) qb.andWhere('post.region ILIKE :region', { region: `%${region}%` });

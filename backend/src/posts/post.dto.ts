@@ -102,6 +102,10 @@ export class UpdatePostDto {
 
 export class PostFilterDto {
   @IsOptional()
+  @IsString()
+  authorId?: string;
+
+  @IsOptional()
   @IsEnum(PostCategory)
   category?: PostCategory;
 
