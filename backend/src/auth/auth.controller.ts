@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService, RegisterDto, EmailLoginDto } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
@@ -24,11 +24,12 @@ export class AuthController {
 
   /** 이메일 로그인 */
   @Post('login')
+  @HttpCode(200)
   async emailLogin(@Body() dto: EmailLoginDto) {
     return this.authService.emailLogin(dto);
   }
 
-  /** 카카오 AccessToken 방식 (팝업) */
+  /** 카카오 AccessToken 방식 (레거시) */
   @Post('kakao')
   async kakaoLogin(@Body() body: KakaoLoginDto) {
     return this.authService.kakaoLogin(body.accessToken);
@@ -36,8 +37,10 @@ export class AuthController {
 
   /** 카카오 Authorization Code 방식 (리다이렉트 콜백) */
   @Post('kakao/callback')
+  @HttpCode(200)
   async kakaoCallback(@Body() body: KakaoCallbackDto) {
-    return this.authService.kakaoLoginByCode(body.code);
+    console.log('[Controller] POST /auth/kakao/callback - code 수신:', !!body.code);
+    return this.authService.kakaoLoginWithCode(body.code);
   }
 
   /** 현재 유저 정보 */

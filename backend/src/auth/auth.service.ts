@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/user.entity';
@@ -22,6 +22,8 @@ interface KakaoTokenResponse {
   token_type: string;
   expires_in: number;
   refresh_token: string;
+  error?: string;
+  error_description?: string;
 }
 
 export class RegisterDto {
@@ -75,24 +77,38 @@ export class AuthService {
     return { accessToken, user };
   }
 
-  // ── 카카오 AccessToken 방식 (기존 팝업 방식 유지) ──────────────────────
+  // ── 카카오 AccessToken 방식 (레거시 팝업용) ────────────────────────────
   async kakaoLogin(accessToken: string): Promise<{ accessToken: string; user: User; isNewUser: boolean }> {
     const kakaoUser = await this.getKakaoUserInfo(accessToken);
     return this.kakaoUpsert(kakaoUser);
   }
 
-  // ── 카카오 Authorization Code 방식 (리다이렉트) ──────────────────────
-  async kakaoLoginByCode(code: string): Promise<{ accessToken: string; user: User; isNewUser: boolean }> {
+  // ── 카카오 Authorization Code 방식 (리다이렉트) ─ 메인 진입점 ──────────
+  async kakaoLoginWithCode(code: string): Promise<{ accessToken: string; user: User; isNewUser: boolean }> {
+    console.log('[KakaoLogin] Step 1 - code 수신:', code.substring(0, 20) + '...');
+
     const kakaoAccessToken = await this.exchangeCodeForToken(code);
+    console.log('[KakaoLogin] Step 2 - accessToken 교환 성공');
+
     const kakaoUser = await this.getKakaoUserInfo(kakaoAccessToken);
-    return this.kakaoUpsert(kakaoUser);
+    console.log('[KakaoLogin] Step 3 - 유저정보 조회 성공. kakaoId:', kakaoUser.id);
+
+    const result = await this.kakaoUpsert(kakaoUser);
+    console.log('[KakaoLogin] Step 4 - 유저 upsert 완료. isNewUser:', result.isNewUser);
+
+    return result;
+  }
+
+  // ── 하위 호환: kakaoLoginByCode ────────────────────────────────────────
+  async kakaoLoginByCode(code: string) {
+    return this.kakaoLoginWithCode(code);
   }
 
   // ── 공통: 카카오 유저 upsert ──────────────────────────────────────────
   private async kakaoUpsert(kakaoUser: KakaoUserInfo): Promise<{ accessToken: string; user: User; isNewUser: boolean }> {
-    const kakaoId = String(kakaoUser.id);
-    const email = kakaoUser.kakao_account?.email;
-    const nickname = kakaoUser.kakao_account?.profile?.nickname;
+    const kakaoId   = String(kakaoUser.id);
+    const email     = kakaoUser.kakao_account?.email;
+    const nickname  = kakaoUser.kakao_account?.profile?.nickname;
     const profileImage = kakaoUser.kakao_account?.profile?.profile_image_url;
 
     let user = await this.usersService.findByKakaoId(kakaoId);
@@ -108,29 +124,50 @@ export class AuthService {
 
   // ── 카카오 code → access_token 교환 ──────────────────────────────────
   async exchangeCodeForToken(code: string): Promise<string> {
+    // REST API 키: KAKAO_REST_API_KEY → 없으면 KAKAO_CLIENT_ID 폴백
     const clientId = this.config.get<string>('KAKAO_REST_API_KEY')
-      ?? this.config.get<string>('KAKAO_CLIENT_ID');
-    const clientSecret = this.config.get<string>('KAKAO_CLIENT_SECRET') ?? '';
-    const redirectUri = this.config.get<string>('KAKAO_FRONTEND_CALLBACK_URL')
-      ?? 'http://localhost:3000/auth/callback';
+      || this.config.get<string>('KAKAO_CLIENT_ID');
+    const clientSecret = this.config.get<string>('KAKAO_CLIENT_SECRET') || '';
+    // redirect_uri 는 프론트 콜백 URL 과 정확히 일치해야 함
+    const redirectUri = this.config.get<string>('KAKAO_CALLBACK_URL')
+      || this.config.get<string>('KAKAO_FRONTEND_CALLBACK_URL')
+      || 'http://localhost:3000/auth/callback';
+
+    console.log('[KakaoToken] client_id:', clientId);
+    console.log('[KakaoToken] redirect_uri:', redirectUri);
+    console.log('[KakaoToken] client_secret 설정됨:', !!clientSecret);
+
+    const params = new URLSearchParams({
+      grant_type:   'authorization_code',
+      client_id:    clientId!,
+      redirect_uri: redirectUri,
+      code,
+    });
+    if (clientSecret) {
+      params.append('client_secret', clientSecret);
+    }
 
     try {
-      const params = new URLSearchParams({
-        grant_type: 'authorization_code',
-        client_id: clientId!,
-        redirect_uri: redirectUri,
-        code,
-      });
-      if (clientSecret) params.append('client_secret', clientSecret);
-
       const { data } = await axios.post<KakaoTokenResponse>(
         'https://kauth.kakao.com/oauth/token',
         params.toString(),
-        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' } },
       );
+
+      if (data.error) {
+        console.error('[KakaoToken] 카카오 오류:', data.error, data.error_description);
+        throw new UnauthorizedException(`카카오 토큰 교환 실패: ${data.error_description ?? data.error}`);
+      }
+
       return data.access_token;
-    } catch {
-      throw new UnauthorizedException('카카오 코드 교환에 실패했습니다.');
+    } catch (err) {
+      if (err instanceof UnauthorizedException) throw err;
+      const axiosErr = err as AxiosError;
+      const errData = axiosErr.response?.data as any;
+      console.error('[KakaoToken] HTTP 오류:', axiosErr.response?.status, errData);
+      throw new UnauthorizedException(
+        `카카오 코드 교환 실패: ${errData?.error_description ?? errData?.error ?? axiosErr.message}`
+      );
     }
   }
 
@@ -143,7 +180,9 @@ export class AuthService {
         },
       });
       return data;
-    } catch {
+    } catch (err) {
+      const axiosErr = err as AxiosError;
+      console.error('[KakaoUserInfo] 오류:', axiosErr.response?.status, axiosErr.response?.data);
       throw new UnauthorizedException('유효하지 않은 카카오 액세스토큰입니다.');
     }
   }
