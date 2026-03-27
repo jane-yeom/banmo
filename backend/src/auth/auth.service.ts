@@ -74,6 +74,7 @@ export class AuthService {
       params.append('client_id', this.config.get<string>('KAKAO_REST_API_KEY')!);
       params.append('redirect_uri', this.config.get<string>('KAKAO_CALLBACK_URL')!);
       params.append('code', code);
+      params.append('client_secret', this.config.get<string>('KAKAO_CLIENT_SECRET')!);
 
       console.log('[카카오] 토큰 교환 요청 중... client_id:', this.config.get('KAKAO_REST_API_KEY'));
       console.log('[카카오] redirect_uri:', this.config.get('KAKAO_CALLBACK_URL'));
