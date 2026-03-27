@@ -24,6 +24,25 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { kakaoId } });
   }
 
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
+  }
+
+  async createEmailUser(data: {
+    email: string;
+    password: string;
+    nickname: string;
+    instruments?: string[];
+  }): Promise<User> {
+    const user = this.usersRepository.create({
+      email: data.email,
+      password: data.password,
+      nickname: data.nickname,
+      instruments: data.instruments ?? [],
+    } as unknown as User);
+    return this.usersRepository.save(user);
+  }
+
   async findById(id: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { id } });
   }

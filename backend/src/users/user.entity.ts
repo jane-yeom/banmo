@@ -24,13 +24,16 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   kakaoId: string;
+
+  @Column({ nullable: true })
+  password: string;
 
   @Column({ nullable: true })
   nickname: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   email: string;
 
   @Column({ nullable: true })
