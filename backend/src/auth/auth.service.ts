@@ -1,30 +1,10 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/user.entity';
-
-interface KakaoUserInfo {
-  id: number;
-  kakao_account?: {
-    email?: string;
-    profile?: {
-      nickname?: string;
-      profile_image_url?: string;
-    };
-  };
-}
-
-interface KakaoTokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  refresh_token: string;
-  error?: string;
-  error_description?: string;
-}
 
 export class RegisterDto {
   email: string;
@@ -59,8 +39,7 @@ export class AuthService {
       nickname: dto.nickname,
       instruments: dto.instruments,
     });
-    const accessToken = this.issueJwt(user);
-    return { accessToken, user };
+    return { accessToken: this.generateToken(user), user };
   }
 
   // ── 이메일 로그인 ──────────────────────────────────────────────────────
@@ -73,122 +52,96 @@ export class AuthService {
     if (!valid) {
       throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
     }
-    const accessToken = this.issueJwt(user);
-    return { accessToken, user };
+    return { accessToken: this.generateToken(user), user };
   }
 
-  // ── 카카오 AccessToken 방식 (레거시 팝업용) ────────────────────────────
+  // ── 카카오 AccessToken 방식 (레거시) ──────────────────────────────────
   async kakaoLogin(accessToken: string): Promise<{ accessToken: string; user: User; isNewUser: boolean }> {
-    const kakaoUser = await this.getKakaoUserInfo(accessToken);
-    return this.kakaoUpsert(kakaoUser);
+    const userRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return this.kakaoUpsert(userRes.data);
   }
 
-  // ── 카카오 Authorization Code 방식 (리다이렉트) ─ 메인 진입점 ──────────
-  async kakaoLoginWithCode(code: string): Promise<{ accessToken: string; user: User; isNewUser: boolean }> {
-    console.log('[KakaoLogin] Step 1 - code 수신:', code.substring(0, 20) + '...');
+  // ── 카카오 Authorization Code 방식 (리다이렉트 콜백) ─────────────────
+  async kakaoLoginWithCode(code: string): Promise<{ accessToken: string; user: User; isNewUser?: boolean }> {
+    try {
+      console.log('[카카오] code 받음:', code);
 
-    const kakaoAccessToken = await this.exchangeCodeForToken(code);
-    console.log('[KakaoLogin] Step 2 - accessToken 교환 성공');
+      // 1단계: code → accessToken 교환
+      const params = new URLSearchParams();
+      params.append('grant_type', 'authorization_code');
+      params.append('client_id', this.config.get<string>('KAKAO_REST_API_KEY')!);
+      params.append('redirect_uri', this.config.get<string>('KAKAO_CALLBACK_URL')!);
+      params.append('code', code);
 
-    const kakaoUser = await this.getKakaoUserInfo(kakaoAccessToken);
-    console.log('[KakaoLogin] Step 3 - 유저정보 조회 성공. kakaoId:', kakaoUser.id);
+      console.log('[카카오] 토큰 교환 요청 중... client_id:', this.config.get('KAKAO_REST_API_KEY'));
+      console.log('[카카오] redirect_uri:', this.config.get('KAKAO_CALLBACK_URL'));
 
-    const result = await this.kakaoUpsert(kakaoUser);
-    console.log('[KakaoLogin] Step 4 - 유저 upsert 완료. isNewUser:', result.isNewUser);
+      const tokenRes = await axios.post(
+        'https://kauth.kakao.com/oauth/token',
+        params.toString(),
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+      );
+      console.log('[카카오] 토큰 교환 성공');
 
-    return result;
+      const accessToken: string = tokenRes.data.access_token;
+
+      // 2단계: accessToken으로 유저정보 조회
+      const userRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      console.log('[카카오] 유저정보 조회 성공. kakaoId:', userRes.data.id);
+
+      const kakaoId      = String(userRes.data.id);
+      const nickname     = userRes.data.kakao_account?.profile?.nickname || '반모유저';
+      const email        = userRes.data.kakao_account?.email as string | undefined;
+      const profileImage = userRes.data.kakao_account?.profile?.profile_image_url as string | undefined;
+
+      // 3단계: DB에서 유저 찾거나 생성
+      let user = await this.usersService.findByKakaoId(kakaoId);
+      const isNewUser = !user;
+      if (!user) {
+        console.log('[카카오] 신규 유저 생성');
+        user = await this.usersService.createKakaoUser({ kakaoId, nickname, email, profileImage });
+      } else {
+        console.log('[카카오] 기존 유저 로그인');
+      }
+
+      // 4단계: JWT 발급
+      const jwtToken = this.generateToken(user);
+      console.log('[카카오] JWT 발급 완료');
+
+      return { accessToken: jwtToken, user, isNewUser };
+
+    } catch (error: any) {
+      console.error('[카카오] 오류 발생:', error.response?.data ?? error.message);
+      throw new UnauthorizedException(
+        '카카오 로그인 실패: ' + (error.response?.data?.error_description ?? error.message),
+      );
+    }
   }
 
-  // ── 하위 호환: kakaoLoginByCode ────────────────────────────────────────
+  // 하위 호환
   async kakaoLoginByCode(code: string) {
     return this.kakaoLoginWithCode(code);
   }
 
-  // ── 공통: 카카오 유저 upsert ──────────────────────────────────────────
-  private async kakaoUpsert(kakaoUser: KakaoUserInfo): Promise<{ accessToken: string; user: User; isNewUser: boolean }> {
-    const kakaoId   = String(kakaoUser.id);
-    const email     = kakaoUser.kakao_account?.email;
-    const nickname  = kakaoUser.kakao_account?.profile?.nickname;
-    const profileImage = kakaoUser.kakao_account?.profile?.profile_image_url;
+  private async kakaoUpsert(data: any): Promise<{ accessToken: string; user: User; isNewUser: boolean }> {
+    const kakaoId      = String(data.id);
+    const email        = data.kakao_account?.email as string | undefined;
+    const nickname     = data.kakao_account?.profile?.nickname as string | undefined;
+    const profileImage = data.kakao_account?.profile?.profile_image_url as string | undefined;
 
     let user = await this.usersService.findByKakaoId(kakaoId);
     const isNewUser = !user;
-
     if (!user) {
       user = await this.usersService.createKakaoUser({ kakaoId, email, nickname, profileImage });
     }
-
-    const token = this.issueJwt(user);
-    return { accessToken: token, user, isNewUser };
+    return { accessToken: this.generateToken(user), user, isNewUser };
   }
 
-  // ── 카카오 code → access_token 교환 ──────────────────────────────────
-  async exchangeCodeForToken(code: string): Promise<string> {
-    // REST API 키: KAKAO_REST_API_KEY → 없으면 KAKAO_CLIENT_ID 폴백
-    const clientId = this.config.get<string>('KAKAO_REST_API_KEY')
-      || this.config.get<string>('KAKAO_CLIENT_ID');
-    const clientSecret = this.config.get<string>('KAKAO_CLIENT_SECRET') || '';
-    // redirect_uri 는 프론트 콜백 URL 과 정확히 일치해야 함
-    const redirectUri = this.config.get<string>('KAKAO_CALLBACK_URL')
-      || this.config.get<string>('KAKAO_FRONTEND_CALLBACK_URL')
-      || 'http://localhost:3000/auth/callback';
-
-    console.log('[KakaoToken] client_id:', clientId);
-    console.log('[KakaoToken] redirect_uri:', redirectUri);
-    console.log('[KakaoToken] client_secret 설정됨:', !!clientSecret);
-
-    const params = new URLSearchParams({
-      grant_type:   'authorization_code',
-      client_id:    clientId!,
-      redirect_uri: redirectUri,
-      code,
-    });
-    if (clientSecret) {
-      params.append('client_secret', clientSecret);
-    }
-
-    try {
-      const { data } = await axios.post<KakaoTokenResponse>(
-        'https://kauth.kakao.com/oauth/token',
-        params.toString(),
-        { headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' } },
-      );
-
-      if (data.error) {
-        console.error('[KakaoToken] 카카오 오류:', data.error, data.error_description);
-        throw new UnauthorizedException(`카카오 토큰 교환 실패: ${data.error_description ?? data.error}`);
-      }
-
-      return data.access_token;
-    } catch (err) {
-      if (err instanceof UnauthorizedException) throw err;
-      const axiosErr = err as AxiosError;
-      const errData = axiosErr.response?.data as any;
-      console.error('[KakaoToken] HTTP 오류:', axiosErr.response?.status, errData);
-      throw new UnauthorizedException(
-        `카카오 코드 교환 실패: ${errData?.error_description ?? errData?.error ?? axiosErr.message}`
-      );
-    }
-  }
-
-  private async getKakaoUserInfo(accessToken: string): Promise<KakaoUserInfo> {
-    try {
-      const { data } = await axios.get<KakaoUserInfo>('https://kapi.kakao.com/v2/user/me', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-        },
-      });
-      return data;
-    } catch (err) {
-      const axiosErr = err as AxiosError;
-      console.error('[KakaoUserInfo] 오류:', axiosErr.response?.status, axiosErr.response?.data);
-      throw new UnauthorizedException('유효하지 않은 카카오 액세스토큰입니다.');
-    }
-  }
-
-  private issueJwt(user: User): string {
-    const payload = { sub: user.id, kakaoId: user.kakaoId };
-    return this.jwtService.sign(payload);
+  private generateToken(user: User): string {
+    return this.jwtService.sign({ sub: user.id, kakaoId: user.kakaoId });
   }
 }
