@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, LoginType, NoteGrade } from './user.entity';
@@ -14,11 +15,22 @@ function calcGrade(score: number): NoteGrade {
 const MAX_VIDEOS = 5;
 
 export class UpdateProfileDto {
+  @IsOptional()
+  @IsString()
   nickname?: string;
+
+  @IsOptional()
+  @IsString()
   bio?: string;
+
+  @IsOptional()
+  @IsString()
   region?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   instruments?: string[];
-  phone?: string;
 }
 
 @Injectable()
@@ -92,7 +104,6 @@ export class UsersService {
     if (dto.bio !== undefined) user.bio = dto.bio;
     if (dto.region !== undefined) user.region = dto.region;
     if (dto.instruments !== undefined) user.instruments = dto.instruments;
-    if (dto.phone !== undefined) (user as any).phone = dto.phone;
     return this.usersRepository.save(user);
   }
 
@@ -118,11 +129,11 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async getPublicProfile(id: string): Promise<Omit<User, 'kakaoId' | 'email' | 'isBanned'>> {
+  async getPublicProfile(id: string): Promise<Partial<User>> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { kakaoId, email, isBanned, ...profile } = user;
+    const { kakaoId, email, isBanned, password, sanitizeArrays, ...profile } = user as any;
     return profile;
   }
 }

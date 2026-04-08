@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { IsString } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './auth.dto';
@@ -6,10 +7,12 @@ import { CurrentUser } from './current-user.decorator';
 import { User } from '../users/user.entity';
 
 class KakaoLoginDto {
+  @IsString()
   accessToken: string;
 }
 
 class KakaoCallbackDto {
+  @IsString()
   code: string;
 }
 

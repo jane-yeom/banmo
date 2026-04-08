@@ -14,6 +14,7 @@
     "start:prod": "node dist/main",
     "seed": "ts-node --project tsconfig.seed.json -r tsconfig-paths/register src/database/seed.ts",
     "seed:clear": "ts-node --project tsconfig.seed.json -r tsconfig-paths/register src/database/seed.ts --clear",
+    "seed:admin": "ts-node --project tsconfig.seed.json -r tsconfig-paths/register src/database/seed.ts --admin",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

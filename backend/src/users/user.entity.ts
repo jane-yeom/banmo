@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  AfterLoad,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 export enum NoteGrade {
   NONE = 'NONE',
@@ -32,6 +34,7 @@ export class User {
   @Column({ unique: true, nullable: true })
   kakaoId: string;
 
+  @Exclude()
   @Column({ nullable: true })
   password: string;
 
@@ -88,4 +91,10 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @AfterLoad()
+  sanitizeArrays() {
+    this.instruments = (this.instruments ?? []).filter(Boolean);
+    this.videoUrls = (this.videoUrls ?? []).filter(Boolean);
+  }
 }

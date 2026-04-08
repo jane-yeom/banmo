@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
+  AfterLoad,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 
@@ -93,4 +94,10 @@ export class Post {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @AfterLoad()
+  sanitizeArrays() {
+    this.instruments = (this.instruments ?? []).filter(Boolean);
+    this.imageUrls = (this.imageUrls ?? []).filter(Boolean);
+  }
 }

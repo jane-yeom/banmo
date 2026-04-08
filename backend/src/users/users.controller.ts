@@ -9,18 +9,22 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { IsString } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService, UpdateProfileDto } from './users.service';
 
 class AddVideoDto {
+  @IsString()
   videoUrl: string;
 }
 
 class RemoveVideoDto {
+  @IsString()
   videoUrl: string;
 }
 
 class UpdateProfileImageDto {
+  @IsString()
   imageUrl: string;
 }
 

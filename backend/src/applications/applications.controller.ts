@@ -7,6 +7,7 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
 import { ApplicationsService } from './applications.service';
 import { ApplicationStatus } from './application.entity';
@@ -14,11 +15,16 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/user.entity';
 
 class ApplyDto {
+  @IsUUID()
   postId: string;
+
+  @IsOptional()
+  @IsString()
   message?: string;
 }
 
 class UpdateStatusDto {
+  @IsEnum(ApplicationStatus)
   status: ApplicationStatus;
 }
 

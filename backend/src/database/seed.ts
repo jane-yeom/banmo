@@ -1,8 +1,9 @@
 import 'reflect-metadata';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as bcryptLib from 'bcrypt';
 import { DataSource } from 'typeorm';
-import { User } from '../users/user.entity';
+import { User, UserRole } from '../users/user.entity';
 import { Post, PostCategory, PayType, PostStatus } from '../posts/post.entity';
 import { Board, BoardType } from '../board/board.entity';
 
@@ -350,10 +351,50 @@ async function seedClear() {
   console.log('\n✅ DB 초기화 완료! admin 계정만 유지됩니다.');
 }
 
+// ─────────────────────────────────────────────
+// 관리자 계정 생성
+// ─────────────────────────────────────────────
+async function seedAdmin() {
+  console.log('👑 관리자 계정 생성 시작...');
+
+  await AppDataSource.initialize();
+  console.log('✅ DB 연결 완료');
+
+  const userRepo = AppDataSource.getRepository(User);
+
+  const existing = await userRepo.findOne({ where: { email: 'admin@banmo.com' } });
+  if (existing) {
+    console.log('ℹ️  이미 관리자 계정이 존재합니다. (admin@banmo.com)');
+    await AppDataSource.destroy();
+    return;
+  }
+
+  const hashed = await bcryptLib.hash('admin1234!', 10);
+  const admin = userRepo.create({
+    email: 'admin@banmo.com',
+    password: hashed,
+    nickname: '관리자',
+    role: UserRole.ADMIN,
+    instruments: [],
+    videoUrls: [],
+  } as unknown as User);
+  await userRepo.save(admin);
+
+  await AppDataSource.destroy();
+  console.log('✅ 관리자 계정 생성 완료!');
+  console.log('   이메일: admin@banmo.com');
+  console.log('   비밀번호: admin1234!');
+}
+
 const args = process.argv.slice(2);
 if (args.includes('--clear')) {
   seedClear().catch((err) => {
     console.error('❌ DB 초기화 실패:', err);
+    process.exit(1);
+  });
+} else if (args.includes('--admin')) {
+  seedAdmin().catch((err) => {
+    console.error('❌ 관리자 생성 실패:', err);
     process.exit(1);
   });
 } else {
