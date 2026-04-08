@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { User, NoteGrade } from '../users/user.entity';
 import { Post } from '../posts/post.entity';
-import { Report, ReportStatus } from '../reports/report.entity';
+import { Report, ReportReason, ReportStatus, ReportTargetType } from '../reports/report.entity';
+import { TrustService, TrustEvent } from '../users/trust.service';
 
 @Injectable()
 export class AdminService {
@@ -14,6 +15,7 @@ export class AdminService {
     private readonly postsRepo: Repository<Post>,
     @InjectRepository(Report)
     private readonly reportsRepo: Repository<Report>,
+    private readonly trustService: TrustService,
   ) {}
 
   // ─── 회원 관리 ──────────────────────────────────────────────
@@ -76,8 +78,44 @@ export class AdminService {
   async updateReport(id: string, status: ReportStatus): Promise<Report> {
     const report = await this.reportsRepo.findOne({ where: { id } });
     if (!report) throw new NotFoundException('신고를 찾을 수 없습니다.');
+
+    const wasResolved = report.status !== ReportStatus.RESOLVED && status === ReportStatus.RESOLVED;
     report.status = status;
-    return this.reportsRepo.save(report);
+    const saved = await this.reportsRepo.save(report);
+
+    // RESOLVED 전환 시 대상 유저에게 신뢰 패널티 적용
+    if (wasResolved) {
+      const targetUserId = await this.resolveTargetUserId(report.targetType, report.targetId);
+      if (targetUserId) {
+        const event = report.reason === ReportReason.FRAUD
+          ? TrustEvent.FRAUD_RESOLVED  // 사기: -30점
+          : TrustEvent.REPORTED;       // 일반: -10점
+        await this.trustService.applyEvent(targetUserId, event).catch(() => {});
+      }
+    }
+
+    return saved;
+  }
+
+  private async resolveTargetUserId(
+    targetType: ReportTargetType,
+    targetId: string,
+  ): Promise<string | null> {
+    if (targetType === ReportTargetType.USER) return targetId;
+    if (targetType === ReportTargetType.POST) {
+      const post = await this.postsRepo.findOne({ where: { id: targetId } });
+      return post?.authorId ?? null;
+    }
+    return null;
+  }
+
+  // ─── 최근 신고 목록 ──────────────────────────────────────────
+  async getRecentReports(limit = 5) {
+    return this.reportsRepo.find({
+      relations: ['reporter'],
+      order: { createdAt: 'DESC' },
+      take: limit,
+    });
   }
 
   // ─── 통계 ───────────────────────────────────────────────────

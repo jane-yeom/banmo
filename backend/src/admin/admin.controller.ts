@@ -52,6 +52,11 @@ export class AdminController {
     return this.adminService.getStats();
   }
 
+  @Get('reports/recent')
+  getRecentReports() {
+    return this.adminService.getRecentReports(5);
+  }
+
   // ─── 회원 관리 ───────────────────────────────────────────
   @Get('users')
   getUsers(

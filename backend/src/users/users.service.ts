@@ -1,7 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, LoginType } from './user.entity';
+import { User, LoginType, NoteGrade } from './user.entity';
+
+function calcGrade(score: number): NoteGrade {
+  if (score >= 100) return NoteGrade.PROFESSIONAL;
+  if (score >= 60)  return NoteGrade.ADVANCED;
+  if (score >= 30)  return NoteGrade.INTERMEDIATE;
+  if (score >= 10)  return NoteGrade.BASIC;
+  return NoteGrade.NONE;
+}
 
 const MAX_VIDEOS = 5;
 
@@ -67,7 +75,14 @@ export class UsersService {
 
   async updateTrustScore(id: string, delta: number): Promise<User> {
     const user = await this.usersRepository.findOneOrFail({ where: { id } });
+    const oldGrade = user.noteGrade;
     user.trustScore = Math.max(0, user.trustScore + delta);
+    user.noteGrade = calcGrade(user.trustScore);
+    if (user.noteGrade !== oldGrade) {
+      console.log(
+        `[TrustScore] ${user.nickname ?? id}: ${oldGrade} → ${user.noteGrade} (score: ${user.trustScore})`,
+      );
+    }
     return this.usersRepository.save(user);
   }
 
