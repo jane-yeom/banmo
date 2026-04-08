@@ -297,7 +297,68 @@ async function seed() {
   console.log(`  - boards 테이블: ${boardCount}개`);
 }
 
-seed().catch((err) => {
-  console.error('❌ 시드 실패:', err);
-  process.exit(1);
-});
+// ─────────────────────────────────────────────
+// DB 초기화 (admin 계정 제외 전체 삭제)
+// ─────────────────────────────────────────────
+async function seedClear() {
+  console.log('🗑️  DB 초기화 시작 (admin 계정 제외)...');
+
+  const ds = new DataSource({
+    type: 'postgres',
+    host: process.env.DATABASE_HOST || 'localhost',
+    port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+    username: process.env.DATABASE_USER || 'banmo_user',
+    password: process.env.DATABASE_PASSWORD || 'banmo_pass',
+    database: process.env.DATABASE_NAME || 'banmo',
+    entities: [User, Post, Board],
+    synchronize: false,
+  });
+
+  await ds.initialize();
+  console.log('✅ DB 연결 완료');
+
+  // 외래키 의존 순서로 삭제
+  await ds.query(`DELETE FROM board_comments`);
+  console.log('  🧹 board_comments 삭제 완료');
+
+  await ds.query(`DELETE FROM chat_messages`);
+  console.log('  🧹 chat_messages 삭제 완료');
+
+  await ds.query(`DELETE FROM applications`);
+  console.log('  🧹 applications 삭제 완료');
+
+  await ds.query(`DELETE FROM reports`);
+  console.log('  🧹 reports 삭제 완료');
+
+  await ds.query(`DELETE FROM payments`);
+  console.log('  🧹 payments 삭제 완료');
+
+  await ds.query(`DELETE FROM chat_rooms`);
+  console.log('  🧹 chat_rooms 삭제 완료');
+
+  await ds.query(`DELETE FROM boards`);
+  console.log('  🧹 boards 삭제 완료');
+
+  await ds.query(`DELETE FROM posts`);
+  console.log('  🧹 posts 삭제 완료');
+
+  // users: admin 계정 제외하고 삭제
+  await ds.query(`DELETE FROM users WHERE role != 'ADMIN'`);
+  console.log('  🧹 users 삭제 완료 (admin 계정 유지)');
+
+  await ds.destroy();
+  console.log('\n✅ DB 초기화 완료! admin 계정만 유지됩니다.');
+}
+
+const args = process.argv.slice(2);
+if (args.includes('--clear')) {
+  seedClear().catch((err) => {
+    console.error('❌ DB 초기화 실패:', err);
+    process.exit(1);
+  });
+} else {
+  seed().catch((err) => {
+    console.error('❌ 시드 실패:', err);
+    process.exit(1);
+  });
+}

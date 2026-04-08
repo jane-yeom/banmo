@@ -134,6 +134,8 @@ export class AuthService {
   }
 
   private generateToken(user: User): string {
-    return this.jwtService.sign({ sub: user.id, kakaoId: user.kakaoId });
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    console.log('[Auth] 토큰 발급:', user.id, '/ email:', user.email);
+    return this.jwtService.sign(payload);
   }
 }
