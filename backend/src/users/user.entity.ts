@@ -19,6 +19,11 @@ export enum UserRole {
   ADMIN = 'ADMIN',
 }
 
+export enum LoginType {
+  KAKAO = 'kakao',
+  EMAIL = 'email',
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -67,6 +72,13 @@ export class User {
     default: UserRole.USER,
   })
   role: UserRole;
+
+  @Column({
+    type: 'enum',
+    enum: LoginType,
+    default: LoginType.EMAIL,
+  })
+  loginType: LoginType;
 
   @Column({ default: false })
   isBanned: boolean;

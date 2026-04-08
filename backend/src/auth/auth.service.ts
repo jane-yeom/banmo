@@ -5,18 +5,9 @@ import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/user.entity';
+import { RegisterDto, LoginDto as EmailLoginDto } from './auth.dto';
 
-export class RegisterDto {
-  email: string;
-  password: string;
-  nickname: string;
-  instruments?: string[];
-}
-
-export class EmailLoginDto {
-  email: string;
-  password: string;
-}
+export { RegisterDto, EmailLoginDto };
 
 @Injectable()
 export class AuthService {

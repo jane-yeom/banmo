@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User, LoginType } from './user.entity';
 
 const MAX_VIDEOS = 5;
 
@@ -39,6 +39,7 @@ export class UsersService {
       password: data.password,
       nickname: data.nickname,
       instruments: data.instruments ?? [],
+      loginType: LoginType.EMAIL,
     } as unknown as User);
     return this.usersRepository.save(user);
   }
@@ -58,6 +59,7 @@ export class UsersService {
       nickname: data.nickname ?? undefined,
       email: data.email ?? undefined,
       profileImage: data.profileImage ?? undefined,
+      loginType: LoginType.KAKAO,
     };
     const user = this.usersRepository.create(partial as User);
     return this.usersRepository.save(user);

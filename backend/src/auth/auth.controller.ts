@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService, RegisterDto, EmailLoginDto } from './auth.service';
+import { AuthService } from './auth.service';
+import { RegisterDto, LoginDto } from './auth.dto';
 import { CurrentUser } from './current-user.decorator';
 import { User } from '../users/user.entity';
 
@@ -25,7 +26,7 @@ export class AuthController {
   /** 이메일 로그인 */
   @Post('login')
   @HttpCode(200)
-  async emailLogin(@Body() dto: EmailLoginDto) {
+  async emailLogin(@Body() dto: LoginDto) {
     return this.authService.emailLogin(dto);
   }
 
