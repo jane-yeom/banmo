@@ -3,11 +3,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as bcryptLib from 'bcrypt';
 import { DataSource } from 'typeorm';
-import { User, UserRole } from '../users/user.entity';
-import { Post, PostCategory, PayType, PostStatus } from '../posts/post.entity';
+import { User, UserRole, NoteGrade, LoginType } from '../users/user.entity';
+import { Post, PostCategory, PayType } from '../posts/post.entity';
 import { Board, BoardType } from '../board/board.entity';
+import { BoardComment } from '../board/board-comment.entity';
 
-// .env 수동 로드 (dotenv 미설치 환경 대비)
+// .env 수동 로드
 function loadEnv() {
   const envPath = path.resolve(__dirname, '../../.env');
   if (!fs.existsSync(envPath)) return;
@@ -31,212 +32,29 @@ const AppDataSource = new DataSource({
   username: process.env.DATABASE_USER || 'banmo_user',
   password: process.env.DATABASE_PASSWORD || 'banmo_pass',
   database: process.env.DATABASE_NAME || 'banmo',
-  entities: [User, Post, Board],
+  entities: [User, Post, Board, BoardComment],
   synchronize: false,
 });
 
 // ─────────────────────────────────────────────
-// 샘플 데이터 정의
+// PostgreSQL enum 마이그레이션 (NONE→SIXTEENTH 등)
 // ─────────────────────────────────────────────
-
-const SAMPLE_USERS = [
-  {
-    kakaoId: 'test_001',
-    nickname: '김지은',
-    email: 'jieun.kim@test.com',
-    bio: '피아노 전공 10년 경력 반주자입니다. 성악·기악 반주 전문이며 초견에 자신있습니다.',
-    region: '서울 강남구',
-    instruments: ['피아노'],
-    noteGrade: 'PROFESSIONAL',
-    trustScore: 120,
-  },
-  {
-    kakaoId: 'test_002',
-    nickname: '이민준',
-    email: 'minjun.lee@test.com',
-    bio: '바이올린 연주 7년차. 실내악·독주 반주 가능합니다.',
-    region: '서울 마포구',
-    instruments: ['바이올린'],
-    noteGrade: 'ADVANCED',
-    trustScore: 65,
-  },
-  {
-    kakaoId: 'test_003',
-    nickname: '박서연',
-    email: 'seoyeon.park@test.com',
-    bio: '첼로 연주자. 협주곡 반주 및 실내악 경험 다수.',
-    region: '경기 성남시',
-    instruments: ['첼로'],
-    noteGrade: 'INTERMEDIATE',
-    trustScore: 35,
-  },
-  {
-    kakaoId: 'test_004',
-    nickname: '최도현',
-    email: 'dohyun.choi@test.com',
-    bio: '플루트 연주자. 목관 실내악 전문.',
-    region: '부산 해운대구',
-    instruments: ['플루트'],
-    noteGrade: 'BASIC',
-    trustScore: 15,
-  },
-  {
-    kakaoId: 'test_005',
-    nickname: '정수아',
-    email: 'sua.jung@test.com',
-    bio: '기타 연주자. 클래식·재즈 장르 모두 가능합니다.',
-    region: '대구 중구',
-    instruments: ['기타'],
-    noteGrade: 'NONE',
-    trustScore: 0,
-  },
-];
-
-function makePosts(users: User[]): Partial<Post>[] {
-  const u = users;
-
-  const jobOffers: Partial<Post>[] = [
-    { title: '피아노 반주자 구합니다 - 성악 레슨용', content: '성악 레슨 학원에서 주 3회 반주자를 모집합니다. 클래식 성악 반주 경험자 우대. 악보 초견 필수.', category: PostCategory.JOB_OFFER, instruments: ['피아노'], region: '서울 강남구', payType: PayType.HOURLY, payMin: 25000, author: u[0], authorId: u[0].id, isPremium: true },
-    { title: '바이올린 반주 급구 - 콩쿨 준비생', content: '콩쿨 준비 중인 바이올린 학생의 반주자를 급히 구합니다. 3주 집중 레슨 반주 가능하신 분.', category: PostCategory.JOB_OFFER, instruments: ['바이올린', '피아노'], region: '서울 서초구', payType: PayType.PER_SESSION, payMin: 80000, author: u[1], authorId: u[1].id, isPremium: true },
-    { title: '합창단 정기연주회 반주자 모집', content: '시민 합창단 정기연주회 반주를 맡아주실 분을 찾습니다. 합창 반주 경험 5년 이상 우대.', category: PostCategory.JOB_OFFER, instruments: ['피아노'], region: '서울 종로구', payType: PayType.PER_SESSION, payMin: 150000, author: u[0], authorId: u[0].id, isPremium: true },
-    { title: '교회 주일 예배 반주자 모집', content: '강남구 소재 교회에서 주일 오전 예배 반주자를 모집합니다. CCM 및 찬송가 반주 가능자.', category: PostCategory.JOB_OFFER, instruments: ['피아노'], region: '서울 강남구', payType: PayType.MONTHLY, payMin: 400000, author: u[2], authorId: u[2].id },
-    { title: '피아노 발표회 반주자 구합니다', content: '피아노 학원 연말 발표회 반주자 모집. 학생 레벨: 체르니 30~100 수준. 1일 행사.', category: PostCategory.JOB_OFFER, instruments: ['피아노'], region: '경기 성남시', payType: PayType.PER_SESSION, payMin: 200000, author: u[2], authorId: u[2].id },
-    { title: '뮤지컬 오디션 반주자 구합니다', content: '뮤지컬 오디션 반주 가능한 분 구합니다. 팝·재즈·클래식 다양한 장르 반주 가능자 우대.', category: PostCategory.JOB_OFFER, instruments: ['피아노'], region: '서울 마포구', payType: PayType.HOURLY, payMin: 30000, author: u[1], authorId: u[1].id },
-    { title: '성인 바이올린 반주자 모집', content: '성인 취미 바이올린 레슨 반주자 모집. 주 2회, 저녁 시간대. 클래식 소품 위주.', category: PostCategory.JOB_OFFER, instruments: ['바이올린'], region: '경기 수원시', payType: PayType.HOURLY, payMin: 20000, author: u[3], authorId: u[3].id },
-    { title: '첼로 앙상블 피아니스트 모집', content: '아마추어 첼로 앙상블 팀에서 피아니스트를 구합니다. 월 2회 합주, 친목 위주 팀.', category: PostCategory.JOB_OFFER, instruments: ['첼로', '피아노'], region: '부산 해운대구', payType: PayType.PER_SESSION, payMin: 50000, author: u[3], authorId: u[3].id },
-    { title: '플루트 소나타 반주 모집', content: '플루트 소나타 반주 전문가 구합니다. 바흐, 헨델, 텔레만 등 바로크 레퍼토리 위주.', category: PostCategory.JOB_OFFER, instruments: ['플루트', '피아노'], region: '대구 중구', payType: PayType.HOURLY, payMin: 35000, author: u[4], authorId: u[4].id },
-    { title: '기타 이중주 파트너 모집', content: '클래식 기타 이중주 파트너 구합니다. 장르: 클래식·보사노바. 주 1회 합주 예정.', category: PostCategory.JOB_OFFER, instruments: ['기타'], region: '인천 연수구', payType: PayType.NEGOTIABLE, payMin: 0, author: u[4], authorId: u[4].id },
-  ];
-
-  const jobSeeks: Partial<Post>[] = [
-    { title: '피아노 전공 반주 구직합니다', content: '음대 피아노 전공 졸업. 성악·기악 반주 5년 경력. 강남·서초 지역 선호. 포트폴리오 제공 가능.', category: PostCategory.JOB_SEEK, instruments: ['피아노'], region: '서울 강남구', payType: PayType.PER_SESSION, payMin: 80000, author: u[0], authorId: u[0].id },
-    { title: '경력 5년 바이올린 반주자 구직', content: '예고·음대 출신 바이올린 연주자. 협주곡·소나타 반주 전문. 콩쿨 반주 경험 다수.', category: PostCategory.JOB_SEEK, instruments: ['바이올린', '피아노'], region: '서울 마포구', payType: PayType.PER_SESSION, payMin: 100000, author: u[1], authorId: u[1].id },
-    { title: '첼로 전공 반주 구직합니다', content: '현재 대학원 재학 중. 첼로·피아노 실내악 반주 가능. 주말·저녁 시간 가능.', category: PostCategory.JOB_SEEK, instruments: ['첼로'], region: '경기 성남시', payType: PayType.PER_SESSION, payMin: 70000, author: u[2], authorId: u[2].id },
-    { title: '찬양 반주 전문 구직합니다', content: '교회 반주 7년 경력. CCM·찬송가 모두 가능. 즉흥 반주 및 편곡 능숙.', category: PostCategory.JOB_SEEK, instruments: ['피아노'], region: '서울 전지역', payType: PayType.MONTHLY, payMin: 500000, author: u[0], authorId: u[0].id },
-    { title: '플루트 레슨 반주 구직', content: '플루트 연주자이며 피아노 반주도 가능합니다. 목관 악기 레슨 반주 전문.', category: PostCategory.JOB_SEEK, instruments: ['플루트'], region: '부산 해운대구', payType: PayType.HOURLY, payMin: 25000, author: u[3], authorId: u[3].id },
-    { title: '재즈 피아니스트 세션 구직', content: '재즈 피아노 전공. 클럽·카페 세션 경험 다수. 즉흥 연주 및 반주 모두 가능.', category: PostCategory.JOB_SEEK, instruments: ['피아노'], region: '서울 홍대', payType: PayType.PER_SESSION, payMin: 120000, author: u[4], authorId: u[4].id },
-    { title: '기타 세션 구직합니다', content: '클래식·포크·재즈 기타 가능. 스튜디오 세션 및 공연 반주 경험 보유.', category: PostCategory.JOB_SEEK, instruments: ['기타'], region: '대구·경북 전지역', payType: PayType.PER_SESSION, payMin: 80000, author: u[4], authorId: u[4].id },
-    { title: '성악 반주 전문 피아니스트 구직', content: '성악 전공 반주 피아니스트. 이탈리아어·독일어·한국가곡 레퍼토리 보유. 딕션 코치 가능.', category: PostCategory.JOB_SEEK, instruments: ['피아노'], region: '서울 강서구', payType: PayType.PER_SESSION, payMin: 90000, author: u[0], authorId: u[0].id },
-    { title: '오케스트라 피아노 파트 구직', content: '오케스트라 피아노·첼레스타 파트 연주 가능. 오케스트라 경험 3년. 악보 초견 능숙.', category: PostCategory.JOB_SEEK, instruments: ['피아노'], region: '경기 전지역', payType: PayType.PER_SESSION, payMin: 150000, author: u[2], authorId: u[2].id },
-    { title: '방과후 음악 교사 겸 반주 구직', content: '초등학교 방과후 피아노 교사 및 학교 행사 반주 가능. 교원자격증 보유.', category: PostCategory.JOB_SEEK, instruments: ['피아노'], region: '경기 수원시', payType: PayType.HOURLY, payMin: 35000, author: u[2], authorId: u[2].id },
-  ];
-
-  const lessonOffers: Partial<Post>[] = [
-    { title: '피아노 레슨 선생님 구합니다 - 초등생', content: '초등학교 3학년 자녀 피아노 레슨 선생님 구합니다. 바이엘~체르니 30 수준. 방문 레슨 가능하신 분.', category: PostCategory.LESSON_OFFER, instruments: ['피아노'], region: '서울 강남구', payType: PayType.HOURLY, payMin: 30000, author: u[0], authorId: u[0].id },
-    { title: '바이올린 초급 레슨 선생님 급구', content: '성인 취미 바이올린 레슨 선생님 급히 구합니다. 초보자 지도 경험 있는 분.', category: PostCategory.LESSON_OFFER, instruments: ['바이올린'], region: '서울 마포구', payType: PayType.HOURLY, payMin: 35000, author: u[1], authorId: u[1].id },
-    { title: '첼로 레슨 선생님 모집', content: '중학생 첼로 레슨 선생님 모집. 스즈키 메소드 또는 경험 있는 분 우대. 주 2회.', category: PostCategory.LESSON_OFFER, instruments: ['첼로'], region: '경기 성남시', payType: PayType.HOURLY, payMin: 40000, author: u[2], authorId: u[2].id },
-    { title: '플루트 레슨 교사 구합니다', content: '플루트 레슨 교사 모집. 초급자 위주. 음악 전공자 우대.', category: PostCategory.LESSON_OFFER, instruments: ['플루트'], region: '부산 해운대구', payType: PayType.HOURLY, payMin: 25000, author: u[3], authorId: u[3].id },
-    { title: '기타 레슨 선생님 모집 (클래식)', content: '클래식 기타 레슨 선생님을 찾습니다. 주 1회, 고등학생 대상.', category: PostCategory.LESSON_OFFER, instruments: ['기타'], region: '대구 중구', payType: PayType.HOURLY, payMin: 28000, author: u[4], authorId: u[4].id },
-    { title: '성인 피아노 레슨 선생님 구합니다', content: '성인 입문자 피아노 레슨 선생님 구합니다. 저녁 6-9시 시간대. 동영상 레슨도 고려 중.', category: PostCategory.LESSON_OFFER, instruments: ['피아노'], region: '인천 남동구', payType: PayType.HOURLY, payMin: 32000, author: u[1], authorId: u[1].id },
-    { title: '예비 초등 피아노 레슨 교사 모집', content: '7세 아이 피아노 레슨 교사 모집. 어린이 지도 경험 필수. 방문 레슨.', category: PostCategory.LESSON_OFFER, instruments: ['피아노'], region: '서울 노원구', payType: PayType.HOURLY, payMin: 28000, author: u[0], authorId: u[0].id },
-    { title: '바이올린 콩쿨 대비 레슨 교사', content: '콩쿨 준비 중인 중학생 바이올린 레슨 교사 구합니다. 콩쿨 지도 경험 필수.', category: PostCategory.LESSON_OFFER, instruments: ['바이올린'], region: '경기 분당구', payType: PayType.HOURLY, payMin: 50000, author: u[1], authorId: u[1].id },
-    { title: '합창단 보컬 코치 구합니다', content: '아마추어 합창단 발성 코치 겸 지도자 모집. 성악 전공자 우대. 월 4회.', category: PostCategory.LESSON_OFFER, instruments: ['피아노'], region: '서울 은평구', payType: PayType.PER_SESSION, payMin: 120000, author: u[2], authorId: u[2].id },
-    { title: '드럼 레슨 선생님 급구', content: '초보 성인 드럼 레슨 선생님 구합니다. 주 1회, 연습실 비용 별도 지원.', category: PostCategory.LESSON_OFFER, instruments: ['드럼'], region: '서울 강동구', payType: PayType.HOURLY, payMin: 30000, author: u[4], authorId: u[4].id },
-  ];
-
-  const lessonSeeks: Partial<Post>[] = [
-    { title: '피아노 레슨 가능합니다 - 음대 재학생', content: '음대 피아노 전공 3학년. 초~중급 학생 지도 가능. 강남·서초 지역 출장 레슨.', category: PostCategory.LESSON_SEEK, instruments: ['피아노'], region: '서울 강남구', payType: PayType.HOURLY, payMin: 40000, author: u[0], authorId: u[0].id },
-    { title: '음대 출신 첼로 레슨 구직', content: '음대 첼로과 졸업. 어린이~성인 모두 지도 가능. 스즈키·전통 교수법 병행.', category: PostCategory.LESSON_SEEK, instruments: ['첼로'], region: '경기 성남시', payType: PayType.HOURLY, payMin: 45000, author: u[2], authorId: u[2].id },
-    { title: '바이올린 레슨 구직합니다', content: '음고 출신 바이올린 선생님. 초급 교재부터 협주곡까지 지도. 화상 레슨도 가능.', category: PostCategory.LESSON_SEEK, instruments: ['바이올린'], region: '서울 마포구', payType: PayType.HOURLY, payMin: 40000, author: u[1], authorId: u[1].id },
-    { title: '플루트 레슨 구직 - 전공자', content: '국악·서양음악 겸비 플루트 연주자. 어린이 플루트 지도 전문.', category: PostCategory.LESSON_SEEK, instruments: ['플루트'], region: '부산·경남 전지역', payType: PayType.HOURLY, payMin: 35000, author: u[3], authorId: u[3].id },
-    { title: '클래식 기타 레슨 구직합니다', content: '클래식 기타 전공. 입문~중급 지도. 출장 레슨 가능. 악보 무료 제공.', category: PostCategory.LESSON_SEEK, instruments: ['기타'], region: '대구 전지역', payType: PayType.HOURLY, payMin: 30000, author: u[4], authorId: u[4].id },
-    { title: '성악·발성 레슨 구직합니다', content: '성악 전공. 대중가요 보컬 트레이닝 및 클래식 성악 레슨 가능. 온·오프라인 모두 가능.', category: PostCategory.LESSON_SEEK, instruments: ['피아노'], region: '서울 전지역', payType: PayType.HOURLY, payMin: 50000, author: u[0], authorId: u[0].id },
-    { title: '작곡·화성학 레슨 구직', content: '작곡 전공 대학원생. 화성학·대위법·편곡 레슨 전문. 입시생 지도 경험 다수.', category: PostCategory.LESSON_SEEK, instruments: ['피아노'], region: '서울 관악구', payType: PayType.HOURLY, payMin: 60000, author: u[2], authorId: u[2].id },
-    { title: '피아노 입시 전문 레슨 구직', content: '음대 피아노과 입시 전문 교사. 예중·예고·음대 입시 지도 경험. 체르니~쇼팽 전 범위.', category: PostCategory.LESSON_SEEK, instruments: ['피아노'], region: '서울 강남·서초', payType: PayType.HOURLY, payMin: 70000, author: u[0], authorId: u[0].id },
-    { title: '바이올린·비올라 레슨 구직', content: '바이올린·비올라 모두 가능. 학교 오케스트라 지도 경험 보유.', category: PostCategory.LESSON_SEEK, instruments: ['바이올린'], region: '인천 전지역', payType: PayType.HOURLY, payMin: 38000, author: u[1], authorId: u[1].id },
-    { title: '국악·양금 레슨 구직합니다', content: '국악 기악과 졸업. 양금·가야금 레슨 가능. 국악 입문자 환영.', category: PostCategory.LESSON_SEEK, instruments: ['기타'], region: '대전 전지역', payType: PayType.HOURLY, payMin: 32000, author: u[4], authorId: u[4].id },
-  ];
-
-  const promoConcerts: Partial<Post>[] = [
-    { title: '제3회 정기연주회 초대합니다', content: '반모 피아노 앙상블의 제3회 정기연주회를 개최합니다. 베토벤 소나타, 쇼팽 발라드 등 수준 높은 프로그램으로 찾아갑니다. 입장 무료.', category: PostCategory.PROMO_CONCERT, instruments: ['피아노'], region: '서울 강남구', payType: PayType.NEGOTIABLE, payMin: 0, author: u[0], authorId: u[0].id },
-    { title: '봄 실내악 연주회 홍보', content: '봄을 맞아 피아노 트리오 연주회를 개최합니다. 슈베르트·브람스·드보르자크 트리오. 예매 필수.', category: PostCategory.PROMO_CONCERT, instruments: ['피아노', '바이올린', '첼로'], region: '서울 종로구', payType: PayType.NEGOTIABLE, payMin: 0, author: u[1], authorId: u[1].id },
-    { title: '피아노 독주회 - 쇼팽 프로그램', content: '쇼팽 탄생 기념 피아노 독주회. 녹턴·발라드·스케르초 전곡 프로그램. 초대권 배포 중.', category: PostCategory.PROMO_CONCERT, instruments: ['피아노'], region: '경기 성남시', payType: PayType.NEGOTIABLE, payMin: 0, author: u[2], authorId: u[2].id },
-    { title: '바이올린·피아노 듀오 리사이틀', content: '바이올린과 피아노의 하모니. 프랑크 소나타, 라벨 소나타 등 프랑스 레퍼토리 위주.', category: PostCategory.PROMO_CONCERT, instruments: ['바이올린', '피아노'], region: '부산 해운대구', payType: PayType.NEGOTIABLE, payMin: 0, author: u[3], authorId: u[3].id },
-    { title: '합창단 정기연주회 초대합니다', content: '지역 합창단 창단 10주년 기념 연주회. 헨델 메시아 중 하이라이트 프로그램. 무료 입장.', category: PostCategory.PROMO_CONCERT, instruments: ['피아노'], region: '대구 중구', payType: PayType.NEGOTIABLE, payMin: 0, author: u[4], authorId: u[4].id },
-    { title: '첼로 협주곡의 밤', content: '드보르자크·엘가 첼로 협주곡. 지역 체임버 오케스트라와 협연. 유료(5,000원).', category: PostCategory.PROMO_CONCERT, instruments: ['첼로'], region: '인천 미추홀구', payType: PayType.NEGOTIABLE, payMin: 0, author: u[2], authorId: u[2].id },
-    { title: '플루트 앙상블 정기연주회', content: '플루트 5중주 연주회. 바흐 관현악 모음곡부터 현대 작품까지. 입장 무료.', category: PostCategory.PROMO_CONCERT, instruments: ['플루트'], region: '부산 남구', payType: PayType.NEGOTIABLE, payMin: 0, author: u[3], authorId: u[3].id },
-    { title: '클래식 기타 갈라 콘서트', content: '클래식 기타 연주자들의 갈라 콘서트. 솔로·앙상블·협연 다채로운 프로그램.', category: PostCategory.PROMO_CONCERT, instruments: ['기타'], region: '서울 강서구', payType: PayType.NEGOTIABLE, payMin: 0, author: u[4], authorId: u[4].id },
-    { title: '어린이를 위한 클래식 음악회', content: '어린이 눈높이 맞춤 클래식 해설 음악회. 악기 체험 코너 운영. 가족 단위 환영.', category: PostCategory.PROMO_CONCERT, instruments: ['피아노', '바이올린'], region: '경기 수원시', payType: PayType.NEGOTIABLE, payMin: 0, author: u[0], authorId: u[0].id },
-    { title: '재즈 피아노 트리오 공연 안내', content: '재즈 피아노·베이스·드럼 트리오 공연. 스탠더드 재즈부터 현대 재즈까지. 예약 입장.', category: PostCategory.PROMO_CONCERT, instruments: ['피아노'], region: '서울 홍대', payType: PayType.NEGOTIABLE, payMin: 0, author: u[1], authorId: u[1].id },
-  ];
-
-  const tradeInstruments: Partial<Post>[] = [
-    { title: '야마하 그랜드피아노 C3 판매합니다', content: '야마하 C3 1990년식. 정기 조율 유지. 피아노 학원 이전으로 판매. 직거래 우선. 사진 요청시 별도 전송.', category: PostCategory.TRADE_INSTRUMENT, instruments: ['피아노'], region: '서울 강남구', payType: PayType.PER_SESSION, payMin: 8000000, author: u[0], authorId: u[0].id },
-    { title: '스트라디바리 모델 바이올린 양도', content: '독일 마이스터 제작 바이올린. 스트라디바리 모델. 활·케이스 포함. 콩쿨 입상 후 업그레이드로 양도.', category: PostCategory.TRADE_INSTRUMENT, instruments: ['바이올린'], region: '서울 마포구', payType: PayType.PER_SESSION, payMin: 3500000, author: u[1], authorId: u[1].id },
-    { title: '피아솔라 모델 첼로 판매', content: '독일 공방 4/4 첼로. 음색 풍부, 반응 좋음. 이탈리아산 활·하드케이스 포함.', category: PostCategory.TRADE_INSTRUMENT, instruments: ['첼로'], region: '경기 성남시', payType: PayType.PER_SESSION, payMin: 2800000, author: u[2], authorId: u[2].id },
-    { title: '무라마츠 플루트 EX 판매', content: '무라마츠 EX 은관. 3년 사용. 사운드홀 14K. 정기 수리 완료. 케이스 포함.', category: PostCategory.TRADE_INSTRUMENT, instruments: ['플루트'], region: '부산 해운대구', payType: PayType.PER_SESSION, payMin: 1500000, author: u[3], authorId: u[3].id },
-    { title: '야마하 클래식 기타 GC82S 양도', content: '야마하 GC82S 삼나무 탑. 1년 사용. 거의 새것 상태. 하드케이스·보조 악기 포함.', category: PostCategory.TRADE_INSTRUMENT, instruments: ['기타'], region: '대구 중구', payType: PayType.PER_SESSION, payMin: 900000, author: u[4], authorId: u[4].id },
-    { title: '롤랜드 전자피아노 FP-90X 판매', content: '롤랜드 FP-90X 2022년 구입. 이사로 판매. 스탠드·페달 포함. 상태 최상.', category: PostCategory.TRADE_INSTRUMENT, instruments: ['피아노'], region: '인천 연수구', payType: PayType.PER_SESSION, payMin: 1200000, author: u[1], authorId: u[1].id },
-    { title: '갈레리 첼로 활 판매합니다', content: '갈레리 페르남부코 활. 무게 62g. 음색 밝고 반응 빠름. 케이스 포함.', category: PostCategory.TRADE_INSTRUMENT, instruments: ['첼로'], region: '서울 서초구', payType: PayType.PER_SESSION, payMin: 500000, author: u[2], authorId: u[2].id },
-    { title: '피카르디 바이올린 7/8 판매', content: '초등학생 자녀가 사용하던 7/8 바이올린. 활·케이스·어깨받침 포함. 상태 양호.', category: PostCategory.TRADE_INSTRUMENT, instruments: ['바이올린'], region: '경기 분당구', payType: PayType.PER_SESSION, payMin: 350000, author: u[0], authorId: u[0].id },
-    { title: '카와이 업라이트 피아노 US6X 판매', content: '카와이 US6X 하이브리드 어쿠스틱. 2019년식. 조율 완료. 이사로 인해 판매.', category: PostCategory.TRADE_INSTRUMENT, instruments: ['피아노'], region: '서울 강서구', payType: PayType.PER_SESSION, payMin: 5500000, author: u[3], authorId: u[3].id },
-    { title: '플루트 교습용 입문 세트 판매', content: '야마하 YFL-222 + 보면대 + 악보집 세트. 초보자 입문용. 상태 양호.', category: PostCategory.TRADE_INSTRUMENT, instruments: ['플루트'], region: '서울 노원구', payType: PayType.PER_SESSION, payMin: 280000, author: u[4], authorId: u[4].id },
-  ];
-
-  return [
-    ...jobOffers,
-    ...jobSeeks,
-    ...lessonOffers,
-    ...lessonSeeks,
-    ...promoConcerts,
-    ...tradeInstruments,
-  ];
-}
-
-function makeBoards(users: User[]): Partial<Board>[] {
-  const u = users;
-
-  const freeBoards: Partial<Board>[] = [
-    { type: BoardType.FREE, title: '반주자 구할 때 주의사항 공유해요', content: '처음 반주자 구하시는 분들을 위해 경험을 공유합니다.\n\n1. 페이를 미리 명확히 협의하세요\n2. 리허설 횟수와 비용을 별도로 정하세요\n3. 악보 제공 시기를 미리 합의하세요\n\n모두 좋은 반주자 만나시길 바랍니다!', author: u[0], authorId: u[0].id },
-    { type: BoardType.FREE, title: '레슨비 협상 어떻게 하시나요?', content: '처음 레슨 자리를 잡을 때 학원 측에서 제시한 금액이 생각보다 낮았어요. 다들 어떻게 협상하시나요? 포트폴리오를 보여주는 방법이 효과적이었다는 분 계신가요?', author: u[1], authorId: u[1].id },
-    { type: BoardType.FREE, title: '콩쿨 반주 경험담 나눠요', content: '지난 주에 학생 콩쿨 반주를 처음 맡았는데 너무 긴장했어요. 결과적으로 학생이 입상해서 뿌듯했지만, 준비 과정에서 어려웠던 점들을 공유하고 싶어요.', author: u[2], authorId: u[2].id },
-    { type: BoardType.FREE, title: '음표 등급 올리려면 어떻게 해야 하나요?', content: '반모 플랫폼의 음표 등급 시스템이 궁금합니다. 어떤 기준으로 등급이 올라가나요? 신뢰 점수와 관련이 있는 건가요?', author: u[3], authorId: u[3].id },
-    { type: BoardType.FREE, title: '반주자 교통비는 어떻게 처리하시나요?', content: '방문 반주를 맡게 됐는데 교통비 처리가 애매하네요. 보통 포함해서 받으시나요, 따로 받으시나요? 거리 기준이 있으신지 궁금합니다.', author: u[4], authorId: u[4].id },
-    { type: BoardType.FREE, title: '초견 능력 향상 팁 공유합니다', content: '저는 매일 새 악보 3페이지씩 초견 연습을 해왔습니다. 6개월 만에 확실히 실력이 늘었어요. 악보 사이트 추천: IMSLP, Musescore 등 활용하시면 좋아요.', author: u[0], authorId: u[0].id },
-    { type: BoardType.FREE, title: '리허설 없이 바로 공연 가능하신가요?', content: '급하게 반주자 필요한 상황인데, 리허설 없이 당일 공연 경험 있으신 분 계신가요? 어떻게 대처하셨는지 궁금합니다.', author: u[1], authorId: u[1].id },
-    { type: BoardType.FREE, title: '악보 PDF를 미리 받지 못하면 어떻게 하세요?', content: '의뢰인이 악보를 공연 직전에 주는 경우가 있어서... 이런 상황 어떻게 처리하시나요? 계약 시 명시해야 할까요?', author: u[2], authorId: u[2].id },
-    { type: BoardType.FREE, title: '반모 플랫폼 사용 후기 - 좋았던 점', content: '반모로 한 달 만에 세 건의 반주 의뢰를 받았습니다! 필터 기능이 편리해서 악기별로 쉽게 찾을 수 있었어요. 다들 활발하게 이용해주세요 :)', author: u[3], authorId: u[3].id },
-    { type: BoardType.FREE, title: '연주회 반주 vs 레슨 반주 어떤 게 더 좋나요?', content: '두 가지 모두 경험해보신 분들 의견이 궁금합니다. 저는 레슨 반주가 정기적이라 좋던데, 연주회 반주는 무대 경험이 쌓이는 게 매력인 것 같아요.', author: u[4], authorId: u[4].id },
-  ];
-
-  const anonymousBoards: Partial<Board>[] = [
-    { type: BoardType.ANONYMOUS, isAnonymous: true, title: '너무 낮은 페이 제시받았어요 ㅠㅠ', content: '경력 3년인데 시급 15,000원을 제시받았어요. 최저시급도 안 되는데... 이런 경우 어떻게 대응하시나요? 그냥 거절해야 할까요?', author: u[0], authorId: u[0].id },
-    { type: BoardType.ANONYMOUS, isAnonymous: true, title: '반주 거절당했는데 상처받네요', content: '이력서 넣고 오디션까지 봤는데 탈락했습니다. 이유도 안 알려주고... 마음이 많이 힘드네요. 다들 이런 경험 있으신가요?', author: u[1], authorId: u[1].id },
-    { type: BoardType.ANONYMOUS, isAnonymous: true, title: '의뢰인이 약속 당일 취소했어요', content: '당일 아침에 취소 연락이 왔는데 교통비도 못 받았어요. 계약서를 안 썼는데 보상받을 방법이 없을까요?', author: u[2], authorId: u[2].id },
-    { type: BoardType.ANONYMOUS, isAnonymous: true, title: '페이 협상이 너무 어려워요', content: '처음 의뢰 잡을 때 페이 얘기 꺼내기가 너무 부끄럽고 어색해요. 어떻게 자연스럽게 협상하시나요?', author: u[3], authorId: u[3].id },
-    { type: BoardType.ANONYMOUS, isAnonymous: true, title: '프리랜서 세금 신고 어떻게 하시나요?', content: '반주 수입이 생기기 시작했는데 세금 신고를 어떻게 해야 할지 모르겠어요. 3.3% 원천징수 받아야 하나요?', author: u[4], authorId: u[4].id },
-    { type: BoardType.ANONYMOUS, isAnonymous: true, title: '레슨비 미지급 상황 어떻게 하셨나요?', content: '2달 치 레슨비를 못 받고 있어요. 학원 원장님이 계속 미루는데 어떻게 해야 할까요?', author: u[0], authorId: u[0].id },
-    { type: BoardType.ANONYMOUS, isAnonymous: true, title: '반주 실력이 너무 부족한 것 같아요', content: '의뢰는 받았는데 연습할수록 내 실력이 부족한 것 같아서 자신감이 없어요. 포기해야 할까요 아니면 솔직하게 말해야 할까요?', author: u[1], authorId: u[1].id },
-    { type: BoardType.ANONYMOUS, isAnonymous: true, title: '의뢰인이 리허설 중 무례하게 대해서 힘들어요', content: '피아노 반주인데 의뢰인이 계속 반말하고 무례하게 대해요. 이미 계약 완료한 상황인데 어떻게 해야 할까요?', author: u[2], authorId: u[2].id },
-    { type: BoardType.ANONYMOUS, isAnonymous: true, title: '음표 등급이 안 올라가는 이유가 뭘까요?', content: '반주 여러 건 완료했는데 등급이 BASIC에서 안 올라가네요. 후기가 없어서 그런 걸까요?', author: u[3], authorId: u[3].id },
-    { type: BoardType.ANONYMOUS, isAnonymous: true, title: '반주 거리가 멀어서 고민이에요', content: '좋은 조건인데 왕복 2시간 거리예요. 교통비 추가 요청이 가능할까요? 아니면 거절하는 게 나을까요?', author: u[4], authorId: u[4].id },
-  ];
-
-  const notices: Partial<Board>[] = [
-    {
-      type: BoardType.NOTICE,
-      title: '반모 플랫폼 오픈 안내',
-      content: '안녕하세요, 반모(반주의 모든것) 플랫폼이 정식 오픈했습니다!\n\n반모는 반주자와 연주자를 연결하는 매칭 플랫폼으로, 투명한 페이 공개와 신뢰 기반의 매칭을 목표로 합니다.\n\n주요 기능:\n- 구인/구직 공고 등록\n- 악기·지역·페이 필터 검색\n- 1:1 채팅 매칭\n- 음표 등급 신뢰 시스템\n\n많은 이용 부탁드립니다.',
-      author: u[0],
-      authorId: u[0].id,
-    },
-    {
-      type: BoardType.NOTICE,
-      title: '페이 최저 기준 정책 안내',
-      content: '반모 플랫폼의 페이 정책을 안내드립니다.\n\n시급 기준 공고는 2024년 법정 최저시급(10,030원) 이상만 등록 가능합니다. 최저시급 미만의 공고는 등록 시 경고가 표시됩니다.\n\n공정한 반주자 처우 개선을 위해 적정 페이 지급에 협조해 주시기 바랍니다.',
-      author: u[0],
-      authorId: u[0].id,
-    },
-    {
-      type: BoardType.NOTICE,
-      title: '음표 등급 시스템 안내',
-      content: '반모의 음표 등급 시스템을 소개합니다.\n\n♩ 초급(BASIC): 신규 가입 후 첫 활동 시작\n♪ 중급(INTERMEDIATE): 신뢰 점수 30점 이상\n♫ 고급(ADVANCED): 신뢰 점수 60점 이상\n♬ 전문(PROFESSIONAL): 신뢰 점수 100점 이상\n\n신뢰 점수는 거래 완료, 후기 작성, 커뮤니티 활동 등을 통해 쌓입니다.',
-      author: u[0],
-      authorId: u[0].id,
-    },
-  ];
-
-  return [...freeBoards, ...anonymousBoards, ...notices];
+async function migrateNoteGradeEnum(ds: DataSource) {
+  await ds.query(`
+    DO $$ BEGIN
+      IF EXISTS (
+        SELECT 1 FROM pg_enum
+        WHERE enumlabel = 'NONE'
+          AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'users_notegrade_enum')
+      ) THEN
+        ALTER TYPE users_notegrade_enum RENAME VALUE 'NONE'         TO 'SIXTEENTH';
+        ALTER TYPE users_notegrade_enum RENAME VALUE 'BASIC'        TO 'EIGHTH';
+        ALTER TYPE users_notegrade_enum RENAME VALUE 'INTERMEDIATE' TO 'QUARTER';
+        ALTER TYPE users_notegrade_enum RENAME VALUE 'ADVANCED'     TO 'HALF';
+        ALTER TYPE users_notegrade_enum RENAME VALUE 'PROFESSIONAL' TO 'WHOLE';
+      END IF;
+    END $$;
+  `);
 }
 
 // ─────────────────────────────────────────────
@@ -248,54 +66,455 @@ async function seed() {
   await AppDataSource.initialize();
   console.log('✅ DB 연결 완료');
 
-  const userRepo = AppDataSource.getRepository(User);
-  const postRepo = AppDataSource.getRepository(Post);
-  const boardRepo = AppDataSource.getRepository(Board);
+  // enum 마이그레이션 (구버전 → 음표 이름)
+  await migrateNoteGradeEnum(AppDataSource);
+  console.log('🔄 NoteGrade enum 마이그레이션 완료');
 
-  // ── 기존 데이터 정리 (seed 재실행 가능하도록)
-  for (const kakaoId of ['test_001', 'test_002', 'test_003', 'test_004', 'test_005']) {
-    const existing = await userRepo.findOne({ where: { kakaoId } });
+  const userRepo    = AppDataSource.getRepository(User);
+  const postRepo    = AppDataSource.getRepository(Post);
+  const boardRepo   = AppDataSource.getRepository(Board);
+  const commentRepo = AppDataSource.getRepository(BoardComment);
+
+  // ── 기존 테스트 데이터 정리
+  const testEmails = [
+    'pianist@banmo.com',
+    'violin@banmo.com',
+    'cello@banmo.com',
+    'flute@banmo.com',
+    'guitar@banmo.com',
+  ];
+  for (const email of testEmails) {
+    const existing = await userRepo.findOne({ where: { email } });
     if (existing) {
+      // 댓글 → 게시글 → 공고 → 유저 순서로 삭제
+      const boards = await boardRepo.find({ where: { authorId: existing.id } });
+      for (const b of boards) {
+        await commentRepo.delete({ boardId: b.id });
+      }
+      // 이 유저가 단 댓글도 삭제
+      await commentRepo.delete({ authorId: existing.id });
       await boardRepo.delete({ authorId: existing.id });
       await postRepo.delete({ authorId: existing.id });
       await userRepo.delete({ id: existing.id });
     }
   }
-  console.log('🧹 기존 seed 데이터 정리 완료');
+  console.log('🧹 기존 테스트 데이터 정리 완료');
 
-  // ── 유저 삽입
+  // ── 관리자 계정 생성 (없으면)
+  let adminUser = await userRepo.findOne({ where: { email: 'admin@banmo.com' } });
+  if (!adminUser) {
+    const adminPw = await bcryptLib.hash('admin1234!', 10);
+    adminUser = userRepo.create({
+      email:      'admin@banmo.com',
+      password:   adminPw,
+      nickname:   '관리자',
+      role:       UserRole.ADMIN,
+      loginType:  LoginType.EMAIL,
+      noteGrade:  NoteGrade.WHOLE,
+      trustScore: 999,
+      instruments: [],
+      videoUrls:   [],
+    } as Partial<User>);
+    adminUser = await userRepo.save(adminUser);
+    console.log('👑 관리자 계정 생성 완료');
+  } else {
+    console.log('ℹ️  관리자 계정 이미 존재');
+  }
+
+  // ── 테스트 유저 5명 생성
+  const pw = await bcryptLib.hash('test1234!', 10);
+
+  const usersData: Partial<User>[] = [
+    {
+      email: 'pianist@banmo.com', nickname: '김피아노', password: pw,
+      instruments: ['피아노'], region: '서울 강남구',
+      noteGrade: NoteGrade.WHOLE, trustScore: 120,
+      bio: '피아노 반주 경력 10년입니다. 성악, 기악 반주 전문입니다.',
+      loginType: LoginType.EMAIL, videoUrls: [],
+    },
+    {
+      email: 'violin@banmo.com', nickname: '이바이올린', password: pw,
+      instruments: ['바이올린'], region: '서울 마포구',
+      noteGrade: NoteGrade.HALF, trustScore: 65,
+      bio: '음대 출신 바이올린 연주자입니다.',
+      loginType: LoginType.EMAIL, videoUrls: [],
+    },
+    {
+      email: 'cello@banmo.com', nickname: '박첼로', password: pw,
+      instruments: ['첼로'], region: '경기 성남시',
+      noteGrade: NoteGrade.QUARTER, trustScore: 35,
+      bio: '첼로 레슨 및 연주 활동 중입니다.',
+      loginType: LoginType.EMAIL, videoUrls: [],
+    },
+    {
+      email: 'flute@banmo.com', nickname: '최플루트', password: pw,
+      instruments: ['플루트'], region: '부산 해운대구',
+      noteGrade: NoteGrade.EIGHTH, trustScore: 15,
+      bio: '플루트 연주자 구직 중입니다.',
+      loginType: LoginType.EMAIL, videoUrls: [],
+    },
+    {
+      email: 'guitar@banmo.com', nickname: '정기타', password: pw,
+      instruments: ['기타'], region: '대구 중구',
+      noteGrade: NoteGrade.SIXTEENTH, trustScore: 0,
+      bio: '기타 연주자입니다.',
+      loginType: LoginType.EMAIL, videoUrls: [],
+    },
+  ];
+
   const savedUsers: User[] = [];
-  for (const u of SAMPLE_USERS) {
+  for (const u of usersData) {
     const user = userRepo.create(u as Partial<User>);
     savedUsers.push(await userRepo.save(user));
   }
   console.log(`👥 유저 ${savedUsers.length}명 삽입 완료`);
 
-  // ── 공고 삽입
-  const postData = makePosts(savedUsers);
+  const [u1, u2, u3, u4, u5] = savedUsers;
+
+  // ─────────────────────────────────────────────
+  // 공고 25개
+  // ─────────────────────────────────────────────
+  const postsData: Partial<Post>[] = [
+    // JOB_OFFER 5개
+    {
+      title: '성악 레슨 피아노 반주자 구합니다',
+      content: '매주 화/목 오전 10시-12시 성악 레슨 반주자를 구합니다. 경력 3년 이상 선호합니다. 레퍼토리는 주로 이탈리아 가곡, 독일 가곡입니다.',
+      category: PostCategory.JOB_OFFER, instruments: ['피아노'],
+      region: '서울 강남구', payType: PayType.HOURLY, payMin: 20000, payMax: 30000,
+      author: u2, authorId: u2.id,
+    },
+    {
+      title: '바이올린 콩쿠르 반주자 급구',
+      content: '다음달 콩쿠르 준비 중인 바이올리니스트입니다. 2주간 집중 연습 가능한 반주자 구합니다. 곡목은 브람스 소나타입니다.',
+      category: PostCategory.JOB_OFFER, instruments: ['피아노'],
+      region: '서울 서초구', payType: PayType.PER_SESSION, payMin: 80000, payMax: 150000,
+      author: u3, authorId: u3.id, isPremium: true,
+    },
+    {
+      title: '합창단 정기연주회 반주자 모집',
+      content: 'OO합창단 정기연주회 반주자를 모집합니다. 연습은 매주 토요일 오후 2-5시입니다. 연주회는 12월 예정입니다.',
+      category: PostCategory.JOB_OFFER, instruments: ['피아노'],
+      region: '경기 수원시', payType: PayType.MONTHLY, payMin: 300000, payMax: 500000,
+      author: u4, authorId: u4.id,
+    },
+    {
+      title: '플루트 독주회 반주자 구합니다',
+      content: '내년 봄 플루트 독주회를 준비 중입니다. 6개월간 함께하실 피아노 반주자를 구합니다. 레퍼토리 협의 가능합니다.',
+      category: PostCategory.JOB_OFFER, instruments: ['피아노'],
+      region: '부산 해운대구', payType: PayType.PER_SESSION, payMin: 100000, payMax: 200000,
+      author: u5, authorId: u5.id,
+    },
+    {
+      title: '방과후 음악 수업 반주자 구인',
+      content: '초등학교 방과후 음악 수업 반주 도우미를 구합니다. 월-금 오후 2-4시, 장기 근무 가능하신 분 우대합니다.',
+      category: PostCategory.JOB_OFFER, instruments: ['피아노'],
+      region: '서울 노원구', payType: PayType.HOURLY, payMin: 15000, payMax: 20000,
+      author: u1, authorId: u1.id,
+    },
+
+    // JOB_SEEK 5개
+    {
+      title: '피아노 반주 구직합니다 - 경력 10년',
+      content: '음대 피아노과 졸업 후 10년간 반주 활동을 해왔습니다. 성악, 기악 모두 가능합니다. 강남/서초 지역 선호합니다.',
+      category: PostCategory.JOB_SEEK, instruments: ['피아노'],
+      region: '서울 강남구', payType: PayType.HOURLY, payMin: 25000, payMax: 40000,
+      author: u1, authorId: u1.id,
+    },
+    {
+      title: '바이올린 반주 전문 피아니스트 구직',
+      content: '실내악 및 콩쿠르 반주 전문입니다. 주요 바이올린 소나타 레퍼토리 보유 중입니다. 단기/장기 모두 가능합니다.',
+      category: PostCategory.JOB_SEEK, instruments: ['피아노', '바이올린'],
+      region: '서울 마포구', payType: PayType.PER_SESSION, payMin: 80000, payMax: 150000,
+      author: u2, authorId: u2.id,
+    },
+    {
+      title: '첼로 레슨 반주 구직합니다',
+      content: '첼로 전공자로 반주 및 레슨 도우미 활동을 원합니다. 수도권 어디든 이동 가능합니다.',
+      category: PostCategory.JOB_SEEK, instruments: ['첼로', '피아노'],
+      region: '경기 성남시', payType: PayType.HOURLY, payMin: 20000, payMax: 35000,
+      author: u3, authorId: u3.id,
+    },
+    {
+      title: '관악 앙상블 반주 및 코치 구직',
+      content: '플루트 전공 후 관악 앙상블 코칭 및 반주 활동 희망합니다. 플루트, 오보에, 클라리넷 레퍼토리 다수 보유합니다.',
+      category: PostCategory.JOB_SEEK, instruments: ['플루트'],
+      region: '부산 해운대구', payType: PayType.PER_SESSION, payMin: 60000, payMax: 100000,
+      author: u4, authorId: u4.id,
+    },
+    {
+      title: '기타 앙상블 반주자 구직',
+      content: '클래식 기타 전공입니다. 기타 이중주, 앙상블, 반주 활동 가능합니다. 대구/경북 지역 활동 선호합니다.',
+      category: PostCategory.JOB_SEEK, instruments: ['기타'],
+      region: '대구 중구', payType: PayType.HOURLY, payMin: 15000, payMax: 25000,
+      author: u5, authorId: u5.id,
+    },
+
+    // LESSON_OFFER 5개
+    {
+      title: '피아노 레슨 선생님 구합니다 - 초급반',
+      content: '7세 자녀 피아노 레슨 선생님을 구합니다. 주 2회 방문 레슨 가능하신 분. 바이엘/체르니 수준입니다.',
+      category: PostCategory.LESSON_OFFER, instruments: ['피아노'],
+      region: '서울 강남구', payType: PayType.HOURLY, payMin: 30000, payMax: 50000,
+      author: u3, authorId: u3.id,
+    },
+    {
+      title: '바이올린 레슨 선생님 급구 - 성인 초보',
+      content: '성인 바이올린 입문자입니다. 주 1회 레슨 원합니다. 직장인이라 저녁 시간 또는 주말 가능한 선생님 선호합니다.',
+      category: PostCategory.LESSON_OFFER, instruments: ['바이올린'],
+      region: '서울 마포구', payType: PayType.HOURLY, payMin: 40000, payMax: 60000,
+      author: u4, authorId: u4.id,
+    },
+    {
+      title: '첼로 레슨 선생님 구인 - 중급',
+      content: '첼로 3년차입니다. 좀 더 체계적으로 배우고 싶어서 새 선생님을 구합니다. 주 2회 레슨 희망합니다.',
+      category: PostCategory.LESSON_OFFER, instruments: ['첼로'],
+      region: '경기 성남시', payType: PayType.HOURLY, payMin: 50000, payMax: 70000,
+      author: u5, authorId: u5.id,
+    },
+    {
+      title: '플루트 레슨 선생님 구합니다',
+      content: '중학생 자녀 플루트 레슨 선생님을 구합니다. 음대 준비 중이며 입시 경험 있는 선생님 선호합니다.',
+      category: PostCategory.LESSON_OFFER, instruments: ['플루트'],
+      region: '부산 해운대구', payType: PayType.HOURLY, payMin: 50000, payMax: 80000,
+      author: u1, authorId: u1.id,
+    },
+    {
+      title: '기타 레슨 구인 - 통기타 입문',
+      content: '통기타 배우고 싶은 직장인입니다. 주 1회 레슨으로 시작하고 싶습니다. 강남역 근처 가능한 선생님 구합니다.',
+      category: PostCategory.LESSON_OFFER, instruments: ['기타'],
+      region: '서울 강남구', payType: PayType.HOURLY, payMin: 30000, payMax: 50000,
+      author: u2, authorId: u2.id,
+    },
+
+    // PROMO_CONCERT 5개
+    {
+      title: '제5회 김피아노 피아노 독주회',
+      content: '쇼팽 발라드, 리스트 소나타를 중심으로 한 피아노 독주회에 초대합니다. 일시: 2026년 5월 15일 오후 7시 30분. 장소: 예술의전당 리사이틀홀. 입장권: 2만원',
+      category: PostCategory.PROMO_CONCERT, instruments: ['피아노'],
+      region: '서울 서초구', payType: PayType.NEGOTIABLE, payMin: 0,
+      author: u1, authorId: u1.id, isPremium: true,
+    },
+    {
+      title: '봄날의 실내악 연주회',
+      content: '피아노 트리오가 선보이는 봄 실내악 연주회입니다. 브람스, 슈만의 피아노 트리오를 연주합니다. 일시: 2026년 4월 20일. 장소: 마포아트센터. 무료 입장',
+      category: PostCategory.PROMO_CONCERT, instruments: ['피아노', '바이올린', '첼로'],
+      region: '서울 마포구', payType: PayType.NEGOTIABLE, payMin: 0,
+      author: u2, authorId: u2.id,
+    },
+    {
+      title: '졸업 독주회 - 첼로 소나타의 밤',
+      content: '음대 졸업 독주회에 여러분을 초대합니다. 베토벤, 브람스 첼로 소나타를 연주합니다. 일시: 2026년 4월 30일 오후 6시. 장소: 예원학교 콘서트홀. 무료입장',
+      category: PostCategory.PROMO_CONCERT, instruments: ['첼로'],
+      region: '서울 종로구', payType: PayType.NEGOTIABLE, payMin: 0,
+      author: u3, authorId: u3.id,
+    },
+    {
+      title: '플루트와 피아노의 만남 - 듀오 리사이틀',
+      content: '플루트와 피아노가 함께하는 아름다운 저녁에 초대합니다. 모차르트, 프랑크, 풀랑크의 작품을 연주합니다. 일시: 2026년 5월 2일 오후 7시. 입장권: 1만원',
+      category: PostCategory.PROMO_CONCERT, instruments: ['플루트', '피아노'],
+      region: '부산 해운대구', payType: PayType.NEGOTIABLE, payMin: 0,
+      author: u4, authorId: u4.id,
+    },
+    {
+      title: '기타 앙상블 정기연주회',
+      content: 'OO기타앙상블 제3회 정기연주회입니다. 클래식 기타 앙상블의 매력을 느껴보세요. 일시: 2026년 5월 10일 오후 5시. 장소: 대구문화예술회관. 입장료 무료',
+      category: PostCategory.PROMO_CONCERT, instruments: ['기타'],
+      region: '대구 중구', payType: PayType.NEGOTIABLE, payMin: 0,
+      author: u5, authorId: u5.id,
+    },
+
+    // TRADE_INSTRUMENT 5개
+    {
+      title: '야마하 그랜드피아노 C3X 판매합니다',
+      content: '2018년 구입한 야마하 C3X 판매합니다. 사용감 적고 관리 잘 된 상품입니다. 조율 최근에 했습니다. 직거래만 가능합니다. 강남구 자택 방문 확인 가능합니다.',
+      category: PostCategory.TRADE_INSTRUMENT, instruments: ['피아노'],
+      region: '서울 강남구', payType: PayType.PER_SESSION, payMin: 15000000, payMax: 18000000,
+      author: u1, authorId: u1.id,
+    },
+    {
+      title: '독일제 바이올린 활 판매',
+      content: '독일산 페르남부코 바이올린 활 판매합니다. 연주자 업그레이드로 인한 판매입니다. 상태 매우 좋습니다. 케이스 포함 판매합니다.',
+      category: PostCategory.TRADE_INSTRUMENT, instruments: ['바이올린'],
+      region: '서울 마포구', payType: PayType.PER_SESSION, payMin: 800000, payMax: 1000000,
+      author: u2, authorId: u2.id,
+    },
+    {
+      title: '첼로 4/4 사이즈 입문용 판매',
+      content: '입문용 첼로 판매합니다. 활, 케이스, 송진 포함입니다. 3년 사용했으나 관리 잘 되어 있습니다. 업그레이드로 인한 판매입니다.',
+      category: PostCategory.TRADE_INSTRUMENT, instruments: ['첼로'],
+      region: '경기 성남시', payType: PayType.PER_SESSION, payMin: 300000, payMax: 400000,
+      author: u3, authorId: u3.id,
+    },
+    {
+      title: '야마하 플루트 YFL-222 판매',
+      content: '야마하 입문용 플루트 판매합니다. 구매 후 1년 사용했습니다. 케이스, 클리닝 도구 포함입니다. 부산 직거래 또는 안전결제 가능합니다.',
+      category: PostCategory.TRADE_INSTRUMENT, instruments: ['플루트'],
+      region: '부산 해운대구', payType: PayType.PER_SESSION, payMin: 250000, payMax: 300000,
+      author: u4, authorId: u4.id,
+    },
+    {
+      title: '클래식 기타 알함브라 판매',
+      content: '스페인산 클래식 기타 판매합니다. 음색이 매우 아름다운 기타입니다. 하드케이스 포함. 대구 직거래 선호합니다.',
+      category: PostCategory.TRADE_INSTRUMENT, instruments: ['기타'],
+      region: '대구 중구', payType: PayType.PER_SESSION, payMin: 500000, payMax: 700000,
+      author: u5, authorId: u5.id,
+    },
+  ];
+
   let postCount = 0;
-  for (const p of postData) {
+  for (const p of postsData) {
     const post = postRepo.create(p as Partial<Post>);
     await postRepo.save(post);
     postCount++;
   }
   console.log(`📋 공고 ${postCount}개 삽입 완료`);
 
-  // ── 게시판 삽입
-  const boardData = makeBoards(savedUsers);
-  let boardCount = 0;
-  for (const b of boardData) {
+  // ─────────────────────────────────────────────
+  // 게시판 글 13개 (FREE 5, ANONYMOUS 5, NOTICE 3)
+  // ─────────────────────────────────────────────
+  const boardsData: Partial<Board>[] = [
+    // FREE 5개
+    {
+      type: BoardType.FREE, title: '반주자 구할 때 유의사항 공유해요',
+      content: '반주자를 구하면서 겪었던 경험을 공유합니다. 페이는 꼭 미리 협의하시고, 악보는 최소 2주 전에 전달해주세요. 연습 횟수와 본 연주 횟수도 명확히 해두시면 좋습니다. 서로 존중하는 문화가 만들어지길 바랍니다.',
+      author: u1, authorId: u1.id,
+    },
+    {
+      type: BoardType.FREE, title: '반주 페이 어느 정도가 적당할까요?',
+      content: '콩쿠르 반주 1회당 페이가 보통 얼마 정도 되나요? 처음 구하는 거라 기준을 모르겠어요. 레퍼토리는 바이올린 소나타 1곡입니다. 연습 3회, 본 연주 1회 예정입니다.',
+      author: u3, authorId: u3.id,
+    },
+    {
+      type: BoardType.FREE, title: '악보 저작권 관련해서 아시는 분?',
+      content: '연주회에서 현대 작곡가 곡을 연주하려는데 악보 저작권 문제가 있을까요? 어디서 정식 악보를 구해야 하는지 아시는 분 도움 부탁드립니다.',
+      author: u2, authorId: u2.id,
+    },
+    {
+      type: BoardType.FREE, title: '반모 플랫폼 사용 후기',
+      content: '반모 플랫폼 통해서 반주자 구했어요! 생각보다 빨리 구해서 너무 좋았습니다. 앞으로 더 많은 분들이 이용하셨으면 좋겠어요. 개발자분들 감사합니다 :)',
+      author: u4, authorId: u4.id,
+    },
+    {
+      type: BoardType.FREE, title: '연습실 추천해주세요 - 강남 근처',
+      content: '강남/서초 근처에 피아노 연습실 추천해주실 분 계신가요? 그랜드 피아노 있는 곳이면 더 좋겠습니다. 시간당 가격도 알려주시면 감사하겠습니다.',
+      author: u5, authorId: u5.id,
+    },
+
+    // ANONYMOUS 5개
+    {
+      type: BoardType.ANONYMOUS, isAnonymous: true,
+      title: '페이 너무 낮게 부르는 분들 때문에 힘드네요',
+      content: '콩쿠르 반주인데 5만원 제시하시는 분들이 너무 많아요. 악보 받고 연습하는 시간만 해도 최소 몇 시간인데... 제발 적정 페이 주세요 ㅠㅠ',
+      author: u2, authorId: u2.id,
+    },
+    {
+      type: BoardType.ANONYMOUS, isAnonymous: true,
+      title: '반주 거절당했는데 상처받았어요',
+      content: '콩쿠르 반주 지원했는데 다른 분으로 정했다고 연락이 왔어요. 거절 자체는 이해하는데 너무 늦게 연락 주셔서 다른 스케줄도 다 비워뒀는데 속상하네요.',
+      author: u3, authorId: u3.id,
+    },
+    {
+      type: BoardType.ANONYMOUS, isAnonymous: true,
+      title: '악보를 당일에 주는 경우도 있나요?',
+      content: '오늘 연락 와서 내일 반주 가능하냐고 하시는데... 이런 경우 어떻게 대응하시나요? 거절하는 게 맞을까요?',
+      author: u4, authorId: u4.id,
+    },
+    {
+      type: BoardType.ANONYMOUS, isAnonymous: true,
+      title: '선생님께 반주 부탁하기 너무 어려워요',
+      content: '개인 레슨 선생님께 콩쿠르 반주도 부탁드렸는데 페이 얘기를 어떻게 꺼내야 할지 모르겠어요. 그냥 당연히 해주실 줄 알고 계신 것 같아서...',
+      author: u1, authorId: u1.id,
+    },
+    {
+      type: BoardType.ANONYMOUS, isAnonymous: true,
+      title: '반주비 안 주는 경우 어떻게 하셨나요',
+      content: '연주회 끝나고 반주비 안 주시는 분 만났어요. 연락도 안 받으시고... 법적으로 어떻게 해야 할지 모르겠어요. 비슷한 경험 있으신 분 계신가요?',
+      author: u5, authorId: u5.id,
+    },
+
+    // NOTICE 3개 (관리자 작성)
+    {
+      type: BoardType.NOTICE,
+      title: '반모 플랫폼 오픈 안내',
+      content: '안녕하세요. 반주자 매칭 플랫폼 반모가 오픈했습니다. 반모는 반주자와 연주자를 연결하는 플랫폼으로, 반주자의 처우 개선을 목표로 합니다. 많은 이용 부탁드립니다.',
+      author: adminUser, authorId: adminUser.id,
+    },
+    {
+      type: BoardType.NOTICE,
+      title: '페이 최저 기준 정책 안내',
+      content: '반모는 반주자 처우 개선을 위해 시급 기준 최저시급(10,030원) 이하의 공고 등록을 제한합니다. 적정 페이 문화 정착을 위해 협조 부탁드립니다.',
+      author: adminUser, authorId: adminUser.id,
+    },
+    {
+      type: BoardType.NOTICE,
+      title: '음표 신뢰도 등급 시스템 안내',
+      content: '반모는 안전한 거래를 위해 음표 신뢰도 등급 시스템을 운영합니다. 16분음표(신규)부터 온음표(최고신뢰)까지 활동에 따라 등급이 올라갑니다. 신고 누적 시 등급이 내려갈 수 있습니다.',
+      author: adminUser, authorId: adminUser.id,
+    },
+  ];
+
+  const savedBoards: Board[] = [];
+  for (const b of boardsData) {
     const board = boardRepo.create(b as Partial<Board>);
-    await boardRepo.save(board);
-    boardCount++;
+    savedBoards.push(await boardRepo.save(board));
   }
-  console.log(`📝 게시판 ${boardCount}개 삽입 완료`);
+  const boardCount = savedBoards.length;
+  console.log(`📝 게시글 ${boardCount}개 삽입 완료`);
+
+  // ─────────────────────────────────────────────
+  // 댓글 15개 (자유게시판 5개에 3개씩)
+  // ─────────────────────────────────────────────
+  // FREE 게시글: savedBoards[0..4]
+  const [b1, b2, b3, b4, b5] = savedBoards;
+
+  const commentsData: Partial<BoardComment>[] = [
+    // board1 댓글
+    { board: b1, boardId: b1.id, author: u2, authorId: u2.id, content: '정말 공감해요. 악보 미리 주는 게 기본 예의인데 당일날 주시는 분들도 계시더라고요.' },
+    { board: b1, boardId: b1.id, author: u3, authorId: u3.id, content: '페이 협의도 중요하지만 연습 횟수 합의도 꼭 필요한 것 같아요. 좋은 글 감사합니다!' },
+    { board: b1, boardId: b1.id, author: u4, authorId: u4.id, content: '저도 비슷한 경험 있어요. 서로 배려하는 문화가 만들어졌으면 좋겠네요.' },
+
+    // board2 댓글
+    { board: b2, boardId: b2.id, author: u1, authorId: u1.id, content: '콩쿠르 반주는 보통 연습 1회당 5-8만원, 본 연주 10-15만원 정도 드립니다.' },
+    { board: b2, boardId: b2.id, author: u4, authorId: u4.id, content: '곡의 난이도와 반주자 경력에 따라 다르긴 한데 그게 일반적인 것 같아요.' },
+    { board: b2, boardId: b2.id, author: u5, authorId: u5.id, content: '처음이시면 주변 선생님들께 여쭤보시는 것도 좋을 것 같아요!' },
+
+    // board3 댓글
+    { board: b3, boardId: b3.id, author: u1, authorId: u1.id, content: 'IMSLP에서 퍼블릭 도메인 악보 찾아보세요. 현대곡은 출판사에 직접 문의하셔야 해요.' },
+    { board: b3, boardId: b3.id, author: u5, authorId: u5.id, content: '음악저작권협회에 문의해보시는 것도 방법입니다.' },
+    { board: b3, boardId: b3.id, author: u3, authorId: u3.id, content: '현대 작곡가 곡은 작곡가에게 직접 허락 받는 경우도 있어요.' },
+
+    // board4 댓글
+    { board: b4, boardId: b4.id, author: u2, authorId: u2.id, content: '저도 좋은 반주자 분 만났어요! 플랫폼 너무 유용하네요.' },
+    { board: b4, boardId: b4.id, author: u3, authorId: u3.id, content: '반모 화이팅! 더 많은 기능 추가되면 좋겠어요 :)' },
+    { board: b4, boardId: b4.id, author: u5, authorId: u5.id, content: '저도 곧 써봐야겠어요. 좋은 후기 감사합니다!' },
+
+    // board5 댓글
+    { board: b5, boardId: b5.id, author: u1, authorId: u1.id, content: '강남역 2번 출구 근처에 OO연습실 추천해요. 그랜드 피아노 있고 시간당 15000원이에요.' },
+    { board: b5, boardId: b5.id, author: u2, authorId: u2.id, content: '서초동에 있는 XX연습실도 좋아요. 예약 시스템이 편리해요.' },
+    { board: b5, boardId: b5.id, author: u4, authorId: u4.id, content: '저도 연습실 찾고 있었는데 좋은 정보 감사해요!' },
+  ];
+
+  let commentCount = 0;
+  for (const c of commentsData) {
+    const comment = commentRepo.create(c as Partial<BoardComment>);
+    await commentRepo.save(comment);
+    commentCount++;
+  }
+  console.log(`💬 댓글 ${commentCount}개 삽입 완료`);
+
+  // ── 최종 카운트 출력
+  const userCount  = await userRepo.count();
+  const totalPost  = await postRepo.count();
+  const totalBoard = await boardRepo.count();
+  const totalComment = await commentRepo.count();
 
   await AppDataSource.destroy();
-  console.log('\n🎵 시드 완료! DBeaver에서 확인하세요.');
-  console.log('  - users 테이블: 5명');
-  console.log(`  - posts 테이블: ${postCount}개`);
-  console.log(`  - boards 테이블: ${boardCount}개`);
+
+  console.log('\n🎵 시드 완료!');
+  console.log(`유저: ${userCount}`);
+  console.log(`공고: ${totalPost}`);
+  console.log(`게시글: ${totalBoard}`);
+  console.log(`댓글: ${totalComment}`);
 }
 
 // ─────────────────────────────────────────────
@@ -311,14 +530,13 @@ async function seedClear() {
     username: process.env.DATABASE_USER || 'banmo_user',
     password: process.env.DATABASE_PASSWORD || 'banmo_pass',
     database: process.env.DATABASE_NAME || 'banmo',
-    entities: [User, Post, Board],
+    entities: [User, Post, Board, BoardComment],
     synchronize: false,
   });
 
   await ds.initialize();
   console.log('✅ DB 연결 완료');
 
-  // 외래키 의존 순서로 삭제
   await ds.query(`DELETE FROM board_comments`);
   console.log('  🧹 board_comments 삭제 완료');
 
@@ -343,7 +561,6 @@ async function seedClear() {
   await ds.query(`DELETE FROM posts`);
   console.log('  🧹 posts 삭제 완료');
 
-  // users: admin 계정 제외하고 삭제
   await ds.query(`DELETE FROM users WHERE role != 'ADMIN'`);
   console.log('  🧹 users 삭제 완료 (admin 계정 유지)');
 
@@ -375,6 +592,9 @@ async function seedAdmin() {
     password: hashed,
     nickname: '관리자',
     role: UserRole.ADMIN,
+    loginType: LoginType.EMAIL,
+    noteGrade: NoteGrade.WHOLE,
+    trustScore: 999,
     instruments: [],
     videoUrls: [],
   } as unknown as User);

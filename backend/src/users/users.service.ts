@@ -5,11 +5,11 @@ import { Repository } from 'typeorm';
 import { User, LoginType, NoteGrade } from './user.entity';
 
 function calcGrade(score: number): NoteGrade {
-  if (score >= 100) return NoteGrade.PROFESSIONAL;
-  if (score >= 60)  return NoteGrade.ADVANCED;
-  if (score >= 30)  return NoteGrade.INTERMEDIATE;
-  if (score >= 10)  return NoteGrade.BASIC;
-  return NoteGrade.NONE;
+  if (score >= 100) return NoteGrade.WHOLE;
+  if (score >= 60)  return NoteGrade.HALF;
+  if (score >= 30)  return NoteGrade.QUARTER;
+  if (score >= 10)  return NoteGrade.EIGHTH;
+  return NoteGrade.SIXTEENTH;
 }
 
 const MAX_VIDEOS = 5;

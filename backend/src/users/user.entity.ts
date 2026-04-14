@@ -9,11 +9,11 @@ import {
 import { Exclude } from 'class-transformer';
 
 export enum NoteGrade {
-  NONE = 'NONE',
-  BASIC = 'BASIC',
-  INTERMEDIATE = 'INTERMEDIATE',
-  ADVANCED = 'ADVANCED',
-  PROFESSIONAL = 'PROFESSIONAL',
+  SIXTEENTH = 'SIXTEENTH',   // 16분음표 (신규/0점)
+  EIGHTH = 'EIGHTH',         // 8분음표 (10점 이상)
+  QUARTER = 'QUARTER',       // 4분음표 (30점 이상)
+  HALF = 'HALF',             // 2분음표 (60점 이상)
+  WHOLE = 'WHOLE',           // 온음표 (100점 이상)
 }
 
 export enum UserRole {
@@ -62,7 +62,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: NoteGrade,
-    default: NoteGrade.NONE,
+    default: NoteGrade.SIXTEENTH,
   })
   noteGrade: NoteGrade;
 

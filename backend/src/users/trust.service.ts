@@ -21,11 +21,11 @@ const SCORE_DELTA: Record<TrustEvent, number> = {
 
 // 점수 → 음표 등급
 function calcGrade(score: number): NoteGrade {
-  if (score >= 100) return NoteGrade.PROFESSIONAL; // 온음표
-  if (score >= 60)  return NoteGrade.ADVANCED;     // 2분음표
-  if (score >= 30)  return NoteGrade.INTERMEDIATE; // 4분음표
-  if (score >= 10)  return NoteGrade.BASIC;        // 8분음표
-  return NoteGrade.NONE;                            // 16분음표 (신규)
+  if (score >= 100) return NoteGrade.WHOLE;     // 온음표
+  if (score >= 60)  return NoteGrade.HALF;      // 2분음표
+  if (score >= 30)  return NoteGrade.QUARTER;   // 4분음표
+  if (score >= 10)  return NoteGrade.EIGHTH;    // 8분음표
+  return NoteGrade.SIXTEENTH;                   // 16분음표 (신규)
 }
 
 @Injectable()
