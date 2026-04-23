@@ -29,9 +29,16 @@ export class PostsController {
     return this.postsService.findOne(id);
   }
 
+  @Post('test')
+  async testCreate(@Body() body: any) {
+    console.log('[Test] 받은 데이터:', body);
+    return { success: true, received: body };
+  }
+
   @Post()
   @UseGuards(AuthGuard('jwt'))
   create(@CurrentUser() user: User, @Body() dto: CreatePostDto) {
+    console.log('[Posts] 글 등록 요청:', dto);
     return this.postsService.create(user.id, dto);
   }
 

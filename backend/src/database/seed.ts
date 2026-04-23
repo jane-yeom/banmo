@@ -7,6 +7,8 @@ import { User, UserRole, NoteGrade, LoginType } from '../users/user.entity';
 import { Post, PostCategory, PayType } from '../posts/post.entity';
 import { Board, BoardType } from '../board/board.entity';
 import { BoardComment } from '../board/board-comment.entity';
+import { Qna, QnaCategory, QnaStatus } from '../admin/qna.entity';
+import { Report, ReportTargetType, ReportReason, ReportStatus } from '../reports/report.entity';
 
 // .env 수동 로드
 function loadEnv() {
@@ -32,7 +34,7 @@ const AppDataSource = new DataSource({
   username: process.env.DATABASE_USER || 'banmo_user',
   password: process.env.DATABASE_PASSWORD || 'banmo_pass',
   database: process.env.DATABASE_NAME || 'banmo',
-  entities: [User, Post, Board, BoardComment],
+  entities: [User, Post, Board, BoardComment, Qna, Report],
   synchronize: false,
 });
 
@@ -70,10 +72,56 @@ async function seed() {
   await migrateNoteGradeEnum(AppDataSource);
   console.log('🔄 NoteGrade enum 마이그레이션 완료');
 
+  // banReason 컬럼 추가 (없으면)
+  await AppDataSource.query(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'users' AND column_name = 'banReason'
+      ) THEN
+        ALTER TABLE users ADD COLUMN "banReason" text NULL;
+      END IF;
+    END $$;
+  `);
+
+  // qnas 테이블 생성 (없으면)
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS qnas (
+      id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+      "authorId" uuid NULL REFERENCES users(id) ON DELETE SET NULL,
+      "authorName" varchar NULL,
+      "authorEmail" varchar NOT NULL,
+      title varchar NOT NULL,
+      content text NOT NULL,
+      category varchar NOT NULL DEFAULT 'GENERAL',
+      status varchar NOT NULL DEFAULT 'PENDING',
+      answer text NULL,
+      "answeredAt" timestamp NULL,
+      "isPrivate" boolean NOT NULL DEFAULT true,
+      "createdAt" timestamp NOT NULL DEFAULT now(),
+      "updatedAt" timestamp NOT NULL DEFAULT now()
+    );
+  `);
+  console.log('🗄️  스키마 마이그레이션 완료');
+
   const userRepo    = AppDataSource.getRepository(User);
   const postRepo    = AppDataSource.getRepository(Post);
   const boardRepo   = AppDataSource.getRepository(Board);
   const commentRepo = AppDataSource.getRepository(BoardComment);
+  const qnaRepo     = AppDataSource.getRepository(Qna);
+  const reportRepo  = AppDataSource.getRepository(Report);
+
+  // ── 기존 QnA, Report 정리
+  const testQnaUsers = ['pianist@banmo.com', 'violin@banmo.com', 'cello@banmo.com', 'flute@banmo.com'];
+  for (const email of testQnaUsers) {
+    const u = await userRepo.findOne({ where: { email } });
+    if (u) {
+      await qnaRepo.delete({ authorId: u.id });
+      await reportRepo.delete({ reporterId: u.id });
+    }
+  }
+  // 비회원 QnA 정리
+  await qnaRepo.delete({ authorId: null as any });
 
   // ── 기존 테스트 데이터 정리
   const testEmails = [
@@ -502,6 +550,115 @@ async function seed() {
   }
   console.log(`💬 댓글 ${commentCount}개 삽입 완료`);
 
+  // ─────────────────────────────────────────────
+  // QnA 5개
+  // ─────────────────────────────────────────────
+  const qnasData: Partial<Qna>[] = [
+    {
+      title: '반주 페이 기준이 궁금합니다',
+      content: '반주 페이 기준이 어떻게 되는지 궁금합니다. 콩쿠르 반주나 연주회 반주 페이의 일반적인 기준을 알고 싶습니다.',
+      category: QnaCategory.GENERAL,
+      authorId: u1.id,
+      authorEmail: u1.email,
+      authorName: u1.nickname,
+      isPrivate: false,
+    },
+    {
+      title: '허위 공고 신고하고 싶어요',
+      content: '반주 구인 공고인데 실제로 연락해보니 조건이 완전히 달랐습니다. 허위 공고를 어떻게 신고하면 되나요?',
+      category: QnaCategory.REPORT,
+      authorId: u2.id,
+      authorEmail: u2.email,
+      authorName: u2.nickname,
+      isPrivate: true,
+    },
+    {
+      title: '계정 비밀번호를 잊어버렸어요',
+      content: '반모 계정 비밀번호를 잊어버렸는데 이메일 인증을 통한 비밀번호 재설정이 가능한가요?',
+      category: QnaCategory.ACCOUNT,
+      authorId: undefined,
+      authorEmail: 'test@test.com',
+      authorName: '비회원',
+      isPrivate: true,
+    },
+    {
+      title: '반주비 미지급 피해 당했어요',
+      content: '연주회 반주를 완료했는데 상대방이 연락을 끊고 반주비를 지급하지 않습니다. 어떻게 도움을 받을 수 있나요?',
+      category: QnaCategory.PAY,
+      authorId: u3.id,
+      authorEmail: u3.email,
+      authorName: u3.nickname,
+      isPrivate: true,
+    },
+    {
+      title: '앱 오류 신고합니다',
+      content: '공고 등록 시 이미지 업로드가 계속 실패합니다. 오류 메시지: "업로드에 실패했습니다". 해결 방법을 알려주세요.',
+      category: QnaCategory.ETC,
+      authorId: u4.id,
+      authorEmail: u4.email,
+      authorName: u4.nickname,
+      isPrivate: false,
+    },
+  ];
+
+  let qnaCount = 0;
+  for (const q of qnasData) {
+    const qna = qnaRepo.create(q as Partial<Qna>);
+    await qnaRepo.save(qna);
+    qnaCount++;
+  }
+  console.log(`❓ QnA ${qnaCount}개 삽입 완료`);
+
+  // ─────────────────────────────────────────────
+  // 신고 3개
+  // ─────────────────────────────────────────────
+  // 이미 신고가 있으면 스킵
+  const existingReports = await reportRepo.count();
+  if (existingReports === 0) {
+    // 공고 중 첫 번째 것 찾기
+    const [firstPost] = await postRepo.find({ order: { createdAt: 'ASC' }, take: 1 });
+    const [secondPost] = await postRepo.find({
+      where: { authorId: u3.id },
+      order: { createdAt: 'ASC' },
+      take: 1,
+    });
+
+    const reportsData: Partial<Report>[] = [
+      {
+        reporterId: u1.id,
+        targetType: ReportTargetType.USER,
+        targetId: u5.id,
+        reason: ReportReason.FRAUD,
+        description: '반주비를 지급하지 않고 연락을 끊었습니다.',
+        status: ReportStatus.PENDING,
+      },
+      ...(firstPost ? [{
+        reporterId: u2.id,
+        targetType: ReportTargetType.POST,
+        targetId: firstPost.id,
+        reason: ReportReason.PRICE,
+        description: '공고에 명시된 페이와 실제 제시 금액이 다릅니다.',
+        status: ReportStatus.PENDING,
+      } as Partial<Report>] : []),
+      ...(secondPost ? [{
+        reporterId: u3.id,
+        targetType: ReportTargetType.POST,
+        targetId: secondPost.id,
+        reason: ReportReason.FAKE,
+        description: '존재하지 않는 공연에 대한 허위 공고입니다.',
+        status: ReportStatus.PENDING,
+      } as Partial<Report>] : []),
+    ];
+
+    for (const r of reportsData) {
+      const report = reportRepo.create(r as Partial<Report>);
+      await reportRepo.save(report);
+    }
+    console.log(`🚨 신고 ${reportsData.length}개 삽입 완료`);
+  } else {
+    console.log(`ℹ️  신고 데이터 이미 존재 (${existingReports}건)`);
+  }
+
   // ── 최종 카운트 출력
   const userCount  = await userRepo.count();
   const totalPost  = await postRepo.count();
@@ -545,6 +702,9 @@ async function seedClear() {
 
   await ds.query(`DELETE FROM applications`);
   console.log('  🧹 applications 삭제 완료');
+
+  await ds.query(`DELETE FROM qnas`);
+  console.log('  🧹 qnas 삭제 완료');
 
   await ds.query(`DELETE FROM reports`);
   console.log('  🧹 reports 삭제 완료');

@@ -5,20 +5,27 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
 import { NoteGrade } from '../users/user.entity';
 import { ReportStatus } from '../reports/report.entity';
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import { QnaCategory, QnaStatus } from './qna.entity';
+import { BoardType } from '../board/board.entity';
+import {
+  IsBoolean, IsEnum, IsOptional, IsString, IsNotEmpty,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class BanUserDto {
-  @IsBoolean()
-  isBanned: boolean;
+  @IsOptional()
+  @IsString()
+  banReason?: string;
 }
 
 class SetGradeDto {
@@ -29,6 +36,27 @@ class SetGradeDto {
 class UpdateReportDto {
   @IsEnum(ReportStatus)
   status: ReportStatus;
+}
+
+class ResolveReportDto {
+  @IsString()
+  action: 'BAN_USER' | 'DELETE_POST' | 'WARNING' | 'DISMISS';
+}
+
+class CreateNoticeDto {
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @IsString()
+  @IsNotEmpty()
+  content: string;
+}
+
+class AnswerQnaDto {
+  @IsString()
+  @IsNotEmpty()
+  answer: string;
 }
 
 class PaginationQuery {
@@ -60,15 +88,29 @@ export class AdminController {
   // ─── 회원 관리 ───────────────────────────────────────────
   @Get('users')
   getUsers(
-    @Query('search') search: string = '',
     @Query() { page = 1, limit = 20 }: PaginationQuery,
+    @Query('search') search: string = '',
+    @Query('grade') grade?: NoteGrade,
+    @Query('isBanned') isBannedStr?: string,
   ) {
-    return this.adminService.getUsers(search, +page, +limit);
+    const isBanned =
+      isBannedStr === 'true' ? true : isBannedStr === 'false' ? false : undefined;
+    return this.adminService.getUsers(search, +page, +limit, grade, isBanned);
+  }
+
+  @Get('users/:id')
+  getUserById(@Param('id') id: string) {
+    return this.adminService.getUserById(id);
   }
 
   @Patch('users/:id/ban')
   banUser(@Param('id') id: string, @Body() dto: BanUserDto) {
-    return this.adminService.banUser(id, dto.isBanned);
+    return this.adminService.banUser(id, dto.banReason);
+  }
+
+  @Patch('users/:id/unban')
+  unbanUser(@Param('id') id: string) {
+    return this.adminService.unbanUser(id);
   }
 
   @Patch('users/:id/grade')
@@ -76,15 +118,79 @@ export class AdminController {
     return this.adminService.setGrade(id, dto.grade);
   }
 
+  @Delete('users/:id')
+  deleteUser(@Param('id') id: string) {
+    return this.adminService.deleteUser(id);
+  }
+
   // ─── 공고 관리 ───────────────────────────────────────────
   @Get('posts')
-  getPosts(@Query() { page = 1, limit = 20 }: PaginationQuery) {
-    return this.adminService.getPosts(+page, +limit);
+  getPosts(
+    @Query() { page = 1, limit = 20 }: PaginationQuery,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.adminService.getPosts(+page, +limit, search, category, status);
+  }
+
+  @Patch('posts/:id/hide')
+  hidePost(@Param('id') id: string) {
+    return this.adminService.hidePost(id);
   }
 
   @Delete('posts/:id')
   deletePost(@Param('id') id: string) {
     return this.adminService.deletePost(id);
+  }
+
+  // ─── 게시판 관리 ───────────────────────────────────────────
+  @Get('boards')
+  getBoards(
+    @Query() { page = 1, limit = 20 }: PaginationQuery,
+    @Query('search') search?: string,
+    @Query('type') type?: BoardType,
+  ) {
+    return this.adminService.getBoards(+page, +limit, search, type);
+  }
+
+  @Get('boards/:boardId/comments')
+  getBoardComments(@Param('boardId') boardId: string) {
+    return this.adminService.getBoardComments(boardId);
+  }
+
+  @Delete('boards/:id')
+  deleteBoard(@Param('id') id: string) {
+    return this.adminService.deleteBoard(id);
+  }
+
+  @Delete('boards/:boardId/comments/:commentId')
+  deleteBoardComment(
+    @Param('boardId') boardId: string,
+    @Param('commentId') commentId: string,
+  ) {
+    return this.adminService.deleteBoardComment(boardId, commentId);
+  }
+
+  // ─── 공지사항 관리 ───────────────────────────────────────────
+  @Get('notices')
+  getNotices(@Query() { page = 1, limit = 20 }: PaginationQuery) {
+    return this.adminService.getNotices(+page, +limit);
+  }
+
+  @Post('notices')
+  createNotice(@Body() dto: CreateNoticeDto, @Request() req: any) {
+    return this.adminService.createNotice(dto.title, dto.content, req.user.id);
+  }
+
+  @Patch('notices/:id')
+  updateNotice(@Param('id') id: string, @Body() dto: CreateNoticeDto) {
+    return this.adminService.updateNotice(id, dto.title, dto.content);
+  }
+
+  @Delete('notices/:id')
+  deleteNotice(@Param('id') id: string) {
+    return this.adminService.deleteNotice(id);
   }
 
   // ─── 신고 관리 ───────────────────────────────────────────
@@ -96,8 +202,33 @@ export class AdminController {
     return this.adminService.getReports(status, +page, +limit);
   }
 
+  @Patch('reports/:id/resolve')
+  resolveReport(@Param('id') id: string, @Body() dto: ResolveReportDto) {
+    return this.adminService.resolveReport(id, dto.action);
+  }
+
   @Patch('reports/:id')
   updateReport(@Param('id') id: string, @Body() dto: UpdateReportDto) {
     return this.adminService.updateReport(id, dto.status);
+  }
+
+  // ─── QnA 관리 ───────────────────────────────────────────
+  @Get('qna')
+  getQnas(
+    @Query() { page = 1, limit = 20 }: PaginationQuery,
+    @Query('status') status?: QnaStatus,
+    @Query('category') category?: QnaCategory,
+  ) {
+    return this.adminService.getQnas(+page, +limit, status, category);
+  }
+
+  @Patch('qna/:id/answer')
+  answerQna(@Param('id') id: string, @Body() dto: AnswerQnaDto) {
+    return this.adminService.answerQna(id, dto.answer);
+  }
+
+  @Delete('qna/:id')
+  deleteQna(@Param('id') id: string) {
+    return this.adminService.deleteQna(id);
   }
 }

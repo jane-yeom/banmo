@@ -21,6 +21,7 @@ export class PostsService {
   ) {}
 
   async create(userId: string, dto: CreatePostDto): Promise<Post> {
+    console.log('[Posts] 저장 시도:', userId, dto);
     this.validatePay(dto.payType, dto.payMin);
 
     const post = this.postsRepository.create({

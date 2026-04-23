@@ -11,6 +11,7 @@ import { AdminModule } from './admin/admin.module';
 import { MediaModule } from './media/media.module';
 import { ApplicationsModule } from './applications/applications.module';
 import { PaymentsModule } from './payments/payments.module';
+import { QnaModule } from './qna/qna.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { PaymentsModule } from './payments/payments.module';
     MediaModule,
     ApplicationsModule,
     PaymentsModule,
+    QnaModule,
   ],
 })
 export class AppModule {}

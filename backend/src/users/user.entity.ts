@@ -86,6 +86,9 @@ export class User {
   @Column({ default: false })
   isBanned: boolean;
 
+  @Column({ nullable: true, type: 'text' })
+  banReason: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

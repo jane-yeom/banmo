@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm run:*)",
+      "Bash(echo \"Backend starting with PID $!\" sleep 8 cat /tmp/backend.log)",
+      "Bash(curl -s -X POST http://localhost:3001/auth/register -H 'Content-Type: application/json' -d '{\"email\":\"test@banmo.com\",\"password\":\"test1234!\",\"nickname\":\"테스트유저\",\"instruments\":[\"피아노\"]}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -X POST http://localhost:3001/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@banmo.com\",\"password\":\"test1234!\"}')",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('updated title:', d.get\\('title'\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('nickname:', d.get\\('nickname'\\), 'password_in_response:', 'password' in d, 'kakaoId_in_response:', 'kakaoId' in d\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); instr=d.get\\('instruments',[]\\); print\\('instruments:', instr, 'empty_str_present:', '' in instr\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); u=d.get\\('user',{}\\); print\\('password_in_user:', 'password' in u, 'nickname:', u.get\\('nickname'\\)\\)\")",
+      "Bash(ls /d/git/banmo/frontend/next.config.*)",
+      "Bash(netstat -ano)",
+      "Bash(tasklist:*)",
+      "Bash(powershell -Command \"Get-Process -Id 13320 | Select-Object Name, Id\")",
+      "Bash(read pid:*)",
+      "Bash(powershell -Command ' Get-Process -Name node -ErrorAction SilentlyContinue | ForEach-Object { $id = $_.Id $cmd = \\(Get-WmiObject Win32_Process -Filter \"ProcessId=$id\"\\).CommandLine Write-Host \"PID $id: $cmd\" }')",
+      "Bash(powershell:*)",
+      "Bash(taskkill /PID 13320 /F)",
+      "Bash(taskkill /PID 26872 /F)",
+      "Bash(taskkill /PID 25772 /F)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
