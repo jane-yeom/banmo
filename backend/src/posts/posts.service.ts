@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { Post, PayType, PostStatus } from './post.entity';
 import { CreatePostDto, PostFilterDto, UpdatePostDto } from './post.dto';
 import { TrustService, TrustEvent } from '../users/trust.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { FavoritesService } from '../favorites/favorites.service';
 
 const MIN_HOURLY_PAY = 10030; // 2024 최저시급
 
@@ -18,6 +20,8 @@ export class PostsService {
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
     private readonly trustService: TrustService,
+    private readonly notificationsService: NotificationsService,
+    private readonly favoritesService: FavoritesService,
   ) {}
 
   async create(userId: string, dto: CreatePostDto): Promise<Post> {
@@ -34,6 +38,11 @@ export class PostsService {
 
     // 공고 작성 완료 → +2점
     await this.trustService.applyEvent(userId, TrustEvent.POST_CREATED).catch(() => {});
+
+    // 키워드 알림 (비동기, 실패 무시)
+    this.notificationsService
+      .sendKeywordNotification(saved.id, saved.title, saved.content ?? '', userId)
+      .catch(() => {});
 
     return saved;
   }
@@ -89,7 +98,14 @@ export class PostsService {
     this.validatePay(payType, payMin);
 
     Object.assign(post, dto);
-    return this.postsRepository.save(post);
+    const saved = await this.postsRepository.save(post);
+
+    // 찜한 유저들에게 알림 (비동기, 실패 무시)
+    this.favoritesService
+      .notifyFavoriteUsers(saved.id, saved.title, userId)
+      .catch(() => {});
+
+    return saved;
   }
 
   async delete(userId: string, id: string): Promise<void> {

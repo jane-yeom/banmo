@@ -12,6 +12,8 @@ import { MediaModule } from './media/media.module';
 import { ApplicationsModule } from './applications/applications.module';
 import { PaymentsModule } from './payments/payments.module';
 import { QnaModule } from './qna/qna.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
@@ -29,7 +31,7 @@ import { QnaModule } from './qna/qna.module';
         password: config.get('DATABASE_PASSWORD'),
         database: config.get('DATABASE_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, // 개발환경에서만 true
+        synchronize: true,
         logging: true,
       }),
     }),
@@ -44,6 +46,8 @@ import { QnaModule } from './qna/qna.module';
     ApplicationsModule,
     PaymentsModule,
     QnaModule,
+    NotificationsModule,
+    FavoritesModule,
   ],
 })
 export class AppModule {}

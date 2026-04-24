@@ -7,6 +7,7 @@ import { ChatMessage } from './chat-message.entity';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 import { ChatController } from './chat.controller';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -19,9 +20,10 @@ import { ChatController } from './chat.controller';
         signOptions: { expiresIn: (config.get<string>('JWT_EXPIRES_IN') || '7d') as any },
       }),
     }),
+    NotificationsModule,
   ],
   providers: [ChatService, ChatGateway],
   controllers: [ChatController],
-  exports: [ChatService],
+  exports: [ChatService, ChatGateway],
 })
 export class ChatModule {}

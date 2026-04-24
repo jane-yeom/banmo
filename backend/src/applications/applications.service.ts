@@ -11,6 +11,7 @@ import { Application, ApplicationStatus } from './application.entity';
 import { Post } from '../posts/post.entity';
 import { ChatService } from '../chat/chat.service';
 import { TrustService, TrustEvent } from '../users/trust.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -21,6 +22,7 @@ export class ApplicationsService {
     private readonly postRepo: Repository<Post>,
     private readonly chatService: ChatService,
     private readonly trustService: TrustService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async apply(
@@ -50,6 +52,11 @@ export class ApplicationsService {
     } catch {
       // 채팅방 생성 실패는 지원 자체를 막지 않음
     }
+
+    // 지원 알림
+    this.notificationsService
+      .sendApplicationNotification(applicantId, post.authorId, postId)
+      .catch(() => {});
 
     return application;
   }
@@ -94,6 +101,15 @@ export class ApplicationsService {
         this.trustService.applyEvent(userId, TrustEvent.DEAL_ACCEPTED).catch(() => {}),
       ]);
     }
+
+    // 지원 결과 알림
+    this.notificationsService
+      .sendApplicationStatusNotification(
+        app.applicantId,
+        status as 'ACCEPTED' | 'REJECTED',
+        app.post.title,
+      )
+      .catch(() => {});
 
     return saved;
   }

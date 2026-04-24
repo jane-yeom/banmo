@@ -9,6 +9,7 @@ import { Board, BoardType } from './board.entity';
 import { BoardComment } from './board-comment.entity';
 import { CreateBoardDto, CreateCommentDto } from './board.dto';
 import { UserRole } from '../users/user.entity';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class BoardService {
@@ -17,6 +18,7 @@ export class BoardService {
     private readonly boardsRepository: Repository<Board>,
     @InjectRepository(BoardComment)
     private readonly commentsRepository: Repository<BoardComment>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async findAll(type?: BoardType): Promise<Board[]> {
@@ -69,7 +71,14 @@ export class BoardService {
     const board = await this.boardsRepository.findOne({ where: { id: boardId } });
     if (!board) throw new NotFoundException('게시글을 찾을 수 없습니다.');
     const comment = this.commentsRepository.create({ boardId, authorId: userId, ...dto });
-    return this.commentsRepository.save(comment);
+    const saved = await this.commentsRepository.save(comment);
+
+    // 댓글 알림 (비동기, 실패 무시)
+    this.notificationsService
+      .sendCommentNotification(userId, board.authorId, boardId)
+      .catch(() => {});
+
+    return saved;
   }
 
   async deleteComment(

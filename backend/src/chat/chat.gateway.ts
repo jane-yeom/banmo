@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ChatService } from './chat.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 interface AuthSocket extends Socket {
   userId?: string;
@@ -25,7 +26,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly chatService: ChatService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly notificationsService: NotificationsService,
   ) {}
+
+  afterInit(server: Server) {
+    // NotificationsService에 socket server 주입
+    this.notificationsService.setSocketServer(server);
+  }
 
   async handleConnection(client: AuthSocket) {
     const token =
@@ -42,13 +49,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
       client.userId = payload.sub;
+      // 유저별 알림 룸에 자동 join
       client.join(`user:${payload.sub}`);
     } catch {
       client.disconnect();
     }
   }
 
-  handleDisconnect(client: AuthSocket) {
+  handleDisconnect(_client: AuthSocket) {
     // 연결 해제 시 별도 처리 없음 (rooms는 socket.io가 자동 정리)
   }
 
@@ -77,6 +85,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(`room:${roomId}`).emit('newMessage', message);
     // 상대방이 채팅방 밖에 있을 때 알림
     this.server.to(`user:${receiverId}`).emit('roomUpdated', { roomId, lastMessage: content });
+
+    // 채팅 알림 전송 (비동기, 실패해도 무시)
+    this.notificationsService
+      .sendChatNotification(client.userId, receiverId, roomId, content)
+      .catch(() => {});
 
     return { event: 'messageSent', data: message };
   }
