@@ -72,6 +72,21 @@ export class BoardService {
     return this.commentsRepository.save(comment);
   }
 
+  async deleteComment(
+    boardId: string,
+    commentId: string,
+    userId: string,
+    userRole: UserRole,
+  ): Promise<{ success: boolean }> {
+    const comment = await this.commentsRepository.findOne({ where: { id: commentId, boardId } });
+    if (!comment) throw new NotFoundException('댓글을 찾을 수 없습니다.');
+    if (comment.authorId !== userId && userRole !== UserRole.ADMIN) {
+      throw new ForbiddenException('삭제 권한이 없습니다.');
+    }
+    await this.commentsRepository.remove(comment);
+    return { success: true };
+  }
+
   private sanitizeAnonymous(board: Board): Board {
     if (board.isAnonymous && board.author) {
       (board.author as any).nickname = '익명';

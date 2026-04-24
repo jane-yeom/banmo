@@ -50,4 +50,14 @@ export class BoardController {
   ) {
     return this.boardService.addComment(user.id, id, dto);
   }
+
+  @Delete(':boardId/comments/:commentId')
+  @UseGuards(AuthGuard('jwt'))
+  deleteComment(
+    @CurrentUser() user: User,
+    @Param('boardId') boardId: string,
+    @Param('commentId') commentId: string,
+  ) {
+    return this.boardService.deleteComment(boardId, commentId, user.id, user.role);
+  }
 }
