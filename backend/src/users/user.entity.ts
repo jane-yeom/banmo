@@ -89,6 +89,9 @@ export class User {
   @Column({ nullable: true, type: 'text' })
   banReason: string;
 
+  @Column({ nullable: true, type: 'timestamptz' })
+  deletedAt: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 

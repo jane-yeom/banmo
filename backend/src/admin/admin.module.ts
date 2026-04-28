@@ -6,13 +6,14 @@ import { Board } from '../board/board.entity';
 import { BoardComment } from '../board/board-comment.entity';
 import { Report } from '../reports/report.entity';
 import { Qna } from './qna.entity';
+import { Payment } from '../payments/payment.entity';
 import { AdminService } from './admin.service';
 import { AdminController } from './admin.controller';
 import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Post, Board, BoardComment, Report, Qna]),
+    TypeOrmModule.forFeature([User, Post, Board, BoardComment, Report, Qna, Payment]),
     UsersModule,
   ],
   providers: [AdminService],

@@ -5,6 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Post } from '../posts/post.entity';
@@ -20,6 +21,7 @@ export enum PaymentStatus {
   SUCCESS   = 'SUCCESS',
   FAILED    = 'FAILED',
   CANCELLED = 'CANCELLED',
+  REFUNDED  = 'REFUNDED',
 }
 
 export const PREMIUM_AMOUNT: Record<PremiumType, number> = {
@@ -68,9 +70,18 @@ export class Payment {
   @Column({ nullable: true })
   paymentKey: string;
 
+  @Column({ nullable: true })
+  tossOrderId: string;
+
+  @Column({ type: 'text', nullable: true })
+  refundReason: string;
+
   @Column({ type: 'timestamptz', nullable: true })
   paidAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
