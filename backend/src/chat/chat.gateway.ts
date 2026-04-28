@@ -17,7 +17,10 @@ interface AuthSocket extends Socket {
   userId?: string;
 }
 
-@WebSocketGateway(3002, { cors: { origin: '*' } })
+@WebSocketGateway(3002, {
+  cors: { origin: '*', credentials: true },
+  transports: ['websocket', 'polling'],
+})
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
@@ -30,34 +33,36 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   afterInit(server: Server) {
-    // NotificationsService에 socket server 주입
     this.notificationsService.setSocketServer(server);
   }
 
   async handleConnection(client: AuthSocket) {
-    const token =
-      client.handshake.auth?.token ||
-      client.handshake.headers?.authorization?.replace('Bearer ', '');
-
-    if (!token) {
-      client.disconnect();
-      return;
-    }
-
     try {
+      const token =
+        client.handshake.auth?.token ||
+        client.handshake.headers?.authorization?.replace('Bearer ', '');
+
+      if (!token) {
+        console.log('[Chat] 토큰 없음, 연결 거부:', client.id);
+        client.disconnect();
+        return;
+      }
+
       const payload = this.jwtService.verify(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
+
       client.userId = payload.sub;
-      // 유저별 알림 룸에 자동 join
       client.join(`user:${payload.sub}`);
-    } catch {
+      console.log('[Chat] 연결됨:', payload.sub, '소켓:', client.id);
+    } catch (e: any) {
+      console.log('[Chat] 토큰 오류:', e.message, '소켓:', client.id);
       client.disconnect();
     }
   }
 
-  handleDisconnect(_client: AuthSocket) {
-    // 연결 해제 시 별도 처리 없음 (rooms는 socket.io가 자동 정리)
+  handleDisconnect(client: AuthSocket) {
+    console.log('[Chat] 연결해제:', client.id, 'userId:', client.userId);
   }
 
   @SubscribeMessage('joinRoom')
@@ -67,6 +72,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     if (!client.userId) return client.disconnect();
     client.join(`room:${roomId}`);
+    console.log('[Chat] 룸 입장:', roomId, 'user:', client.userId);
     return { event: 'joinedRoom', data: { roomId } };
   }
 
@@ -77,6 +83,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     if (!client.userId) return client.disconnect();
     const { roomId, content } = body;
+    console.log('[Chat] 메시지 전송:', roomId, content, 'from:', client.userId);
 
     const message = await this.chatService.saveMessage(client.userId, roomId, content);
     const receiverId = await this.chatService.getReceiverId(roomId, client.userId);
@@ -102,6 +109,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!client.userId) return client.disconnect();
     await this.chatService.markAsRead(client.userId, roomId);
     this.server.to(`room:${roomId}`).emit('messagesRead', { roomId, userId: client.userId });
+    console.log('[Chat] 읽음 처리:', roomId, 'user:', client.userId);
     return { event: 'markedAsRead', data: { roomId } };
   }
 }

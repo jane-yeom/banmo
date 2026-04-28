@@ -21,11 +21,20 @@ export class ChatService {
     const where2: Record<string, unknown> = { senderId: receiverId, receiverId: senderId };
     if (postId) { where1.postId = postId; where2.postId = postId; }
 
-    const existing = await this.roomsRepository.findOne({ where: [where1 as any, where2 as any] });
+    const existing = await this.roomsRepository.findOne({
+      where: [where1 as any, where2 as any],
+      relations: ['post'],
+    });
     if (existing) return existing;
 
     const room = this.roomsRepository.create({ senderId, receiverId, postId });
-    return this.roomsRepository.save(room);
+    const saved = await this.roomsRepository.save(room);
+
+    // eager relation이 save() 후 자동 로딩 안 될 수 있으므로 재조회
+    return this.roomsRepository.findOne({
+      where: { id: saved.id },
+      relations: ['post'],
+    }) as Promise<ChatRoom>;
   }
 
   async getMyRooms(userId: string): Promise<ChatRoom[]> {
@@ -67,9 +76,11 @@ export class ChatService {
       throw new ForbiddenException('접근 권한이 없습니다.');
     }
 
-    const message = await this.messagesRepository.save(
-      this.messagesRepository.create({ roomId, senderId, content }),
-    );
+    const created = this.messagesRepository.create({ roomId, senderId, content });
+    const saved = await this.messagesRepository.save(created);
+
+    // eager relation(sender)이 save() 후 미로딩될 수 있으므로 재조회
+    const message = await this.messagesRepository.findOne({ where: { id: saved.id } });
 
     await this.roomsRepository.update(roomId, {
       lastMessage: content,
@@ -77,7 +88,7 @@ export class ChatService {
       isRead: false,
     });
 
-    return message;
+    return message!;
   }
 
   async markAsRead(userId: string, roomId: string): Promise<void> {
