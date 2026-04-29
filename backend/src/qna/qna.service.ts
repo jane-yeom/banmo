@@ -37,7 +37,6 @@ export class QnaService {
     } as any);
 
     const saved = await this.qnaRepo.save(qna) as any;
-    console.log('[QnA] 저장 완료:', saved.id, 'authorId:', saved.authorId);
     return saved;
   }
 

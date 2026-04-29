@@ -91,9 +91,7 @@ export class UsersService {
     user.trustScore = Math.max(0, user.trustScore + delta);
     user.noteGrade = calcGrade(user.trustScore);
     if (user.noteGrade !== oldGrade) {
-      console.log(
-        `[TrustScore] ${user.nickname ?? id}: ${oldGrade} → ${user.noteGrade} (score: ${user.trustScore})`,
-      );
+      // grade changed
     }
     return this.usersRepository.save(user);
   }

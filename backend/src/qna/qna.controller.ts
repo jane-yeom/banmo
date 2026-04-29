@@ -55,7 +55,6 @@ export class QnaController {
   @Post()
   async create(@Body() dto: CreateQnaDto, @Request() req: any) {
     const user = req.user ?? null;
-    console.log('[QnA] 문의 접수:', dto.category, dto.title, user ? `user:${user.id}` : '비로그인');
     const result = await this.qnaService.create(dto, user);
     return { success: true, data: result };
   }

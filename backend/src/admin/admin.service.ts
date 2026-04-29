@@ -32,7 +32,6 @@ export class AdminService {
 
   // ─── 통계 ───────────────────────────────────────────────────
   async getStats() {
-    console.log('[Admin] getStats 호출');
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
@@ -129,7 +128,6 @@ export class AdminService {
   }
 
   async getRecentReports(limit = 5) {
-    console.log('[Admin] getRecentReports 호출, limit:', limit);
     return this.reportsRepo.find({
       relations: ['reporter'],
       order: { createdAt: 'DESC' },
@@ -138,7 +136,6 @@ export class AdminService {
   }
 
   async getRecentQna(limit = 5) {
-    console.log('[Admin] getRecentQna 호출, limit:', limit);
     return this.qnaRepo.find({
       where: { status: QnaStatus.PENDING },
       order: { createdAt: 'DESC' },
@@ -154,7 +151,6 @@ export class AdminService {
     grade?: NoteGrade,
     isBanned?: boolean,
   ) {
-    console.log('[Admin] getUsers 호출 - search:', search, 'page:', page, 'limit:', limit);
     const qb = this.usersRepo
       .createQueryBuilder('u')
       .where('u.deletedAt IS NULL');
@@ -186,7 +182,6 @@ export class AdminService {
   }
 
   async getUserById(id: string) {
-    console.log('[Admin] getUserById 호출 - id:', id);
     const user = await this.usersRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
 
@@ -213,7 +208,6 @@ export class AdminService {
   }
 
   async banUser(id: string, reason?: string): Promise<User> {
-    console.log('[Admin] banUser 호출 - id:', id, 'reason:', reason);
     const user = await this.usersRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
     user.isBanned = true;
@@ -222,7 +216,6 @@ export class AdminService {
   }
 
   async unbanUser(id: string): Promise<User> {
-    console.log('[Admin] unbanUser 호출 - id:', id);
     const user = await this.usersRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
     user.isBanned = false;
@@ -231,7 +224,6 @@ export class AdminService {
   }
 
   async setGrade(id: string, grade: NoteGrade): Promise<User> {
-    console.log('[Admin] setGrade 호출 - id:', id, 'grade:', grade);
     const user = await this.usersRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
     user.noteGrade = grade;
@@ -239,7 +231,6 @@ export class AdminService {
   }
 
   async deleteUser(id: string): Promise<void> {
-    console.log('[Admin] deleteUser 호출 - id:', id);
     const user = await this.usersRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
     user.deletedAt = new Date();
@@ -257,7 +248,6 @@ export class AdminService {
     status?: string,
     isPremium?: boolean,
   ) {
-    console.log('[Admin] getPosts 호출 - page:', page, 'limit:', limit, 'search:', search);
     const qb = this.postsRepo
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.author', 'author');
@@ -284,7 +274,6 @@ export class AdminService {
   }
 
   async hidePost(id: string): Promise<Post> {
-    console.log('[Admin] hidePost 호출 - id:', id);
     const post = await this.postsRepo.findOne({ where: { id } });
     if (!post) throw new NotFoundException('공고를 찾을 수 없습니다.');
     post.status = PostStatus.HIDDEN;
@@ -292,7 +281,6 @@ export class AdminService {
   }
 
   async showPost(id: string): Promise<Post> {
-    console.log('[Admin] showPost 호출 - id:', id);
     const post = await this.postsRepo.findOne({ where: { id } });
     if (!post) throw new NotFoundException('공고를 찾을 수 없습니다.');
     post.status = PostStatus.ACTIVE;
@@ -300,7 +288,6 @@ export class AdminService {
   }
 
   async deletePost(id: string): Promise<void> {
-    console.log('[Admin] deletePost 호출 - id:', id);
     const post = await this.postsRepo.findOne({ where: { id } });
     if (!post) throw new NotFoundException('공고를 찾을 수 없습니다.');
     await this.postsRepo.remove(post);
@@ -313,7 +300,6 @@ export class AdminService {
     search?: string,
     type?: BoardType,
   ) {
-    console.log('[Admin] getBoards 호출 - page:', page, 'limit:', limit, 'type:', type);
     const qb = this.boardsRepo
       .createQueryBuilder('b')
       .leftJoinAndSelect('b.author', 'author')
@@ -343,7 +329,6 @@ export class AdminService {
   }
 
   async getBoardComments(boardId: string) {
-    console.log('[Admin] getBoardComments 호출 - boardId:', boardId);
     return this.commentsRepo.find({
       where: { boardId },
       relations: ['author'],
@@ -352,7 +337,6 @@ export class AdminService {
   }
 
   async deleteBoard(id: string): Promise<void> {
-    console.log('[Admin] deleteBoard 호출 - id:', id);
     const board = await this.boardsRepo.findOne({ where: { id } });
     if (!board) throw new NotFoundException('게시글을 찾을 수 없습니다.');
     await this.commentsRepo.delete({ boardId: id });
@@ -360,7 +344,6 @@ export class AdminService {
   }
 
   async deleteBoardComment(boardId: string, commentId: string): Promise<void> {
-    console.log('[Admin] deleteBoardComment 호출 - boardId:', boardId, 'commentId:', commentId);
     const comment = await this.commentsRepo.findOne({
       where: { id: commentId, boardId },
     });
@@ -370,7 +353,6 @@ export class AdminService {
 
   // ─── 공지사항 관리 ──────────────────────────────────────────────
   async getNotices(page: number, limit: number) {
-    console.log('[Admin] getNotices 호출 - page:', page, 'limit:', limit);
     const [notices, total] = await this.boardsRepo.findAndCount({
       where: { type: BoardType.NOTICE },
       relations: ['author'],
@@ -382,7 +364,6 @@ export class AdminService {
   }
 
   async createNotice(title: string, content: string, adminId: string): Promise<Board> {
-    console.log('[Admin] createNotice 호출 - title:', title);
     const board = this.boardsRepo.create({
       type: BoardType.NOTICE,
       title,
@@ -393,7 +374,6 @@ export class AdminService {
   }
 
   async updateNotice(id: string, title?: string, content?: string): Promise<Board> {
-    console.log('[Admin] updateNotice 호출 - id:', id);
     const board = await this.boardsRepo.findOne({ where: { id, type: BoardType.NOTICE } });
     if (!board) throw new NotFoundException('공지사항을 찾을 수 없습니다.');
     if (title !== undefined) board.title = title;
@@ -402,7 +382,6 @@ export class AdminService {
   }
 
   async deleteNotice(id: string): Promise<void> {
-    console.log('[Admin] deleteNotice 호출 - id:', id);
     const board = await this.boardsRepo.findOne({ where: { id, type: BoardType.NOTICE } });
     if (!board) throw new NotFoundException('공지사항을 찾을 수 없습니다.');
     await this.boardsRepo.remove(board);
@@ -415,7 +394,6 @@ export class AdminService {
     status?: ReportStatus,
     targetType?: string,
   ) {
-    console.log('[Admin] getReports 호출 - page:', page, 'status:', status, 'targetType:', targetType);
     const qb = this.reportsRepo
       .createQueryBuilder('r')
       .leftJoinAndSelect('r.reporter', 'reporter');
@@ -436,7 +414,6 @@ export class AdminService {
     action: 'BAN_USER' | 'DELETE_POST' | 'HIDE_POST' | 'WARNING' | 'DISMISS',
     note?: string,
   ) {
-    console.log('[Admin] resolveReport 호출 - id:', id, 'action:', action);
     const report = await this.reportsRepo.findOne({ where: { id } });
     if (!report) throw new NotFoundException('신고를 찾을 수 없습니다.');
 
@@ -490,7 +467,6 @@ export class AdminService {
     status?: QnaStatus,
     category?: QnaCategory,
   ) {
-    console.log('[Admin] getQnas 호출 - page:', page, 'status:', status, 'category:', category);
     const qb = this.qnaRepo
       .createQueryBuilder('q')
       .leftJoinAndSelect('q.author', 'author');
@@ -507,14 +483,12 @@ export class AdminService {
   }
 
   async getQnaById(id: string) {
-    console.log('[Admin] getQnaById 호출 - id:', id);
     const qna = await this.qnaRepo.findOne({ where: { id }, relations: ['author'] });
     if (!qna) throw new NotFoundException('문의를 찾을 수 없습니다.');
     return qna;
   }
 
   async answerQna(id: string, answer: string): Promise<Qna> {
-    console.log('[Admin] answerQna 호출 - id:', id);
     const qna = await this.qnaRepo.findOne({ where: { id } });
     if (!qna) throw new NotFoundException('문의를 찾을 수 없습니다.');
     qna.answer = answer;
@@ -524,7 +498,6 @@ export class AdminService {
   }
 
   async deleteQna(id: string): Promise<void> {
-    console.log('[Admin] deleteQna 호출 - id:', id);
     const qna = await this.qnaRepo.findOne({ where: { id } });
     if (!qna) throw new NotFoundException('문의를 찾을 수 없습니다.');
     await this.qnaRepo.remove(qna);
@@ -537,7 +510,6 @@ export class AdminService {
     status?: PaymentStatus,
     type?: string,
   ) {
-    console.log('[Admin] getPayments 호출 - page:', page, 'status:', status, 'type:', type);
     const qb = this.paymentsRepo
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.user', 'user')
@@ -555,7 +527,6 @@ export class AdminService {
   }
 
   async refundPayment(id: string, reason: string) {
-    console.log('[Admin] refundPayment 호출 - id:', id, 'reason:', reason);
     const payment = await this.paymentsRepo.findOne({
       where: { id },
       relations: ['post'],

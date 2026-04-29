@@ -25,7 +25,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    console.log('[JWT] payload 검증:', { sub: payload.sub, email: payload.email, role: payload.role });
     const user = await this.usersService.findById(payload.sub);
     if (!user) {
       console.warn('[JWT] 유저 없음 - sub:', payload.sub);

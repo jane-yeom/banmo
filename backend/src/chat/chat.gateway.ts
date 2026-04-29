@@ -43,7 +43,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.handshake.headers?.authorization?.replace('Bearer ', '');
 
       if (!token) {
-        console.log('[Chat] 토큰 없음, 연결 거부:', client.id);
         client.disconnect();
         return;
       }
@@ -54,15 +53,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       client.userId = payload.sub;
       client.join(`user:${payload.sub}`);
-      console.log('[Chat] 연결됨:', payload.sub, '소켓:', client.id);
     } catch (e: any) {
-      console.log('[Chat] 토큰 오류:', e.message, '소켓:', client.id);
       client.disconnect();
     }
   }
 
   handleDisconnect(client: AuthSocket) {
-    console.log('[Chat] 연결해제:', client.id, 'userId:', client.userId);
   }
 
   @SubscribeMessage('joinRoom')
@@ -72,7 +68,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     if (!client.userId) return client.disconnect();
     client.join(`room:${roomId}`);
-    console.log('[Chat] 룸 입장:', roomId, 'user:', client.userId);
     return { event: 'joinedRoom', data: { roomId } };
   }
 
@@ -83,7 +78,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     if (!client.userId) return client.disconnect();
     const { roomId, content } = body;
-    console.log('[Chat] 메시지 전송:', roomId, content, 'from:', client.userId);
 
     const message = await this.chatService.saveMessage(client.userId, roomId, content);
     const receiverId = await this.chatService.getReceiverId(roomId, client.userId);
@@ -109,7 +103,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!client.userId) return client.disconnect();
     await this.chatService.markAsRead(client.userId, roomId);
     this.server.to(`room:${roomId}`).emit('messagesRead', { roomId, userId: client.userId });
-    console.log('[Chat] 읽음 처리:', roomId, 'user:', client.userId);
     return { event: 'markedAsRead', data: { roomId } };
   }
 }

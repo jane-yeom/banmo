@@ -57,7 +57,6 @@ export class AuthService {
   // ── 카카오 Authorization Code 방식 (리다이렉트 콜백) ─────────────────
   async kakaoLoginWithCode(code: string): Promise<{ accessToken: string; user: User; isNewUser?: boolean }> {
     try {
-      console.log('[카카오] code 받음:', code);
 
       // 1단계: code → accessToken 교환
       const params = new URLSearchParams();
@@ -67,15 +66,12 @@ export class AuthService {
       params.append('code', code);
       params.append('client_secret', this.config.get<string>('KAKAO_CLIENT_SECRET')!);
 
-      console.log('[카카오] 토큰 교환 요청 중... client_id:', this.config.get('KAKAO_REST_API_KEY'));
-      console.log('[카카오] redirect_uri:', this.config.get('KAKAO_CALLBACK_URL'));
 
       const tokenRes = await axios.post(
         'https://kauth.kakao.com/oauth/token',
         params.toString(),
         { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
       );
-      console.log('[카카오] 토큰 교환 성공');
 
       const accessToken: string = tokenRes.data.access_token;
 
@@ -83,7 +79,6 @@ export class AuthService {
       const userRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      console.log('[카카오] 유저정보 조회 성공. kakaoId:', userRes.data.id);
 
       const kakaoId      = String(userRes.data.id);
       const nickname     = userRes.data.kakao_account?.profile?.nickname || '반모유저';
@@ -94,15 +89,12 @@ export class AuthService {
       let user = await this.usersService.findByKakaoId(kakaoId);
       const isNewUser = !user;
       if (!user) {
-        console.log('[카카오] 신규 유저 생성');
         user = await this.usersService.createKakaoUser({ kakaoId, nickname, email, profileImage });
       } else {
-        console.log('[카카오] 기존 유저 로그인');
       }
 
       // 4단계: JWT 발급
       const jwtToken = this.generateToken(user);
-      console.log('[카카오] JWT 발급 완료');
 
       return { accessToken: jwtToken, user, isNewUser };
 
@@ -135,7 +127,6 @@ export class AuthService {
 
   private generateToken(user: User): string {
     const payload = { sub: user.id, email: user.email, role: user.role };
-    console.log('[Auth] 토큰 발급:', user.id, '/ email:', user.email);
     return this.jwtService.sign(payload);
   }
 }

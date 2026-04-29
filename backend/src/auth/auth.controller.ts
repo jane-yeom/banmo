@@ -43,7 +43,6 @@ export class AuthController {
   @Post('kakao/callback')
   @HttpCode(200)
   async kakaoCallback(@Body() body: KakaoCallbackDto) {
-    console.log('[Controller] POST /auth/kakao/callback - code 수신:', !!body.code);
     return this.authService.kakaoLoginWithCode(body.code);
   }
 
