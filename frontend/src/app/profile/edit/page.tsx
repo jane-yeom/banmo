@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { User } from '@/types';
 import { useToast } from '@/hooks/useToast';
 import ToastContainer from '@/components/common/Toast';
+import { uploadImage } from '@/lib/upload';
 
 const INSTRUMENTS = [
   '피아노', '바이올린', '비올라', '첼로', '콘트라베이스',
@@ -35,15 +36,20 @@ interface VideoUploadItem {
   error?: string;
 }
 
-async function getPresignedUrl(
+async function getVideoPresignedUrl(
   fileName: string,
-  fileType: 'image' | 'video',
 ): Promise<{ uploadUrl: string; fileUrl: string }> {
-  const { data } = await apiClient.post<{ uploadUrl: string; fileUrl: string }>(
+  const ext = fileName.split('.').pop()?.toLowerCase() ?? 'mp4';
+  const mimeMap: Record<string, string> = {
+    mp4: 'video/mp4',
+    mov: 'video/quicktime',
+    avi: 'video/x-msvideo',
+  };
+  const { data } = await apiClient.post<{ success: boolean; data: { uploadUrl: string; fileUrl: string; key: string } }>(
     '/media/presigned-url',
-    { fileName, fileType },
+    { fileName, fileType: mimeMap[ext] ?? 'video/mp4', folder: 'videos' },
   );
-  return data;
+  return data.data;
 }
 
 function uploadToS3(
@@ -120,8 +126,7 @@ export default function ProfileEditPage() {
     }
     setImageUploading(true);
     try {
-      const { uploadUrl, fileUrl } = await getPresignedUrl(file.name, 'image');
-      await uploadToS3(uploadUrl, file, file.type, () => {});
+      const fileUrl = await uploadImage(file);
       await apiClient.patch('/users/me/profile-image', { imageUrl: fileUrl });
       setProfileImageUrl(fileUrl);
       if (me && accessToken) {
@@ -178,7 +183,7 @@ export default function ProfileEditPage() {
       prev.map((q) => (q.id === item.id ? { ...q, status: 'uploading' } : q)),
     );
     try {
-      const { uploadUrl, fileUrl } = await getPresignedUrl(item.file.name, 'video');
+      const { uploadUrl, fileUrl } = await getVideoPresignedUrl(item.file.name);
       await uploadToS3(uploadUrl, item.file, item.file.type, (pct) => {
         setUploadQueue((prev) =>
           prev.map((q) => (q.id === item.id ? { ...q, progress: pct } : q)),

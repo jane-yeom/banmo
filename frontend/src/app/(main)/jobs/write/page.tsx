@@ -9,7 +9,7 @@ import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { useCreatePost } from '@/hooks/usePosts';
 import { useAuthStore } from '@/store/auth.store';
-import apiClient from '@/lib/axios';
+import { uploadImage } from '@/lib/upload';
 
 const MIN_HOURLY = 10030;
 const MAX_IMAGES = 5;
@@ -68,21 +68,6 @@ const REGIONS: Record<string, string[]> = {
   제주: ['제주시', '서귀포시'],
 };
 
-async function uploadImageToS3(file: File): Promise<string> {
-  const { data } = await apiClient.post<{ uploadUrl: string; fileUrl: string }>(
-    '/media/presigned-url',
-    { fileName: file.name, fileType: 'image' },
-  );
-  const xhr = new XMLHttpRequest();
-  await new Promise<void>((resolve, reject) => {
-    xhr.open('PUT', data.uploadUrl);
-    xhr.setRequestHeader('Content-Type', file.type);
-    xhr.onload = () => (xhr.status === 200 ? resolve() : reject(new Error(`S3 ${xhr.status}`)));
-    xhr.onerror = () => reject(new Error('업로드 실패'));
-    xhr.send(file);
-  });
-  return data.fileUrl;
-}
 
 export default function JobWritePage() {
   const router = useRouter();
@@ -147,7 +132,7 @@ export default function JobWritePage() {
     if (toUpload.length === 0) { alert(`이미지는 최대 ${MAX_IMAGES}장까지 첨부 가능합니다.`); return; }
     setImageUploading(true);
     try {
-      const uploaded = await Promise.all(toUpload.map(uploadImageToS3));
+      const uploaded = await Promise.all(toUpload.map(uploadImage));
       setImageUrls((prev) => [...prev, ...uploaded]);
     } catch { alert('이미지 업로드에 실패했습니다.'); }
     finally { setImageUploading(false); }
