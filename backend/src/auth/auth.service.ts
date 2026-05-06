@@ -56,6 +56,7 @@ export class AuthService {
 
   // ── 카카오 Authorization Code 방식 (리다이렉트 콜백) ─────────────────
   async kakaoLoginWithCode(code: string): Promise<{ accessToken: string; user: User; isNewUser?: boolean }> {
+    console.log('[Auth] 카카오 콜백 처리 시작, code:', !!code);
     try {
 
       // 1단계: code → accessToken 교환
@@ -74,6 +75,7 @@ export class AuthService {
       );
 
       const accessToken: string = tokenRes.data.access_token;
+      console.log('[Auth] 카카오 토큰 교환 완료');
 
       // 2단계: accessToken으로 유저정보 조회
       const userRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
@@ -95,6 +97,7 @@ export class AuthService {
 
       // 4단계: JWT 발급
       const jwtToken = this.generateToken(user);
+      console.log('[Auth] 유저 처리 완료:', user.id);
 
       return { accessToken: jwtToken, user, isNewUser };
 
