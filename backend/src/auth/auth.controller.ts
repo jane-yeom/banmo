@@ -1,3 +1,6 @@
+// TODO: 이메일 로그인 - 현재 카카오 로그인만 지원
+// 추후 필요시 register/login 주석 해제
+
 import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { IsString } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
@@ -20,18 +23,19 @@ class KakaoCallbackDto {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  /** 이메일 회원가입 */
-  @Post('register')
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
-  }
+  // TODO: 이메일 로그인 - 추후 필요시 주석 해제
+  // /** 이메일 회원가입 */
+  // @Post('register')
+  // async register(@Body() dto: RegisterDto) {
+  //   return this.authService.register(dto);
+  // }
 
-  /** 이메일 로그인 */
-  @Post('login')
-  @HttpCode(200)
-  async emailLogin(@Body() dto: LoginDto) {
-    return this.authService.emailLogin(dto);
-  }
+  // /** 이메일 로그인 */
+  // @Post('login')
+  // @HttpCode(200)
+  // async emailLogin(@Body() dto: LoginDto) {
+  //   return this.authService.emailLogin(dto);
+  // }
 
   /** 카카오 AccessToken 방식 (레거시) */
   @Post('kakao')

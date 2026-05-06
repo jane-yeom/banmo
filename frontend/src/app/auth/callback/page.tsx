@@ -56,11 +56,16 @@ function CallbackContent() {
         const secure = window.location.protocol === 'https:' ? ';Secure' : '';
         document.cookie = `accessToken=${token};max-age=${maxAge};path=/${secure};SameSite=Lax`;
 
-        console.log('[Callback] 저장 완료, 메인으로 이동');
+        // 4. 신규/기존 유저 구분 후 이동
+        const isNewUser = data.isNewUser === true;
+        console.log('[Callback] 저장 완료, 신규유저:', isNewUser);
 
-        // 4. 저장 완료 후 이동
         setTimeout(() => {
-          router.replace('/');
+          if (isNewUser) {
+            router.replace('/welcome');
+          } else {
+            router.replace('/');
+          }
         }, 300);
       } catch (error: any) {
         console.error('[Callback] 오류:', error.message);
