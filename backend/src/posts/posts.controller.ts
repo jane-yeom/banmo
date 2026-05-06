@@ -37,6 +37,7 @@ export class PostsController {
   @Post()
   @UseGuards(AuthGuard('jwt'))
   create(@CurrentUser() user: User, @Body() dto: CreatePostDto) {
+    console.log('[Posts] 글 등록 요청 받음', user.id, dto);
     return this.postsService.create(user.id, dto);
   }
 

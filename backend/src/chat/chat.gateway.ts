@@ -18,7 +18,14 @@ interface AuthSocket extends Socket {
 }
 
 @WebSocketGateway({
-  cors: { origin: '*', credentials: true },
+  cors: {
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'https://frontend-production-9843d.up.railway.app',
+      '*',
+    ],
+    credentials: true,
+  },
   transports: ['websocket', 'polling'],
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {

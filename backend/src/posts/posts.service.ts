@@ -25,6 +25,7 @@ export class PostsService {
   ) {}
 
   async create(userId: string, dto: CreatePostDto): Promise<Post> {
+    console.log('[Posts] 저장 시도:', userId, dto);
     this.validatePay(dto.payType, dto.payMin);
 
     const post = this.postsRepository.create({
@@ -34,6 +35,7 @@ export class PostsService {
       imageUrls: dto.imageUrls ?? [],
     });
     const saved = await this.postsRepository.save(post);
+    console.log('[Posts] 저장 완료:', saved.id);
 
     // 공고 작성 완료 → +2점
     await this.trustService.applyEvent(userId, TrustEvent.POST_CREATED).catch(() => {});

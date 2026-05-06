@@ -1,8 +1,8 @@
 import { io, Socket } from 'socket.io-client';
 
 const WS_URL =
-  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_WS_URL) ||
-  'http://localhost:3002';
+  (typeof process !== 'undefined' && (process.env.NEXT_PUBLIC_WS_URL || process.env.NEXT_PUBLIC_API_URL)) ||
+  'http://localhost:3001';
 
 let _socket: Socket | null = null;
 let _currentToken: string | null = null;
