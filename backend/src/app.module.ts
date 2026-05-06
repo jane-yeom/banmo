@@ -23,17 +23,34 @@ import { FavoritesModule } from './favorites/favorites.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get('DATABASE_HOST'),
-        port: +config.get('DATABASE_PORT'),
-        username: config.get('DATABASE_USER'),
-        password: config.get('DATABASE_PASSWORD'),
-        database: config.get('DATABASE_NAME'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true,
-        logging: true,
-      }),
+      useFactory: (config: ConfigService) => {
+        const databaseUrl = config.get('DATABASE_URL');
+
+        if (databaseUrl) {
+          console.log('[DB] DATABASE_URL 방식으로 연결');
+          return {
+            type: 'postgres' as const,
+            url: databaseUrl,
+            entities: [__dirname + '/**/*.entity{.ts,.js}'],
+            synchronize: true,
+            ssl: { rejectUnauthorized: false },
+            logging: false,
+          };
+        }
+
+        console.log('[DB] 개별 환경변수 방식으로 연결');
+        return {
+          type: 'postgres' as const,
+          host: config.get<string>('DATABASE_HOST') || 'localhost',
+          port: +(config.get<string>('DATABASE_PORT') || 5432),
+          username: config.get<string>('DATABASE_USER') || 'banmo_user',
+          password: config.get<string>('DATABASE_PASSWORD') || 'banmo_pass',
+          database: config.get<string>('DATABASE_NAME') || 'banmo',
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: true,
+          logging: false,
+        };
+      },
     }),
     UsersModule,
     AuthModule,
