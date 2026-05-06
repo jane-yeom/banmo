@@ -8,3 +8,4 @@ frontend/out/
 *.log
 .idea/
 .DS_Store
+pnpm-lock.yaml
