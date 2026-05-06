@@ -32,10 +32,11 @@ export default function JobsPage() {
 
   const { data, isLoading } = usePosts({ category: category || undefined, instrument: instrument || undefined, region: region || undefined, payMin: payMin || undefined, payMax: payMax < 500000 ? payMax : undefined });
 
-  // 프리미엄 공고 상단 정렬
-  const sortedItems = data?.items
-    ? [...data.items.filter((p) => p.isPremium), ...data.items.filter((p) => !p.isPremium)]
-    : [];
+  // TODO: 유료 기능 활성화시 주석 해제 (프리미엄 공고 상단 정렬)
+  // const sortedItems = data?.items
+  //   ? [...data.items.filter((p) => p.isPremium), ...data.items.filter((p) => !p.isPremium)]
+  //   : [];
+  const sortedItems = data?.items ?? [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -151,7 +152,8 @@ export default function JobsPage() {
                       region={post.region ?? ''}
                       pay={post.payType === 'NEGOTIABLE' ? '협의' : `${(post.payMin / 10000).toFixed(0)}만원~`}
                       noteGrade={post.author?.noteGrade}
-                      isPremium={post.isPremium}
+                      // TODO: 유료 기능 활성화시 주석 해제
+                      // isPremium={post.isPremium}
                     />
                   </Link>
                 ))}

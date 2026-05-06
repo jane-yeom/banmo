@@ -20,7 +20,8 @@ const NAV = [
   { href: '/admin/notices',  label: '공지사항',    icon: '📢' },
   { href: '/admin/reports',  label: '신고 관리',   icon: '🚨', badge: 'reports' },
   { href: '/admin/qna',      label: 'QnA 관리',   icon: '💬', badge: 'qna' },
-  { href: '/admin/payments', label: '결제 관리',   icon: '💳' },
+  // TODO: 유료 기능 활성화시 주석 해제
+  // { href: '/admin/payments', label: '결제 관리',   icon: '💳' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

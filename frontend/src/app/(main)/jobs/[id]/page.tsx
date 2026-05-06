@@ -12,7 +12,8 @@ import { useAuthStore } from '@/store/auth.store';
 import apiClient from '@/lib/axios';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
 import PayBadge from '@/components/common/PayBadge';
-import PremiumModal from '@/components/payment/PremiumModal';
+// TODO: 유료 기능 활성화시 주석 해제
+// import PremiumModal from '@/components/payment/PremiumModal';
 
 const CATEGORY_LABEL: Record<string, string> = {
   JOB_OFFER: '반주자 구인', JOB_SEEK: '반주자 구직',
@@ -113,7 +114,8 @@ export default function JobDetailPage() {
   const createRoom = useCreateChatRoom();
   const qc = useQueryClient();
   const [showApply, setShowApply] = useState(false);
-  const [showPremium, setShowPremium] = useState(false);
+  // TODO: 유료 기능 활성화시 주석 해제
+  // const [showPremium, setShowPremium] = useState(false);
 
   // 찜 여부 조회
   const { data: favData } = useQuery({
@@ -189,6 +191,7 @@ export default function JobDetailPage() {
       {showApply && (
         <ApplyModal postId={post.id} onClose={() => setShowApply(false)} />
       )}
+      {/* TODO: 유료 기능 활성화시 주석 해제
       {showPremium && (
         <PremiumModal
           postId={post.id}
@@ -197,6 +200,7 @@ export default function JobDetailPage() {
           onSuccess={() => { setShowPremium(false); window.location.reload(); }}
         />
       )}
+      */}
 
       <div className="mx-auto max-w-3xl px-4 py-8">
         {/* 카테고리 + 상태 */}
@@ -204,11 +208,13 @@ export default function JobDetailPage() {
           <span className="rounded-full bg-violet-100 px-3 py-1 text-sm font-medium text-violet-700">
             {CATEGORY_LABEL[post.category] ?? post.category}
           </span>
+          {/* TODO: 유료 기능 활성화시 주석 해제 (프리미엄 배지)
           {post.isPremium && (
             <span className="rounded-full bg-amber-400 px-3 py-1 text-sm font-bold text-white">
               👑 프리미엄
             </span>
           )}
+          */}
           <span className={`ml-auto rounded-full px-3 py-1 text-xs font-medium ${
             post.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
           }`}>
@@ -298,7 +304,7 @@ export default function JobDetailPage() {
         {/* 액션 버튼 */}
         {isOwner ? (
           <div className="space-y-3">
-            {/* 상위노출 버튼 */}
+            {/* TODO: 유료 기능 활성화시 주석 해제 (상위노출 버튼 + 프리미엄 상태 표시)
             {!post.isPremium && (
               <button
                 onClick={() => setShowPremium(true)}
@@ -317,6 +323,7 @@ export default function JobDetailPage() {
                 </span>
               </div>
             )}
+            */}
             <div className="flex gap-3">
               <Link
                 href={`/jobs/${id}/edit`}

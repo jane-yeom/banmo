@@ -67,9 +67,10 @@ export class PostsService {
     if (payMin !== undefined) qb.andWhere('post.payMin >= :payMin', { payMin });
     if (payMax !== undefined) qb.andWhere('post.payMin <= :payMax', { payMax });
 
-    // 프리미엄 먼저, 그 다음 최신순
-    qb.orderBy('post.isPremium', 'DESC')
-      .addOrderBy('post.createdAt', 'DESC')
+    // TODO: 프리미엄 정렬 - 유료 기능 활성화시 주석 해제
+    // qb.orderBy('post.isPremium', 'DESC')
+    //   .addOrderBy('post.createdAt', 'DESC')
+    qb.orderBy('post.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
 

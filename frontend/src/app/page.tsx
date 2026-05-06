@@ -72,7 +72,8 @@ export default function HomePage() {
                       region={post.region ?? ''}
                       pay={post.payType === 'NEGOTIABLE' ? '협의' : `${(post.payMin / 10000).toFixed(0)}만원~`}
                       noteGrade={post.author?.noteGrade}
-                      isPremium={post.isPremium}
+                      // TODO: 유료 기능 활성화시 주석 해제
+                      // isPremium={post.isPremium}
                       categoryColor="bg-violet-100 text-violet-700"
                     />
                   </Link>
@@ -103,7 +104,8 @@ export default function HomePage() {
                       category={post.category}
                       region={post.region ?? ''}
                       noteGrade={post.author?.noteGrade}
-                      isPremium={post.isPremium}
+                      // TODO: 유료 기능 활성화시 주석 해제
+                      // isPremium={post.isPremium}
                       categoryColor="bg-pink-100 text-pink-700"
                     />
                   </Link>

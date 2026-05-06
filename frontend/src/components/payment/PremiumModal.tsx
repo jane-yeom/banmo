@@ -1,3 +1,7 @@
+// TODO: 유료 결제 기능 - 추후 활성화 예정
+// 토스페이먼츠 연동 완료 후 jobs/[id]/page.tsx에서 import 주석 해제
+// 현재 비활성: jobs/[id]/page.tsx의 PremiumModal import/usage 주석 참고
+
 'use client';
 
 import { useState } from 'react';
