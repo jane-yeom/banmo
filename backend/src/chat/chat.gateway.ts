@@ -17,7 +17,7 @@ interface AuthSocket extends Socket {
   userId?: string;
 }
 
-@WebSocketGateway(3002, {
+@WebSocketGateway({
   cors: { origin: '*', credentials: true },
   transports: ['websocket', 'polling'],
 })
