@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Cookies from 'js-cookie';
 import { useAuthStore } from '@/store/auth.store';
 import { kakaoLogin } from '@/lib/kakao';
 import apiClient from '@/lib/axios';
@@ -31,6 +31,7 @@ interface AuthResponse {
 
 export default function LoginPage() {
   const { setAuth } = useAuthStore();
+  const router = useRouter();
   const [kakaoError, setKakaoError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -56,12 +57,11 @@ export default function LoginPage() {
         email: data.email,
         password: data.password,
       });
-      localStorage.setItem('accessToken', res.data.accessToken);
-      Cookies.set('accessToken', res.data.accessToken, { expires: 7 });
+      // setAuth 내부에서 localStorage + 쿠키 저장 처리
       setAuth(res.data.user as any, res.data.accessToken);
       const params = new URLSearchParams(window.location.search);
       const redirectTo = params.get('redirect') || '/';
-      window.location.href = redirectTo;
+      router.replace(redirectTo);
     } catch (err: any) {
       setServerError(err?.response?.data?.message ?? '로그인에 실패했습니다.');
     }

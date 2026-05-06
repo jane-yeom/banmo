@@ -1,48 +1,75 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
-import { useAuthStore } from '@/store/auth.store';
-import api from '@/lib/axios';
 
 function CallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const processed = useRef(false);
 
   useEffect(() => {
+    if (processed.current) return;
+    processed.current = true;
+
     const code = searchParams.get('code');
-    console.log('[콜백] URL 전체:', window.location.href);
-    console.log('[콜백] code 값:', code);
+    console.log('[Callback] code:', code ? '있음' : '없음');
 
     if (!code) {
-      console.error('[콜백] code 없음, 로그인 페이지로 이동');
-      router.push('/login');
+      router.replace('/login?error=no_code');
       return;
     }
 
     const handleCallback = async () => {
       try {
-        console.log('[콜백] 백엔드로 code 전송 중...');
-        const res = await api.post('/auth/kakao/callback', { code });
-        console.log('[콜백] 응답:', res.data);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        console.log('[Callback] API URL:', apiUrl);
 
-        const { accessToken, user } = res.data;
-        localStorage.setItem('accessToken', accessToken);
-        Cookies.set('accessToken', accessToken, { expires: 7 });
-        setAuth(user, accessToken);
-        // persist 저장 완료 대기 후 이동
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        router.replace('/');
+        const res = await fetch(`${apiUrl}/auth/kakao/callback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        });
+
+        const data = await res.json();
+        console.log('[Callback] 응답:', data);
+
+        if (!res.ok) throw new Error(data.message || '로그인 실패');
+
+        const token = data.accessToken || data.data?.accessToken;
+        const user = data.user || data.data?.user;
+
+        if (!token) throw new Error('토큰 없음');
+
+        console.log('[Callback] 토큰 저장 시작');
+
+        // 1. localStorage 저장
+        localStorage.setItem('accessToken', token);
+
+        // 2. Zustand store 업데이트
+        const { useAuthStore } = await import('@/store/auth.store');
+        const store = useAuthStore.getState();
+        store.setAuth(user, token);
+
+        // 3. 쿠키 저장 (HTTPS 환경 Secure 플래그 자동 적용)
+        const maxAge = 7 * 24 * 60 * 60;
+        const secure = window.location.protocol === 'https:' ? ';Secure' : '';
+        document.cookie = `accessToken=${token};max-age=${maxAge};path=/${secure};SameSite=Lax`;
+
+        console.log('[Callback] 저장 완료, 메인으로 이동');
+
+        // 4. 저장 완료 후 이동
+        setTimeout(() => {
+          router.replace('/');
+        }, 300);
       } catch (error: any) {
-        console.error('[콜백] 오류:', error.response?.data || error.message);
-        router.push('/login?error=true');
+        console.error('[Callback] 오류:', error.message);
+        router.replace(`/login?error=${encodeURIComponent(error.message)}`);
       }
     };
 
     handleCallback();
-  }, [searchParams, router, setAuth]);
+  }, []);
 
   return (
     <div style={{
@@ -51,16 +78,28 @@ function CallbackContent() {
       alignItems: 'center',
       justifyContent: 'center',
       height: '100vh',
-      gap: '16px',
+      gap: 16,
     }}>
-      <div>카카오 로그인 처리 중...</div>
+      <div style={{ fontSize: 32 }}>🎵</div>
+      <div style={{ fontSize: 16, color: '#6B7280' }}>
+        카카오 로그인 처리 중...
+      </div>
     </div>
   );
 }
 
 export default function CallbackPage() {
   return (
-    <Suspense fallback={<div>로딩 중...</div>}>
+    <Suspense fallback={
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+      }}>
+        로딩 중...
+      </div>
+    }>
       <CallbackContent />
     </Suspense>
   );

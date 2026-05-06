@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import Cookies from 'js-cookie';
 
 export interface AuthUser {
   id: string;
@@ -21,6 +20,16 @@ interface AuthState {
   logout: () => void;
 }
 
+function setCookie(token: string) {
+  const maxAge = 7 * 24 * 60 * 60;
+  const secure = typeof window !== 'undefined' && window.location.protocol === 'https:' ? ';Secure' : '';
+  document.cookie = `accessToken=${token};max-age=${maxAge};path=/${secure};SameSite=Lax`;
+}
+
+function removeCookie() {
+  document.cookie = 'accessToken=;max-age=0;path=/';
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -30,14 +39,14 @@ export const useAuthStore = create<AuthState>()(
       setAuth: (user, accessToken) => {
         if (typeof window !== 'undefined') {
           localStorage.setItem('accessToken', accessToken);
-          Cookies.set('accessToken', accessToken, { expires: 7 });
+          setCookie(accessToken);
         }
         set({ user, accessToken, isLoggedIn: true });
       },
       logout: () => {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('accessToken');
-          Cookies.remove('accessToken');
+          removeCookie();
         }
         set({ user: null, accessToken: null, isLoggedIn: false });
       },
