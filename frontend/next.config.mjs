@@ -3,13 +3,11 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'k.kakaocdn.net' },
-      { protocol: 'http',  hostname: 'k.kakaocdn.net' },
-      { protocol: 'https', hostname: 'img1.kakaocdn.net' },
-      { protocol: 'https', hostname: 'K.kakaocdn.net' },
       { protocol: 'https', hostname: '*.kakaocdn.net' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: '*.railway.app' },
-      { protocol: 'http',  hostname: 'localhost' },
+      { protocol: 'https', hostname: 'pub-0f7951488c3d49b498e60ef2261a7fbe.r2.dev' },
+      { protocol: 'https', hostname: '*.r2.dev' },
     ],
   },
   env: {
