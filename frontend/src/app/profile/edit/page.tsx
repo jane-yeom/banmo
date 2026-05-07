@@ -116,7 +116,7 @@ export default function ProfileEditPage() {
     );
   };
 
-  // 프로필 이미지 업로드
+  // 프로필 이미지 업로드 (미리보기만, 저장 버튼 클릭시 함께 저장)
   const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -127,11 +127,7 @@ export default function ProfileEditPage() {
     setImageUploading(true);
     try {
       const fileUrl = await uploadImage(file);
-      await apiClient.patch('/users/me/profile-image', { imageUrl: fileUrl });
       setProfileImageUrl(fileUrl);
-      if (me && accessToken) {
-        setAuth({ ...me, profileImage: fileUrl }, accessToken);
-      }
     } catch {
       alert('이미지 업로드에 실패했습니다.');
     } finally {
@@ -231,15 +227,20 @@ export default function ProfileEditPage() {
     setUploadQueue((prev) => prev.filter((q) => q.id !== id));
   };
 
-  // 프로필 저장
+  // 프로필 저장 (닉네임 + 이미지 + 나머지 한번에)
   const onSubmit = async (data: ProfileForm) => {
     setSaving(true);
     setSaveError(null);
     try {
-      await apiClient.patch('/users/me', {
+      const res = await apiClient.patch('/users/me', {
         ...data,
+        profileImage: profileImageUrl,
         instruments: selectedInstruments,
       });
+      if (me && accessToken) {
+        const updatedUser = res.data?.data || res.data;
+        setAuth({ ...me, ...updatedUser }, accessToken);
+      }
       showToast('프로필이 저장되었습니다.', 'success');
       setTimeout(() => router.push(`/profile/${me?.id}`), 1000);
     } catch {

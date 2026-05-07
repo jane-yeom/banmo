@@ -16,10 +16,8 @@ export default function LoginPage() {
         maxWidth: 400, textAlign: 'center',
         boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
       }}>
-        <div style={{ fontSize: 48, marginBottom: 8 }}>🎵</div>
-        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4, color: '#111827' }}>
-          반모
-        </h1>
+        <img src="/banmo-logo.png" alt="반모"
+          style={{ height: 80, width: 'auto', marginBottom: 16 }}/>
         <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 40 }}>
           반주의 모든것
         </p>

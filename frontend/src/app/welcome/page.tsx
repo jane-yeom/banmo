@@ -111,7 +111,8 @@ export default function WelcomePage() {
       }}>
         {/* 헤더 */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ fontSize: 32, marginBottom: 8 }}>🎵</div>
+          <img src="/banmo-logo.png" alt="반모"
+            style={{ height: 56, width: 'auto', marginBottom: 12 }}/>
           <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
             반모에 오신걸 환영해요!
           </h1>
