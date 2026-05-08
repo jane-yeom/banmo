@@ -33,7 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <ReactQueryProvider>
           <AuthRestorer />
-          {children}
+          <main style={{ paddingBottom: 80 }}>
+            {children}
+          </main>
           <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
         </ReactQueryProvider>
       </body>

@@ -133,7 +133,7 @@ export default function Header() {
           {/* 로고 */}
           <Link href="/" style={{ textDecoration: 'none' }}>
             <img src="/banmo-logo.png" alt="반모"
-              style={{ height: 36, width: 'auto' }}/>
+              style={{ height: 36, width: 'auto', mixBlendMode: 'multiply' }}/>
           </Link>
 
           {/* 데스크탑 네비 */}
@@ -263,7 +263,7 @@ export default function Header() {
           alignItems: 'center',
         }}>
           <img src="/banmo-logo.png" alt="반모"
-            style={{ height: 28, width: 'auto' }}/>
+            style={{ height: 28, width: 'auto', mixBlendMode: 'multiply' }}/>
           <button onClick={() => setMenuOpen(false)} style={{
             background: 'none', border: 'none',
             fontSize: 24, cursor: 'pointer', color: '#6B7280',

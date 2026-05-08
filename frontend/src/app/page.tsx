@@ -1,176 +1,405 @@
 'use client';
 
-import Header from '@/components/layout/Header';
-import PostCard from '@/components/common/PostCard';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { usePosts } from '@/hooks/usePosts';
-import { useBoardPosts } from '@/hooks/useBoard';
-import { HeroBanner } from '@/components/HeroBanner';
+import Header from '@/components/layout/Header';
+import BottomNav from '@/components/layout/BottomNav';
+import api from '@/lib/axios';
 
-function SectionSkeleton() {
+// 슬라이딩 배너 컴포넌트
+function HeroBanner() {
+  const [current, setCurrent] = useState(0);
+  const touchStartRef = useRef(0);
+
+  const banners = [
+    {
+      bg: 'linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%)',
+      emoji: '🎹',
+      title: '반주자를 찾고 계신가요?',
+      sub: '피아노, 바이올린, 첼로 등\n다양한 반주자를 만나보세요',
+      btn: '구인 공고 보기',
+      href: '/jobs?category=JOB_OFFER',
+    },
+    {
+      bg: 'linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%)',
+      emoji: '🎵',
+      title: '반주 활동을 원하시나요?',
+      sub: '나에게 맞는 연주 기회를\n찾아보세요',
+      btn: '구직 공고 보기',
+      href: '/jobs?category=JOB_SEEK',
+    },
+    {
+      bg: 'linear-gradient(135deg, #EC4899 0%, #BE185D 100%)',
+      emoji: '🎭',
+      title: '공연을 홍보해보세요',
+      sub: '연주회, 공연 소식을\n많은 분들께 알려보세요',
+      btn: '공연 홍보 보기',
+      href: '/promo',
+    },
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((c) => (c + 1) % banners.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const b = banners[current];
+
   return (
-    <div className="flex flex-col gap-2">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="h-20 rounded-xl bg-gray-200 animate-pulse" />
-      ))}
+    <div
+      onTouchStart={(e) => { touchStartRef.current = e.touches[0].clientX; }}
+      onTouchEnd={(e) => {
+        const diff = touchStartRef.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) {
+          setCurrent((c) =>
+            diff > 0
+              ? (c + 1) % banners.length
+              : (c - 1 + banners.length) % banners.length
+          );
+        }
+      }}
+      style={{
+        background: b.bg,
+        borderRadius: 20,
+        padding: '32px 24px 40px',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'background 0.5s ease',
+        marginBottom: 24,
+      }}
+    >
+      {/* 배경 장식 */}
+      <div style={{
+        position: 'absolute', top: -20, right: -20,
+        width: 120, height: 120, borderRadius: '50%',
+        background: 'rgba(255,255,255,0.08)',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: -30, left: -20,
+        width: 160, height: 160, borderRadius: '50%',
+        background: 'rgba(255,255,255,0.06)',
+      }} />
+
+      <div style={{ fontSize: 44, marginBottom: 12 }}>{b.emoji}</div>
+      <h2 style={{
+        color: 'white', fontSize: 20, fontWeight: 700,
+        marginBottom: 8, lineHeight: 1.3,
+      }}>
+        {b.title}
+      </h2>
+      <p style={{
+        color: 'rgba(255,255,255,0.85)',
+        fontSize: 14, marginBottom: 20,
+        lineHeight: 1.6, whiteSpace: 'pre-line',
+      }}>
+        {b.sub}
+      </p>
+      <Link href={b.href} style={{
+        display: 'inline-block',
+        background: 'white',
+        color: '#374151',
+        padding: '10px 24px',
+        borderRadius: 99,
+        fontWeight: 700,
+        fontSize: 14,
+        textDecoration: 'none',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+      }}>
+        {b.btn} →
+      </Link>
+
+      {/* 좌우 버튼 */}
+      <button
+        onClick={() => setCurrent((c) => (c - 1 + banners.length) % banners.length)}
+        style={{
+          position: 'absolute', left: 8, top: '50%',
+          transform: 'translateY(-50%)',
+          background: 'rgba(255,255,255,0.2)',
+          backdropFilter: 'blur(4px)',
+          border: 'none', borderRadius: '50%',
+          width: 32, height: 32, cursor: 'pointer',
+          color: 'white', fontSize: 14,
+        }}
+      >‹</button>
+      <button
+        onClick={() => setCurrent((c) => (c + 1) % banners.length)}
+        style={{
+          position: 'absolute', right: 8, top: '50%',
+          transform: 'translateY(-50%)',
+          background: 'rgba(255,255,255,0.2)',
+          backdropFilter: 'blur(4px)',
+          border: 'none', borderRadius: '50%',
+          width: 32, height: 32, cursor: 'pointer',
+          color: 'white', fontSize: 14,
+        }}
+      >›</button>
+
+      {/* 인디케이터 */}
+      <div style={{
+        position: 'absolute', bottom: 12,
+        left: '50%', transform: 'translateX(-50%)',
+        display: 'flex', gap: 6,
+      }}>
+        {banners.map((_, i) => (
+          <div
+            key={i}
+            onClick={() => setCurrent(i)}
+            style={{
+              width: i === current ? 20 : 6,
+              height: 6, borderRadius: 3,
+              background: i === current ? 'white' : 'rgba(255,255,255,0.4)',
+              cursor: 'pointer',
+              transition: 'all 0.3s',
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 섹션 카드 컴포넌트
+function SectionCard({ post }: { post: any }) {
+  const categoryMap: Record<string, string> = {
+    JOB_OFFER: '반주자구인', JOB_SEEK: '반주자구직',
+    LESSON_OFFER: '레슨구인', LESSON_SEEK: '레슨구직',
+    PERFORMANCE: '공연도우미', AFTERSCHOOL: '방과후교사',
+    PROMO_CONCERT: '공연홍보', PROMO_SPACE: '연습실대여',
+    TRADE_LESSON: '레슨양도', TRADE_SPACE: '연습실양도',
+    TRADE_TICKET: '티켓양도', TRADE_INSTRUMENT: '중고악기',
+  };
+
+  const payText =
+    post.payType === 'NEGOTIABLE' ? '협의'
+    : post.payType === 'HOURLY' ? `${post.payMin?.toLocaleString()}원/시`
+    : post.payType === 'PER_SESSION' ? `${post.payMin?.toLocaleString()}원/회`
+    : `${post.payMin?.toLocaleString()}원/월`;
+
+  return (
+    <Link href={`/jobs/${post.id}`} style={{ textDecoration: 'none' }}>
+      <div style={{
+        background: 'white',
+        borderRadius: 14,
+        padding: '16px',
+        marginBottom: 10,
+        border: '1px solid #F3F4F6',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        cursor: 'pointer',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ flex: 1 }}>
+            <span style={{
+              display: 'inline-block',
+              background: '#EDE9FE', color: '#7C3AED',
+              fontSize: 11, fontWeight: 600,
+              padding: '3px 8px', borderRadius: 6,
+              marginBottom: 8,
+            }}>
+              {categoryMap[post.category] || post.category}
+            </span>
+            <div style={{
+              fontSize: 15, fontWeight: 600,
+              color: '#111827', marginBottom: 6,
+              lineHeight: 1.3,
+            }}>
+              {post.title}
+            </div>
+            <div style={{
+              display: 'flex', alignItems: 'center',
+              gap: 4, fontSize: 13, color: '#6B7280',
+            }}>
+              <span>📍</span>
+              <span>{post.region || '지역 미정'}</span>
+            </div>
+          </div>
+          <div style={{
+            fontSize: 14, fontWeight: 700,
+            color: '#7C3AED', marginLeft: 12,
+            flexShrink: 0,
+          }}>
+            {payText}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// 섹션 타이틀
+function SectionTitle({ icon, title, href }: { icon: string; title: string; href: string }) {
+  return (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between',
+      alignItems: 'center', marginBottom: 14,
+    }}>
+      <h2 style={{
+        fontSize: 17, fontWeight: 700,
+        color: '#111827', margin: 0,
+        display: 'flex', alignItems: 'center', gap: 6,
+      }}>
+        <span>{icon}</span>
+        {title}
+      </h2>
+      <Link href={href} style={{
+        fontSize: 13, color: '#7C3AED',
+        textDecoration: 'none', fontWeight: 500,
+      }}>
+        더보기 →
+      </Link>
+    </div>
+  );
+}
+
+// 빠른 메뉴
+function QuickMenu() {
+  const menus = [
+    { icon: '🎹', label: '반주자\n구인', href: '/jobs?category=JOB_OFFER' },
+    { icon: '🎵', label: '반주자\n구직', href: '/jobs?category=JOB_SEEK' },
+    { icon: '📚', label: '레슨\n구인', href: '/jobs?category=LESSON_OFFER' },
+    { icon: '🎭', label: '공연\n홍보', href: '/promo' },
+    { icon: '🏠', label: '연습실\n대여', href: '/promo?category=PROMO_SPACE' },
+    { icon: '🎸', label: '중고\n악기', href: '/trade?category=TRADE_INSTRUMENT' },
+    { icon: '💬', label: '자유\n게시판', href: '/board?type=FREE' },
+    { icon: '🔒', label: '익명\n게시판', href: '/board?type=ANONYMOUS' },
+  ];
+
+  return (
+    <div style={{ marginBottom: 28 }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: 10,
+      }}>
+        {menus.map((m) => (
+          <Link key={m.href} href={m.href} style={{ textDecoration: 'none' }}>
+            <div style={{
+              background: 'white',
+              borderRadius: 14,
+              padding: '12px 8px',
+              textAlign: 'center',
+              border: '1px solid #F3F4F6',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              cursor: 'pointer',
+            }}>
+              <div style={{ fontSize: 24, marginBottom: 6 }}>{m.icon}</div>
+              <div style={{
+                fontSize: 11, color: '#374151',
+                fontWeight: 500, lineHeight: 1.4,
+                whiteSpace: 'pre-line',
+              }}>
+                {m.label}
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
 
 export default function HomePage() {
-  const { data: jobsData, isLoading: jobsLoading } = usePosts({ limit: 3 });
-  const { data: promoData, isLoading: promoLoading } = usePosts({ category: 'PROMO_CONCERT', limit: 3 });
-  const { data: tradeData, isLoading: tradeLoading } = usePosts({ category: 'TRADE_INSTRUMENT', limit: 3 });
-  const { data: boardPosts, isLoading: boardLoading } = useBoardPosts();
+  const [jobPosts, setJobPosts] = useState<any[]>([]);
+  const [promoPosts, setPromoPosts] = useState<any[]>([]);
+  const [tradePosts, setTradePosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const boardPreview = boardPosts?.slice(0, 3) ?? [];
-
-  const PAY_TYPE_LABEL: Record<string, string> = {
-    HOURLY: '시급', PER_SESSION: '회당', MONTHLY: '월급', NEGOTIABLE: '협의',
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [jobs, promo, trade] = await Promise.all([
+          api.get('/posts?limit=3&status=ACTIVE').catch(() => ({ data: { data: [] } })),
+          api.get('/posts?category=PROMO_CONCERT&limit=3').catch(() => ({ data: { data: [] } })),
+          api.get('/posts?category=TRADE_INSTRUMENT&limit=3').catch(() => ({ data: { data: [] } })),
+        ]);
+        setJobPosts(jobs.data?.items || jobs.data?.data || jobs.data?.posts || []);
+        setPromoPosts(promo.data?.items || promo.data?.data || promo.data?.posts || []);
+        setTradePosts(trade.data?.items || trade.data?.data || trade.data?.posts || []);
+      } catch (e) {
+        console.error('홈 데이터 로딩 실패:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', background: '#F9FAFB' }}>
       <Header />
 
-      {/* 히어로 배너 */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 pt-6">
+      <div style={{
+        maxWidth: 600,
+        margin: '0 auto',
+        padding: '16px 16px 80px',
+      }}>
+        {/* 슬라이딩 배너 */}
         <HeroBanner />
-      </section>
 
-      {/* 메인 그리드 */}
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-          {/* 구인구직 */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h2 className="flex items-center gap-1.5 text-base font-bold text-gray-800">
-                <span>🎹</span> 구인구직
-              </h2>
-              <Link href="/jobs" className="text-xs text-violet-600 hover:text-violet-800 font-medium">
-                더보기 →
-              </Link>
-            </div>
-            {jobsLoading ? <SectionSkeleton /> : (
-              <div className="flex flex-col gap-2">
-                {(jobsData?.items ?? []).map((post) => (
-                  <Link key={post.id} href={`/jobs/${post.id}`}>
-                    <PostCard
-                      title={post.title}
-                      category={post.category}
-                      region={post.region ?? ''}
-                      pay={post.payType === 'NEGOTIABLE' ? '협의' : `${(post.payMin / 10000).toFixed(0)}만원~`}
-                      noteGrade={post.author?.noteGrade}
-                      // TODO: 유료 기능 활성화시 주석 해제
-                      // isPremium={post.isPremium}
-                      categoryColor="bg-violet-100 text-violet-700"
-                    />
-                  </Link>
-                ))}
-                {!jobsLoading && jobsData?.items.length === 0 && (
-                  <p className="text-sm text-gray-400 text-center py-6">공고가 없습니다.</p>
-                )}
-              </div>
-            )}
-          </div>
+        {/* 빠른 메뉴 */}
+        <QuickMenu />
 
-          {/* 공연/연습실 */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h2 className="flex items-center gap-1.5 text-base font-bold text-gray-800">
-                <span>🎵</span> 공연/연습실
-              </h2>
-              <Link href="/promo" className="text-xs text-pink-600 hover:text-pink-800 font-medium">
-                더보기 →
-              </Link>
+        {/* 구인구직 섹션 */}
+        <div style={{ marginBottom: 28 }}>
+          <SectionTitle icon="💼" title="구인구직" href="/jobs" />
+          {loading ? (
+            [1, 2, 3].map((i) => (
+              <div key={i} style={{
+                background: '#E5E7EB', borderRadius: 14,
+                height: 80, marginBottom: 10,
+                animation: 'pulse 1.5s infinite',
+              }} />
+            ))
+          ) : jobPosts.length === 0 ? (
+            <div style={{
+              textAlign: 'center', padding: '24px',
+              color: '#9CA3AF', fontSize: 14,
+              background: 'white', borderRadius: 14,
+            }}>
+              등록된 공고가 없습니다
             </div>
-            {promoLoading ? <SectionSkeleton /> : (
-              <div className="flex flex-col gap-2">
-                {(promoData?.items ?? []).map((post) => (
-                  <Link key={post.id} href={`/promo/${post.id}`}>
-                    <PostCard
-                      title={post.title}
-                      category={post.category}
-                      region={post.region ?? ''}
-                      noteGrade={post.author?.noteGrade}
-                      // TODO: 유료 기능 활성화시 주석 해제
-                      // isPremium={post.isPremium}
-                      categoryColor="bg-pink-100 text-pink-700"
-                    />
-                  </Link>
-                ))}
-                {!promoLoading && promoData?.items.length === 0 && (
-                  <p className="text-sm text-gray-400 text-center py-6">공연/연습실 글이 없습니다.</p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* 양도/중고 */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h2 className="flex items-center gap-1.5 text-base font-bold text-gray-800">
-                <span>🎸</span> 양도/중고
-              </h2>
-              <Link href="/trade" className="text-xs text-amber-600 hover:text-amber-800 font-medium">
-                더보기 →
-              </Link>
-            </div>
-            {tradeLoading ? <SectionSkeleton /> : (
-              <div className="flex flex-col gap-2">
-                {(tradeData?.items ?? []).map((post) => (
-                  <Link key={post.id} href={`/trade/${post.id}`}>
-                    <PostCard
-                      title={post.title}
-                      category={post.category}
-                      region={post.region ?? ''}
-                      pay={
-                        post.payType === 'NEGOTIABLE' || post.payMin === 0
-                          ? '협의'
-                          : `${(post.payMin / 10000).toFixed(0)}만원`
-                      }
-                      categoryColor="bg-amber-100 text-amber-700"
-                    />
-                  </Link>
-                ))}
-                {!tradeLoading && tradeData?.items.length === 0 && (
-                  <p className="text-sm text-gray-400 text-center py-6">게시글이 없습니다.</p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* 게시판 */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h2 className="flex items-center gap-1.5 text-base font-bold text-gray-800">
-                <span>📋</span> 게시판
-              </h2>
-              <Link href="/board" className="text-xs text-teal-600 hover:text-teal-800 font-medium">
-                더보기 →
-              </Link>
-            </div>
-            {boardLoading ? <SectionSkeleton /> : (
-              <div className="flex flex-col gap-2">
-                {boardPreview.map((post) => (
-                  <Link key={post.id} href={`/board/${post.id}`}>
-                    <div className="rounded-xl bg-white border border-gray-100 p-3 hover:shadow-sm transition-shadow">
-                      <p className="line-clamp-2 text-sm font-medium text-gray-800 leading-snug">{post.title}</p>
-                      <p className="mt-1 text-xs text-gray-400">
-                        {post.isAnonymous ? '익명' : (post.author?.nickname ?? '익명')} ·{' '}
-                        {new Date(post.createdAt).toLocaleDateString('ko-KR')}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-                {!boardLoading && boardPreview.length === 0 && (
-                  <p className="text-sm text-gray-400 text-center py-6">게시글이 없습니다.</p>
-                )}
-              </div>
-            )}
-          </div>
+          ) : (
+            jobPosts.map((post: any) => <SectionCard key={post.id} post={post} />)
+          )}
         </div>
-      </main>
+
+        {/* 공연/연습실 섹션 */}
+        <div style={{ marginBottom: 28 }}>
+          <SectionTitle icon="🎭" title="공연/연습실" href="/promo" />
+          {!loading && promoPosts.length === 0 ? (
+            <div style={{
+              textAlign: 'center', padding: '24px',
+              color: '#9CA3AF', fontSize: 14,
+              background: 'white', borderRadius: 14,
+            }}>
+              등록된 공연이 없습니다
+            </div>
+          ) : (
+            promoPosts.map((post: any) => <SectionCard key={post.id} post={post} />)
+          )}
+        </div>
+
+        {/* 중고거래 섹션 */}
+        <div style={{ marginBottom: 28 }}>
+          <SectionTitle icon="🎸" title="중고악기" href="/trade" />
+          {!loading && tradePosts.length === 0 ? (
+            <div style={{
+              textAlign: 'center', padding: '24px',
+              color: '#9CA3AF', fontSize: 14,
+              background: 'white', borderRadius: 14,
+            }}>
+              등록된 매물이 없습니다
+            </div>
+          ) : (
+            tradePosts.map((post: any) => <SectionCard key={post.id} post={post} />)
+          )}
+        </div>
+      </div>
+
+      <BottomNav />
     </div>
   );
 }

@@ -2,46 +2,129 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
-
-const NAV_ITEMS = [
-  { href: '/',       icon: '🏠', label: '홈' },
-  { href: '/jobs',   icon: '🎹', label: '구인구직' },
-  { href: '/board',  icon: '📋', label: '게시판' },
-  { href: '/chat',   icon: '💬', label: '채팅', showBadge: true },
-  { href: '/mypage', icon: '👤', label: '마이' },
-];
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { isLoggedIn } = useAuthStore();
   const { unreadCount } = useChatStore();
 
+  const tabs = [
+    { icon: '🏠', label: '홈', href: '/' },
+    { icon: '💼', label: '구인구직', href: '/jobs' },
+    { icon: '✍️', label: '글쓰기', href: '/jobs/write', highlight: true },
+    { icon: '💬', label: '채팅', href: '/chat', showBadge: true },
+    { icon: '👤', label: '내정보', href: isLoggedIn ? '/mypage' : '/login' },
+  ];
+
+  // 숨길 페이지
+  const hideOn = ['/login', '/welcome', '/auth/callback', '/admin'];
+  if (hideOn.some((p) => pathname.startsWith(p))) return null;
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-100 bg-white md:hidden">
-      <div className="flex h-16">
-        {NAV_ITEMS.map((item) => {
-          const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+    <nav style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0,
+      background: 'white',
+      borderTop: '1px solid #F3F4F6',
+      display: 'flex',
+      zIndex: 50,
+      paddingBottom: 'env(safe-area-inset-bottom)',
+      boxShadow: '0 -4px 12px rgba(0,0,0,0.06)',
+    }}>
+      {tabs.map((tab) => {
+        const isActive =
+          tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
+
+        if (tab.highlight) {
           return (
             <Link
-              key={item.href}
-              href={item.href}
-              className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 text-xs transition-colors ${
-                isActive ? 'text-violet-700' : 'text-gray-400 hover:text-gray-600'
-              }`}
+              key={tab.href}
+              href={tab.href}
+              style={{
+                flex: 1, display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '8px 0',
+                textDecoration: 'none',
+              }}
             >
-              <span className="relative text-xl leading-none">
-                {item.icon}
-                {item.showBadge && unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white leading-none">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
+              <div style={{
+                width: 44, height: 44,
+                background: '#7C3AED',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 20,
+                marginBottom: 2,
+                boxShadow: '0 4px 12px rgba(124,58,237,0.4)',
+                transform: 'translateY(-8px)',
+              }}>
+                {tab.icon}
+              </div>
+              <span style={{
+                fontSize: 10, color: '#7C3AED',
+                fontWeight: 600,
+                transform: 'translateY(-8px)',
+              }}>
+                {tab.label}
               </span>
-              <span className={isActive ? 'font-semibold' : ''}>{item.label}</span>
             </Link>
           );
-        })}
-      </div>
+        }
+
+        return (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            style={{
+              flex: 1, display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '10px 0',
+              textDecoration: 'none',
+              position: 'relative',
+            }}
+          >
+            <span style={{
+              fontSize: 22, marginBottom: 2,
+              position: 'relative',
+            }}>
+              {tab.icon}
+              {tab.showBadge && unreadCount > 0 && (
+                <span style={{
+                  position: 'absolute', top: -4, right: -8,
+                  background: '#EF4444', color: 'white',
+                  borderRadius: '50%', width: 16, height: 16,
+                  fontSize: 10, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </span>
+            <span style={{
+              fontSize: 10,
+              color: isActive ? '#7C3AED' : '#9CA3AF',
+              fontWeight: isActive ? 700 : 400,
+            }}>
+              {tab.label}
+            </span>
+            {isActive && (
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                width: 4, height: 4,
+                borderRadius: '50%',
+                background: '#7C3AED',
+              }} />
+            )}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
