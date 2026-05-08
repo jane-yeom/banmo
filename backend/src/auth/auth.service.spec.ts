@@ -5,6 +5,9 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
+import axios from 'axios';
+
+jest.mock('axios');
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -23,6 +26,16 @@ describe('AuthService', () => {
     findByKakaoId: jest.fn(),
     createEmailUser: jest.fn(),
     createKakaoUser: jest.fn(),
+  };
+
+  const mockKakaoUser = {
+    id: 'kakao-uuid-1',
+    kakaoId: '12345678',
+    email: 'kakao@kakao.com',
+    nickname: '카카오유저',
+    profileImage: null,
+    role: 'USER',
+    isBanned: false,
   };
 
   const mockJwtService = {
@@ -135,6 +148,99 @@ describe('AuthService', () => {
         }),
       );
       expect(result.accessToken).toBe('mock.jwt.token');
+    });
+  });
+
+  // ─── 카카오 로그인 테스트 ──────────────────────────────────────────
+  describe('카카오 로그인 (isNewUser 검증)', () => {
+    const kakaoUserInfoResponse = {
+      data: {
+        id: 12345678,
+        kakao_account: {
+          email: 'kakao@kakao.com',
+          profile: {
+            nickname: '카카오유저',
+            profile_image_url: null,
+          },
+        },
+      },
+    };
+
+    const kakaoTokenResponse = {
+      data: { access_token: 'kakao-access-token' },
+    };
+
+    beforeEach(() => {
+      (axios.post as jest.Mock).mockResolvedValue(kakaoTokenResponse);
+      (axios.get as jest.Mock).mockResolvedValue(kakaoUserInfoResponse);
+    });
+
+    it('신규 유저: isNewUser = true 반환', async () => {
+      mockUsersService.findByKakaoId.mockResolvedValue(null);
+      mockUsersService.createKakaoUser.mockResolvedValue(mockKakaoUser);
+
+      const result = await service.kakaoLoginWithCode('auth-code-new');
+
+      expect(result.isNewUser).toBe(true);
+      expect(mockUsersService.createKakaoUser).toHaveBeenCalledWith(
+        expect.objectContaining({ kakaoId: '12345678' }),
+      );
+    });
+
+    it('기존 유저: isNewUser = false 반환', async () => {
+      mockUsersService.findByKakaoId.mockResolvedValue(mockKakaoUser);
+
+      const result = await service.kakaoLoginWithCode('auth-code-existing');
+
+      expect(result.isNewUser).toBe(false);
+      expect(mockUsersService.createKakaoUser).not.toHaveBeenCalled();
+    });
+
+    it('신규 유저: JWT 발급 및 user 반환', async () => {
+      mockUsersService.findByKakaoId.mockResolvedValue(null);
+      mockUsersService.createKakaoUser.mockResolvedValue(mockKakaoUser);
+
+      const result = await service.kakaoLoginWithCode('auth-code-jwt');
+
+      expect(result.accessToken).toBe('mock.jwt.token');
+      expect(result.user).toMatchObject({ kakaoId: '12345678' });
+    });
+
+    it('기존 유저: JWT 발급 및 기존 user 반환', async () => {
+      mockUsersService.findByKakaoId.mockResolvedValue(mockKakaoUser);
+
+      const result = await service.kakaoLoginWithCode('auth-code-existing-jwt');
+
+      expect(result.accessToken).toBe('mock.jwt.token');
+      expect(result.user.id).toBe('kakao-uuid-1');
+    });
+
+    it('카카오 API 오류시 UnauthorizedException 발생', async () => {
+      (axios.post as jest.Mock).mockRejectedValue(
+        Object.assign(new Error('invalid_code'), {
+          response: { data: { error_description: 'invalid authorization code' } },
+        }),
+      );
+
+      await expect(service.kakaoLoginWithCode('bad-code')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('카카오 토큰 교환 성공 후 유저 정보 조회', async () => {
+      mockUsersService.findByKakaoId.mockResolvedValue(mockKakaoUser);
+
+      await service.kakaoLoginWithCode('valid-code');
+
+      expect(axios.post).toHaveBeenCalledWith(
+        'https://kauth.kakao.com/oauth/token',
+        expect.any(String),
+        expect.objectContaining({ headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }),
+      );
+      expect(axios.get).toHaveBeenCalledWith(
+        'https://kapi.kakao.com/v2/user/me',
+        expect.objectContaining({ headers: { Authorization: 'Bearer kakao-access-token' } }),
+      );
     });
   });
 });
