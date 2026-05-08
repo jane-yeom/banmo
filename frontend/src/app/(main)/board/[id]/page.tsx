@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import BackButton from '@/components/common/BackButton';
 import Image from 'next/image';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -160,6 +161,11 @@ export default function BoardDetailPage() {
       )}
 
       <div className="mx-auto max-w-3xl px-4 py-8">
+        {/* 뒤로가기 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, padding: '8px 0' }}>
+          <BackButton />
+        </div>
+
         {/* 상단 배지 + 제목 */}
         <div className="mb-4">
           <div className="mb-2 flex items-center gap-2">

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, DragEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import BackButton from '@/components/common/BackButton';
 import { useForm } from 'react-hook-form';
 import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
@@ -267,15 +268,9 @@ export default function ProfileEditPage() {
     <>
     <ToastContainer toasts={toasts} dismiss={dismiss} />
     <div className="mx-auto max-w-xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <button
-          onClick={() => router.back()}
-          className="text-sm text-gray-500 hover:text-gray-700"
-        >
-          ← 뒤로
-        </button>
-        <h1 className="text-lg font-bold text-gray-900">프로필 편집</h1>
-        <div className="w-10" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, padding: '8px 0' }}>
+        <BackButton />
+        <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>프로필 편집</h1>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import BackButton from '@/components/common/BackButton';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { usePost } from '@/hooks/usePosts';
@@ -203,6 +204,11 @@ export default function JobDetailPage() {
       */}
 
       <div className="mx-auto max-w-3xl px-4 py-8">
+        {/* 뒤로가기 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: '8px 0' }}>
+          <BackButton />
+        </div>
+
         {/* 카테고리 + 상태 */}
         <div className="flex items-center gap-2 mb-3">
           <span className="rounded-full bg-violet-100 px-3 py-1 text-sm font-medium text-violet-700">

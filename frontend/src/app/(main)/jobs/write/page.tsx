@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import BackButton from '@/components/common/BackButton';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -168,15 +169,18 @@ export default function JobWritePage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">공고 작성</h1>
-        <button
-          type="button"
-          onClick={saveDraft}
-          className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-50 transition-colors"
-        >
-          {draftSaved ? '✓ 저장됨' : '임시저장'}
-        </button>
+      <div className="mb-6">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, padding: '8px 0' }}>
+          <BackButton href="/jobs" />
+          <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>공고 작성</h1>
+          <button
+            type="button"
+            onClick={saveDraft}
+            className="ml-auto rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-50 transition-colors"
+          >
+            {draftSaved ? '✓ 저장됨' : '임시저장'}
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

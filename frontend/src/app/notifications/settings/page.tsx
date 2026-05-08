@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import BackButton from '@/components/common/BackButton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/axios';
@@ -64,14 +65,11 @@ export default function NotificationSettingsPage() {
   return (
     <div className="mx-auto max-w-lg px-4 py-8">
       <div className="mb-6">
-        <button
-          onClick={() => router.back()}
-          className="mb-4 text-sm text-gray-400 hover:text-gray-600"
-        >
-          ← 뒤로
-        </button>
-        <h1 className="text-2xl font-bold text-gray-900">알림 설정</h1>
-        <p className="mt-1 text-sm text-gray-500">받고 싶은 알림을 선택하세요</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, padding: '8px 0' }}>
+          <BackButton />
+          <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>알림 설정</h1>
+        </div>
+        <p className="text-sm text-gray-500">받고 싶은 알림을 선택하세요</p>
       </div>
 
       {isLoading ? (

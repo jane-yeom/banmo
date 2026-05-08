@@ -89,7 +89,7 @@ function BoardContent() {
             className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-teal-400 focus:outline-none"
           />
           <Link
-            href="/board/write"
+            href={`/board/write?type=${tab}`}
             className="flex-shrink-0 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-teal-700 transition-colors"
           >
             + 글쓰기

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import BackButton from '@/components/common/BackButton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/axios';
@@ -72,14 +73,11 @@ export default function KeywordsPage() {
   return (
     <div className="mx-auto max-w-lg px-4 py-8">
       <div className="mb-6">
-        <button
-          onClick={() => router.back()}
-          className="mb-4 text-sm text-gray-400 hover:text-gray-600"
-        >
-          ← 뒤로
-        </button>
-        <h1 className="text-2xl font-bold text-gray-900">키워드 알림</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, padding: '8px 0' }}>
+          <BackButton />
+          <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>키워드 알림</h1>
+        </div>
+        <p className="text-sm text-gray-500">
           원하는 키워드를 등록하면 관련 공고가 올라올 때 알려드려요
         </p>
       </div>

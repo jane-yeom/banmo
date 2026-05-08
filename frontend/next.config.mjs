@@ -8,6 +8,7 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.railway.app' },
       { protocol: 'https', hostname: 'pub-0f7951488c3d49b498e60ef2261a7fbe.r2.dev' },
       { protocol: 'https', hostname: '*.r2.dev' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
   },
   env: {

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import BackButton from '@/components/common/BackButton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/axios';
@@ -44,16 +45,11 @@ export default function FavoritesPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-6 flex items-center gap-3">
-        <button
-          onClick={() => router.back()}
-          className="text-sm text-gray-400 hover:text-gray-600"
-        >
-          ←
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">찜한 공고</h1>
-          <p className="mt-0.5 text-sm text-gray-400">{favorites.length}개</p>
+      <div className="mb-6">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4, padding: '8px 0' }}>
+          <BackButton />
+          <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>찜한 공고</h1>
+          <span className="text-sm text-gray-400">{favorites.length}개</span>
         </div>
       </div>
 

@@ -409,8 +409,146 @@ async function seed() {
     },
   ];
 
+  // 추가 공고 15개 (구인구직 5, 중고악기 5, 공연홍보 5)
+  const postsDataExtra: Partial<Post>[] = [
+    // 구인구직 5개
+    {
+      title: '성악 레슨 피아노 반주자 구함 (주 3회)',
+      content: '성악 레슨실 반주자를 구합니다. 주 3회(화/목/토) 오전 10시~1시. 레퍼토리: 이탈리아 가곡, 독일 가곡, 한국 가곡. 경력 3년 이상 우대합니다.',
+      category: PostCategory.JOB_OFFER, instruments: ['피아노'],
+      region: '서울 서초구', payType: PayType.HOURLY, payMin: 25000,
+      author: u3, authorId: u3.id,
+    },
+    {
+      title: '첼로 전공자 반주 경험 있는 피아니스트 구해요',
+      content: '첼로 레슨 반주 및 연주회 반주 가능하신 분을 구합니다. 스케줄 협의 가능하며 장기 근무 가능하신 분 우대합니다.',
+      category: PostCategory.JOB_OFFER, instruments: ['피아노'],
+      region: '경기 성남시', payType: PayType.PER_SESSION, payMin: 80000,
+      author: u4, authorId: u4.id,
+    },
+    {
+      title: '플루트 독주회 반주자 모집합니다',
+      content: '6개월 후 플루트 독주회를 준비 중입니다. 모차르트, 프랑크 작품 예정. 연습 주 1~2회, 연주회 2회 예정입니다.',
+      category: PostCategory.JOB_OFFER, instruments: ['피아노'],
+      region: '부산 수영구', payType: PayType.PER_SESSION, payMin: 100000,
+      author: u5, authorId: u5.id,
+    },
+    {
+      title: '음대 피아노 전공자 레슨 구직합니다',
+      content: '서울 소재 음대 피아노과 졸업했습니다. 초등~고등 레슨 가능하며 콩쿠르 준비 지도 경험 있습니다. 강남/서초 지역 선호합니다.',
+      category: PostCategory.LESSON_SEEK, instruments: ['피아노'],
+      region: '서울 강남구', payType: PayType.HOURLY, payMin: 40000,
+      author: u1, authorId: u1.id,
+    },
+    {
+      title: '방과후 학교 바이올린 강사 구인',
+      content: '초등학교 방과후 바이올린 수업 강사를 구합니다. 월~금 오후 1시~4시. 학교 내 악기 구비되어 있습니다.',
+      category: PostCategory.AFTERSCHOOL, instruments: ['바이올린'],
+      region: '경기 수원시', payType: PayType.HOURLY, payMin: 20000,
+      author: u2, authorId: u2.id,
+    },
+
+    // 중고악기 5개
+    {
+      title: '스타인웨이 업라이트 피아노 K132 판매',
+      content: '2015년 구입한 스타인웨이 업라이트 피아노 판매합니다. 이사로 인한 판매이며 상태 매우 양호합니다. 조율 6개월 전 완료. 직거래만 가능합니다.',
+      category: PostCategory.TRADE_INSTRUMENT, instruments: ['피아노'],
+      region: '서울 강남구', payType: PayType.PER_SESSION, payMin: 8000000, payMax: 10000000,
+      imageUrls: [
+        'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=800',
+        'https://images.unsplash.com/photo-1552422535-c45813c61732?w=800',
+      ],
+      author: u1, authorId: u1.id,
+    },
+    {
+      title: '야마하 바이올린 V20G 4/4 판매',
+      content: '야마하 입문~중급 바이올린 판매합니다. 활, 케이스, 숄더레스트 포함. 2년 사용했으며 관리 잘 되어 있습니다.',
+      category: PostCategory.TRADE_INSTRUMENT, instruments: ['바이올린'],
+      region: '서울 마포구', payType: PayType.PER_SESSION, payMin: 350000, payMax: 400000,
+      imageUrls: [
+        'https://images.unsplash.com/photo-1612225330812-01a9c6b355ec?w=800',
+      ],
+      author: u2, authorId: u2.id,
+    },
+    {
+      title: '첼로 4/4 중급용 판매합니다',
+      content: '중급 수준의 첼로 판매합니다. 활 2개, 하드케이스 포함. 음색 매우 좋습니다. 직거래 또는 안전결제 가능합니다.',
+      category: PostCategory.TRADE_INSTRUMENT, instruments: ['첼로'],
+      region: '경기 성남시', payType: PayType.PER_SESSION, payMin: 800000, payMax: 1000000,
+      imageUrls: [
+        'https://images.unsplash.com/photo-1465821185615-20b3c2fbf41b?w=800',
+      ],
+      author: u3, authorId: u3.id,
+    },
+    {
+      title: '뮤라이트 플루트 MU-211 판매',
+      content: '입문용 플루트 판매합니다. 1년 사용. 케이스, 클리닝 도구 포함. 작은 흠집 있으나 연주에 지장 없습니다.',
+      category: PostCategory.TRADE_INSTRUMENT, instruments: ['플루트'],
+      region: '부산 해운대구', payType: PayType.PER_SESSION, payMin: 180000, payMax: 220000,
+      imageUrls: [
+        'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800',
+      ],
+      author: u4, authorId: u4.id,
+    },
+    {
+      title: '클래식 기타 라미레즈 스튜디오 판매',
+      content: '스페인 명품 라미레즈 스튜디오 기타 판매합니다. 음색 훌륭하며 상태 양호합니다. 하드케이스 포함. 대구 직거래 선호합니다.',
+      category: PostCategory.TRADE_INSTRUMENT, instruments: ['기타'],
+      region: '대구 중구', payType: PayType.PER_SESSION, payMin: 1200000, payMax: 1500000,
+      imageUrls: [
+        'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=800',
+      ],
+      author: u5, authorId: u5.id,
+    },
+
+    // 공연홍보 5개
+    {
+      title: '5월 봄 피아노 독주회 - 김피아노',
+      content: '봄을 맞이하여 피아노 독주회를 개최합니다. 쇼팽 발라드 1번, 리스트 소나타 등을 연주합니다. 일시: 2026년 5월 20일 오후 7시 30분. 장소: 예술의전당 리사이틀홀. 입장권: 20,000원',
+      category: PostCategory.PROMO_CONCERT, instruments: ['피아노'],
+      region: '서울 서초구', payType: PayType.NEGOTIABLE, payMin: 0,
+      imageUrls: [
+        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800',
+      ],
+      author: u1, authorId: u1.id,
+    },
+    {
+      title: '현악 4중주 정기연주회 - 봄의 소리',
+      content: '현악 4중주 앙상블의 정기연주회입니다. 하이든, 베토벤 현악 4중주를 연주합니다. 일시: 2026년 5월 25일. 장소: 세종문화회관 소극장. 무료 입장',
+      category: PostCategory.PROMO_CONCERT, instruments: ['바이올린', '비올라', '첼로'],
+      region: '서울 종로구', payType: PayType.NEGOTIABLE, payMin: 0,
+      author: u2, authorId: u2.id,
+    },
+    {
+      title: '플루트와 함께하는 봄밤 - 듀오 리사이틀',
+      content: '플루트와 피아노가 함께하는 아름다운 저녁입니다. 모차르트 플루트 소나타, 풀랑크 플루트 소나타 등을 연주합니다. 일시: 2026년 6월 1일 오후 6시. 입장권: 10,000원',
+      category: PostCategory.PROMO_CONCERT, instruments: ['플루트', '피아노'],
+      region: '부산 수영구', payType: PayType.NEGOTIABLE, payMin: 0,
+      author: u4, authorId: u4.id,
+    },
+    {
+      title: '강남 그랜드 피아노 연습실 대여',
+      content: '스타인웨이 그랜드 피아노 연습실 대여합니다. 방음 완벽, 냉난방 완비. 시간당 15,000원. 월정액 할인 가능합니다. 예약 후 이용 가능합니다.',
+      category: PostCategory.PROMO_SPACE, instruments: ['피아노'],
+      region: '서울 강남구', payType: PayType.HOURLY, payMin: 15000,
+      author: u3, authorId: u3.id,
+    },
+    {
+      title: '서초동 소규모 공연장 대여',
+      content: '50석 규모 소규모 공연장 대여합니다. 스타인웨이 그랜드 피아노, 조명, 음향 완비. 독주회, 실내악 연주회에 적합합니다. 하루 대여: 50만원~',
+      category: PostCategory.PROMO_SPACE, instruments: ['피아노'],
+      region: '서울 서초구', payType: PayType.PER_SESSION, payMin: 500000,
+      author: u5, authorId: u5.id,
+    },
+  ];
+
   let postCount = 0;
   for (const p of postsData) {
+    const post = postRepo.create(p as Partial<Post>);
+    await postRepo.save(post);
+    postCount++;
+  }
+  for (const p of postsDataExtra) {
     const post = postRepo.create(p as Partial<Post>);
     await postRepo.save(post);
     postCount++;
@@ -477,6 +615,70 @@ async function seed() {
       type: BoardType.ANONYMOUS, isAnonymous: true,
       title: '반주비 안 주는 경우 어떻게 하셨나요',
       content: '연주회 끝나고 반주비 안 주시는 분 만났어요. 연락도 안 받으시고... 법적으로 어떻게 해야 할지 모르겠어요. 비슷한 경험 있으신 분 계신가요?',
+      author: u5, authorId: u5.id,
+    },
+
+    // FREE 추가 5개
+    {
+      type: BoardType.FREE,
+      title: '피아노 반주 처음 해봤는데 너무 재밌어요!',
+      content: '오늘 처음으로 성악 반주를 해봤는데 솔로 연주랑 느낌이 완전 달라서 너무 좋았어요. 같이 음악 만들어가는 느낌? 반주자 하길 잘한 것 같아요 ㅎㅎ',
+      author: u2, authorId: u2.id,
+    },
+    {
+      type: BoardType.FREE,
+      title: '레슨비 vs 반주비 어떻게 책정하세요?',
+      content: '선생님들 레슨비랑 반주비 따로 책정하시나요? 저는 레슨할 때 반주도 같이 하는데 통합으로 받아야 할지 따로 받아야 할지 고민이에요.',
+      author: u1, authorId: u1.id,
+    },
+    {
+      type: BoardType.FREE,
+      title: '연주회 후기 - 브람스 소나타',
+      content: '지난주 연주회에서 브람스 바이올린 소나타 1번 반주했어요! 연습 때랑 실제 공연이 많이 다르더라고요. 긴장했지만 잘 마무리된 것 같아서 뿌듯합니다.',
+      author: u3, authorId: u3.id,
+    },
+    {
+      type: BoardType.FREE,
+      title: '악보 PDF로 받아도 되나요?',
+      content: '반주자분들 악보를 PDF로 받으시나요? 출력해서 드려야 하는지 아니면 태블릿으로 보셔도 되는지 궁금해요.',
+      author: u4, authorId: u4.id,
+    },
+    {
+      type: BoardType.FREE,
+      title: '방과후 강사 페이 현실은 어떤가요?',
+      content: '방과후 음악 강사 하시는 분들 실제 페이가 어느 정도 되는지 궁금해요. 공고마다 천차만별이라서요.',
+      author: u5, authorId: u5.id,
+    },
+
+    // ANONYMOUS 추가 5개
+    {
+      type: BoardType.ANONYMOUS, isAnonymous: true,
+      title: '반주 거절하는 법을 모르겠어요',
+      content: '페이가 너무 낮거나 일정이 안 맞을 때 거절하는 게 너무 어려워요. 특히 지인이 부탁하면 더 힘들고... 어떻게 하세요?',
+      author: u1, authorId: u1.id,
+    },
+    {
+      type: BoardType.ANONYMOUS, isAnonymous: true,
+      title: '연습 횟수 협의 안 하고 계속 추가하는 분',
+      content: '처음에 연습 3회라고 했는데 자꾸 한 번만 더 하자고 하세요. 이런 경우 어떻게 대응하시나요?',
+      author: u2, authorId: u2.id,
+    },
+    {
+      type: BoardType.ANONYMOUS, isAnonymous: true,
+      title: 'SNS에 반주자 실명 올리는 거 괜찮은 건가요',
+      content: '연주자분이 연주회 후기에 제 실명이랑 사진을 동의 없이 올리셨어요. 불편한데 말하기가 어렵네요.',
+      author: u3, authorId: u3.id,
+    },
+    {
+      type: BoardType.ANONYMOUS, isAnonymous: true,
+      title: '콩쿠르 당일 반주자가 연락두절됐어요',
+      content: '오늘 콩쿠르인데 반주자분이 갑자기 연락이 안 돼요 ㅠㅠ 어떻게 해야 할까요',
+      author: u4, authorId: u4.id,
+    },
+    {
+      type: BoardType.ANONYMOUS, isAnonymous: true,
+      title: '반주료 깎아달라는 요청 받았어요',
+      content: '견적 드렸더니 너무 비싸다고 깎아달라고 하시네요. 이미 최소한으로 드렸는데... 다들 이런 경험 있으신가요?',
       author: u5, authorId: u5.id,
     },
 

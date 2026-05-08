@@ -180,7 +180,7 @@ export default function ChatRoomPage() {
       <div className="flex-shrink-0 border-b border-gray-100 bg-white px-4 py-3 shadow-sm">
         <div className="mx-auto flex max-w-3xl items-center gap-3">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/chat')}
             className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 transition-colors"
             aria-label="뒤로"
           >

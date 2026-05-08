@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import BackButton from '@/components/common/BackButton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
@@ -90,10 +91,9 @@ export default function SupportContactPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
-      <div className="bg-white border-b border-gray-100 px-4 py-4">
+      <div className="bg-white border-b border-gray-100 px-4 py-2">
         <div className="mx-auto max-w-2xl flex items-center gap-2">
-          <Link href="/support" className="text-gray-400 hover:text-gray-600 text-sm">고객센터</Link>
-          <span className="text-gray-300">/</span>
+          <BackButton href="/support" />
           <span className="text-sm font-medium text-gray-700">문의하기</span>
         </div>
       </div>
