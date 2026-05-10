@@ -21,7 +21,7 @@ function PromoCard({ post }: { post: Post }) {
     <Link href={`/promo/${post.id}`}>
       <div className={`group relative flex flex-col rounded-2xl bg-white shadow-sm border overflow-hidden transition-shadow hover:shadow-md ${isPremium ? 'border-amber-300' : 'border-gray-100'}`}>
         {/* 썸네일 */}
-        <div className="relative h-44 bg-gradient-to-br from-pink-100 to-purple-100 overflow-hidden">
+        <div className="relative h-44 bg-gradient-to-br from-pink-50 to-pink-100 overflow-hidden">
           {firstImage ? (
             <Image src={firstImage} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
           ) : (
@@ -43,7 +43,7 @@ function PromoCard({ post }: { post: Post }) {
           <div className="flex items-center justify-between text-xs text-gray-400 mt-1">
             <span>📍 {post.region ?? '지역 미정'}</span>
             {post.payMin > 0 && (
-              <span className="font-medium text-violet-700">
+              <span className="font-medium text-pink-700">
                 {post.payType === 'NEGOTIABLE' ? '협의' : `${(post.payMin / 10000).toFixed(0)}만원~`}
               </span>
             )}

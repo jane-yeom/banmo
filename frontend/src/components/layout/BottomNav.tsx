@@ -52,20 +52,20 @@ export default function BottomNav() {
             >
               <div style={{
                 width: 44, height: 44,
-                background: '#7C3AED',
+                background: '#E8789A',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 20,
                 marginBottom: 2,
-                boxShadow: '0 4px 12px rgba(124,58,237,0.4)',
+                boxShadow: '0 4px 12px rgba(232,120,154,0.4)',
                 transform: 'translateY(-8px)',
               }}>
                 {tab.icon}
               </div>
               <span style={{
-                fontSize: 10, color: '#7C3AED',
+                fontSize: 10, color: '#E8789A',
                 fontWeight: 600,
                 transform: 'translateY(-8px)',
               }}>
@@ -108,7 +108,7 @@ export default function BottomNav() {
             </span>
             <span style={{
               fontSize: 10,
-              color: isActive ? '#7C3AED' : '#9CA3AF',
+              color: isActive ? '#E8789A' : '#9CA3AF',
               fontWeight: isActive ? 700 : 400,
             }}>
               {tab.label}
@@ -119,7 +119,7 @@ export default function BottomNav() {
                 bottom: 0,
                 width: 4, height: 4,
                 borderRadius: '50%',
-                background: '#7C3AED',
+                background: '#E8789A',
               }} />
             )}
           </Link>

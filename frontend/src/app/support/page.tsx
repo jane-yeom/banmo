@@ -8,9 +8,9 @@ const MENU_CARDS = [
     title: 'QnA',
     desc: '자주 묻는 질문을 확인하세요',
     href: '/support/qna',
-    color: 'from-violet-50 to-violet-100',
-    border: 'border-violet-200',
-    textColor: 'text-violet-700',
+    color: 'from-pink-50 to-pink-100',
+    border: 'border-pink-200',
+    textColor: 'text-pink-700',
   },
   {
     icon: '✉️',
@@ -36,12 +36,12 @@ export default function SupportPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 상단 배너 */}
-      <div className="bg-gradient-to-br from-violet-700 to-violet-900 py-12 text-center text-white">
+      <div className="py-12 text-center text-white" style={{ background: 'linear-gradient(135deg, #E8789A, #C45C7A)' }}>
         <div className="mx-auto max-w-2xl px-4">
           <h1 className="text-3xl font-bold mb-2">고객센터</h1>
-          <p className="text-violet-200 text-base mb-6">무엇을 도와드릴까요?</p>
+          <p className="text-white/80 text-base mb-6">무엇을 도와드릴까요?</p>
           <div className="mx-auto max-w-md">
-            <div className="flex items-center rounded-full bg-white/20 backdrop-blur-sm px-5 py-3 text-sm text-violet-200">
+            <div className="flex items-center rounded-full bg-white/20 backdrop-blur-sm px-5 py-3 text-sm text-white/80">
               <svg className="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>

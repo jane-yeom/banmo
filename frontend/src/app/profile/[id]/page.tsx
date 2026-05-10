@@ -94,7 +94,7 @@ export default function ProfilePage() {
       <div className="mx-auto max-w-2xl px-4 py-8 space-y-5">
         {/* 프로필 카드 */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
-          <div className="h-24 bg-gradient-to-r from-violet-600 to-violet-800" />
+          <div className="h-24" style={{ background: 'linear-gradient(135deg, #E8789A, #C45C7A)' }} />
           <div className="px-6 pb-6">
             <div className="flex items-end justify-between -mt-10 mb-4">
               <div className="flex items-end gap-4">
@@ -107,7 +107,7 @@ export default function ProfilePage() {
                     className="rounded-full border-4 border-white object-cover shadow"
                   />
                 ) : (
-                  <div className="h-20 w-20 rounded-full border-4 border-white bg-violet-200 flex items-center justify-center text-violet-700 text-3xl font-bold shadow">
+                  <div className="h-20 w-20 rounded-full border-4 border-white bg-pink-200 flex items-center justify-center text-pink-700 text-3xl font-bold shadow">
                     {(user.nickname ?? '?')[0]}
                   </div>
                 )}
@@ -122,7 +122,7 @@ export default function ProfilePage() {
               {isMyProfile && (
                 <Link
                   href="/profile/edit"
-                  className="mt-12 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100 transition-colors"
+                  className="mt-12 rounded-lg border border-pink-200 bg-pink-50 px-3 py-1.5 text-xs font-medium text-pink-700 hover:bg-pink-100 transition-colors"
                 >
                   프로필 편집
                 </Link>
@@ -145,7 +145,7 @@ export default function ProfilePage() {
                 {instruments.map((inst) => (
                   <span
                     key={inst}
-                    className="rounded-full bg-violet-50 border border-violet-200 px-3 py-0.5 text-xs text-violet-700 font-medium"
+                    className="rounded-full bg-pink-50 border border-pink-200 px-3 py-0.5 text-xs text-pink-700 font-medium"
                   >
                     🎵 {inst}
                   </span>
@@ -184,7 +184,7 @@ export default function ProfilePage() {
                   <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="h-12 w-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
                       <svg
-                        className="h-5 w-5 text-violet-700 ml-0.5"
+                        className="h-5 w-5 text-pink-700 ml-0.5"
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >

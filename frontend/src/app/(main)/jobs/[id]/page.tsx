@@ -56,7 +56,7 @@ function ApplyModal({
           <p className="mb-6 text-sm text-gray-500">공고 작성자와 채팅방이 생성되었습니다.</p>
           <button
             onClick={onClose}
-            className="w-full rounded-xl bg-violet-700 py-3 text-sm font-semibold text-white hover:bg-violet-800"
+            className="w-full rounded-xl bg-pink-700 py-3 text-sm font-semibold text-white hover:bg-pink-800"
           >
             확인
           </button>
@@ -80,7 +80,7 @@ function ApplyModal({
           onChange={(e) => setMessage(e.target.value)}
           rows={5}
           placeholder="지원 메시지를 입력하세요. (선택사항)"
-          className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-violet-400 resize-none"
+          className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-pink-400 resize-none"
         />
         {applyMutation.isError && (
           <p className="mt-2 text-xs text-red-500">
@@ -97,7 +97,7 @@ function ApplyModal({
           <button
             onClick={() => applyMutation.mutate()}
             disabled={applyMutation.isPending}
-            className="flex-1 rounded-xl bg-violet-700 py-2.5 text-sm font-semibold text-white hover:bg-violet-800 disabled:opacity-60"
+            className="flex-1 rounded-xl bg-pink-700 py-2.5 text-sm font-semibold text-white hover:bg-pink-800 disabled:opacity-60"
           >
             {applyMutation.isPending ? '지원 중...' : '지원 완료'}
           </button>
@@ -180,7 +180,7 @@ export default function JobDetailPage() {
       <div className="flex flex-col items-center justify-center py-32 text-gray-400">
         <span className="text-5xl mb-3">😢</span>
         <p>공고를 찾을 수 없습니다.</p>
-        <Link href="/jobs" className="mt-4 text-violet-600 hover:underline">목록으로</Link>
+        <Link href="/jobs" className="mt-4 text-pink-600 hover:underline">목록으로</Link>
       </div>
     );
 
@@ -211,7 +211,7 @@ export default function JobDetailPage() {
 
         {/* 카테고리 + 상태 */}
         <div className="flex items-center gap-2 mb-3">
-          <span className="rounded-full bg-violet-100 px-3 py-1 text-sm font-medium text-violet-700">
+          <span className="rounded-full bg-pink-100 px-3 py-1 text-sm font-medium text-pink-700">
             {CATEGORY_LABEL[post.category] ?? post.category}
           </span>
           {/* TODO: 유료 기능 활성화시 주석 해제 (프리미엄 배지)
@@ -244,8 +244,8 @@ export default function JobDetailPage() {
         </div>
 
         {/* 페이 */}
-        <div className="mb-6 rounded-2xl bg-violet-50 p-5 border border-violet-100">
-          <p className="mb-2 text-xs font-semibold text-violet-500 uppercase tracking-wide">급여 조건</p>
+        <div className="mb-6 rounded-2xl bg-pink-50 p-5 border border-pink-100">
+          <p className="mb-2 text-xs font-semibold text-pink-500 uppercase tracking-wide">급여 조건</p>
           <PayBadge payType={post.payType} payMin={post.payMin} payMax={post.payMax ?? undefined} />
         </div>
 
@@ -286,7 +286,7 @@ export default function JobDetailPage() {
             />
           ) : (
             <div
-              className="flex-shrink-0 rounded-full bg-violet-200 flex items-center justify-center text-violet-700 text-xl font-bold"
+              className="flex-shrink-0 rounded-full bg-pink-200 flex items-center justify-center text-pink-700 text-xl font-bold"
               style={{ width: 52, height: 52 }}
             >
               {(post.author.nickname ?? '?')[0]}
@@ -301,7 +301,7 @@ export default function JobDetailPage() {
           </div>
           <Link
             href={`/profile/${post.author.id}`}
-            className="flex-shrink-0 text-sm text-violet-600 hover:underline"
+            className="flex-shrink-0 text-sm text-pink-600 hover:underline"
           >
             프로필 보기
           </Link>
@@ -333,7 +333,7 @@ export default function JobDetailPage() {
             <div className="flex gap-3">
               <Link
                 href={`/jobs/${id}/edit`}
-                className="flex-1 rounded-xl border-2 border-violet-700 py-3.5 text-center text-base font-semibold text-violet-700 hover:bg-violet-50 transition-colors"
+                className="flex-1 rounded-xl border-2 border-pink-700 py-3.5 text-center text-base font-semibold text-pink-700 hover:bg-pink-50 transition-colors"
               >
                 ✏️ 수정하기
               </Link>
@@ -351,7 +351,7 @@ export default function JobDetailPage() {
             <button
               onClick={handleChat}
               disabled={createRoom.isPending}
-              className="flex-1 rounded-xl bg-violet-700 py-3.5 text-base font-semibold text-white hover:bg-violet-800 transition-colors disabled:opacity-60"
+              className="flex-1 rounded-xl bg-pink-700 py-3.5 text-base font-semibold text-white hover:bg-pink-800 transition-colors disabled:opacity-60"
             >
               💬 채팅하기
             </button>
@@ -361,7 +361,7 @@ export default function JobDetailPage() {
                   if (!user) { router.push('/login'); return; }
                   setShowApply(true);
                 }}
-                className="flex-1 rounded-xl border-2 border-violet-700 py-3.5 text-base font-semibold text-violet-700 hover:bg-violet-50 transition-colors"
+                className="flex-1 rounded-xl border-2 border-pink-700 py-3.5 text-base font-semibold text-pink-700 hover:bg-pink-50 transition-colors"
               >
                 ✋ 지원하기
               </button>

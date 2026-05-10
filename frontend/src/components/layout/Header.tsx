@@ -142,8 +142,8 @@ export default function Header() {
               <Link key={item.href} href={item.href} style={{
                 padding: '8px 14px',
                 borderRadius: 8,
-                color: pathname.startsWith(item.href) ? '#7C3AED' : '#374151',
-                background: pathname.startsWith(item.href) ? '#EDE9FE' : 'transparent',
+                color: pathname.startsWith(item.href) ? '#E8789A' : '#374151',
+                background: pathname.startsWith(item.href) ? '#FFF0F4' : 'transparent',
                 textDecoration: 'none',
                 fontSize: 14,
                 fontWeight: pathname.startsWith(item.href) ? 600 : 400,
@@ -190,7 +190,7 @@ export default function Header() {
               }} className="desktop-only">
                 <div style={{
                   width: 32, height: 32, borderRadius: '50%',
-                  background: '#EDE9FE', overflow: 'hidden',
+                  background: '#FFF0F4', overflow: 'hidden',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {user?.profileImage ? (
@@ -210,7 +210,7 @@ export default function Header() {
                 style={{
                   display: 'none',
                   padding: '8px 16px',
-                  background: '#7C3AED', color: 'white',
+                  background: '#E8789A', color: 'white',
                   borderRadius: 8, textDecoration: 'none',
                   fontSize: 14, fontWeight: 600,
                 }}>
@@ -279,7 +279,7 @@ export default function Header() {
           }}>
             <div style={{
               width: 48, height: 48, borderRadius: '50%',
-              background: '#EDE9FE', overflow: 'hidden',
+              background: '#FFF0F4', overflow: 'hidden',
               flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
@@ -294,7 +294,7 @@ export default function Header() {
               <div style={{ fontWeight: 600, fontSize: 15 }}>
                 {user.nickname}
               </div>
-              <div style={{ fontSize: 12, color: '#7C3AED', marginTop: 2 }}>
+              <div style={{ fontSize: 12, color: '#E8789A', marginTop: 2 }}>
                 {user.noteGrade === 'WHOLE' ? '♩ 온음표' :
                  user.noteGrade === 'HALF' ? '♩ 2분음표' :
                  user.noteGrade === 'QUARTER' ? '♩ 4분음표' :
@@ -316,13 +316,13 @@ export default function Header() {
           {navItems.map(item => (
             <Link key={item.href} href={item.href} style={{
               display: 'block', padding: '12px 20px',
-              color: pathname.startsWith(item.href) ? '#7C3AED' : '#374151',
-              background: pathname.startsWith(item.href) ? '#EDE9FE' : 'transparent',
+              color: pathname.startsWith(item.href) ? '#E8789A' : '#374151',
+              background: pathname.startsWith(item.href) ? '#FFF0F4' : 'transparent',
               textDecoration: 'none',
               fontSize: 15,
               fontWeight: pathname.startsWith(item.href) ? 600 : 400,
               borderLeft: pathname.startsWith(item.href)
-                ? '3px solid #7C3AED' : '3px solid transparent',
+                ? '3px solid #E8789A' : '3px solid transparent',
             }}>
               {item.label}
             </Link>
@@ -375,7 +375,7 @@ export default function Header() {
           ) : (
             <Link href="/login" style={{
               display: 'block', textAlign: 'center',
-              padding: '12px', background: '#7C3AED',
+              padding: '12px', background: '#E8789A',
               color: 'white', borderRadius: 8,
               fontSize: 15, fontWeight: 600,
               textDecoration: 'none',

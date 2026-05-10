@@ -13,7 +13,7 @@ function HeroBanner() {
 
   const banners = [
     {
-      bg: 'linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%)',
+      bg: 'linear-gradient(135deg, #E8789A 0%, #C45C7A 100%)',
       emoji: '🎹',
       title: '반주자를 찾고 계신가요?',
       sub: '피아노, 바이올린, 첼로 등\n다양한 반주자를 만나보세요',
@@ -21,7 +21,7 @@ function HeroBanner() {
       href: '/jobs?category=JOB_OFFER',
     },
     {
-      bg: 'linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%)',
+      bg: 'linear-gradient(135deg, #F09AB5, #E8789A)',
       emoji: '🎵',
       title: '반주 활동을 원하시나요?',
       sub: '나에게 맞는 연주 기회를\n찾아보세요',
@@ -29,7 +29,7 @@ function HeroBanner() {
       href: '/jobs?category=JOB_SEEK',
     },
     {
-      bg: 'linear-gradient(135deg, #EC4899 0%, #BE185D 100%)',
+      bg: 'linear-gradient(135deg, #C45C7A, #A84060)',
       emoji: '🎭',
       title: '공연을 홍보해보세요',
       sub: '연주회, 공연 소식을\n많은 분들께 알려보세요',
@@ -194,7 +194,7 @@ function SectionCard({ post }: { post: any }) {
           <div style={{ flex: 1 }}>
             <span style={{
               display: 'inline-block',
-              background: '#EDE9FE', color: '#7C3AED',
+              background: '#FFF0F4', color: '#E8789A',
               fontSize: 11, fontWeight: 600,
               padding: '3px 8px', borderRadius: 6,
               marginBottom: 8,
@@ -218,7 +218,7 @@ function SectionCard({ post }: { post: any }) {
           </div>
           <div style={{
             fontSize: 14, fontWeight: 700,
-            color: '#7C3AED', marginLeft: 12,
+            color: '#E8789A', marginLeft: 12,
             flexShrink: 0,
           }}>
             {payText}
@@ -245,7 +245,7 @@ function SectionTitle({ icon, title, href }: { icon: string; title: string; href
         {title}
       </h2>
       <Link href={href} style={{
-        fontSize: 13, color: '#7C3AED',
+        fontSize: 13, color: '#E8789A',
         textDecoration: 'none', fontWeight: 500,
       }}>
         더보기 →

@@ -73,7 +73,7 @@ export default function JobsPage() {
                 border: 'none',
                 cursor: 'pointer',
                 flexShrink: 0,
-                background: category === tab.value ? '#7C3AED' : '#F3F4F6',
+                background: category === tab.value ? '#E8789A' : '#F3F4F6',
                 color: category === tab.value ? 'white' : '#4B5563',
                 transition: 'all 0.15s',
               }}
@@ -102,8 +102,8 @@ export default function JobsPage() {
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '7px 14px', borderRadius: 8,
                 border: '1px solid #E5E7EB',
-                background: activeFilters > 0 ? '#EDE9FE' : 'white',
-                color: activeFilters > 0 ? '#7C3AED' : '#374151',
+                background: activeFilters > 0 ? '#FFF0F4' : 'white',
+                color: activeFilters > 0 ? '#E8789A' : '#374151',
                 fontSize: 13, fontWeight: 500, cursor: 'pointer',
               }}
             >
@@ -113,7 +113,7 @@ export default function JobsPage() {
               href="/jobs/write"
               style={{
                 padding: '7px 14px', borderRadius: 8,
-                background: '#7C3AED', color: 'white',
+                background: '#E8789A', color: 'white',
                 fontSize: 13, fontWeight: 600,
                 textDecoration: 'none',
               }}
@@ -141,8 +141,8 @@ export default function JobsPage() {
                     style={{
                       borderRadius: 99, padding: '5px 12px',
                       fontSize: 12, cursor: 'pointer', border: '1px solid',
-                      borderColor: instrument === inst ? '#7C3AED' : '#E5E7EB',
-                      background: instrument === inst ? '#7C3AED' : 'white',
+                      borderColor: instrument === inst ? '#E8789A' : '#E5E7EB',
+                      background: instrument === inst ? '#E8789A' : 'white',
                       color: instrument === inst ? 'white' : '#6B7280',
                     }}
                   >
@@ -179,7 +179,7 @@ export default function JobsPage() {
                 type="range" min={0} max={500000} step={10000}
                 value={payMax}
                 onChange={(e) => setPayMax(Number(e.target.value))}
-                style={{ width: '100%', accentColor: '#7C3AED' }}
+                style={{ width: '100%', accentColor: '#E8789A' }}
               />
             </div>
           </div>

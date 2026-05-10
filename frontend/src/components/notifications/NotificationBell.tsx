@@ -36,7 +36,7 @@ function NotificationItem({ notification, onClose }: { notification: AppNotifica
     <button
       onClick={handleClick}
       className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 ${
-        !notification.isRead ? 'bg-violet-50' : ''
+        !notification.isRead ? 'bg-pink-50' : ''
       }`}
     >
       <span className="flex-shrink-0 text-xl leading-none mt-0.5">{icon}</span>
@@ -52,7 +52,7 @@ function NotificationItem({ notification, onClose }: { notification: AppNotifica
         </p>
       </div>
       {!notification.isRead && (
-        <span className="flex-shrink-0 mt-1.5 h-2 w-2 rounded-full bg-violet-600" />
+        <span className="flex-shrink-0 mt-1.5 h-2 w-2 rounded-full bg-pink-600" />
       )}
     </button>
   );
@@ -93,7 +93,7 @@ export default function NotificationBell() {
       {/* 벨 아이콘 버튼 */}
       <button
         onClick={handleOpen}
-        className="relative p-1.5 text-gray-500 hover:text-violet-700 transition-colors"
+        className="relative p-1.5 text-gray-500 hover:text-pink-700 transition-colors"
         aria-label="알림"
       >
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
