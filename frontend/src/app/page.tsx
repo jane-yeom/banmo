@@ -321,14 +321,23 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const JOB_CATS = 'JOB_OFFER,JOB_SEEK,LESSON_OFFER,LESSON_SEEK,PERFORMANCE,AFTERSCHOOL';
+        const PROMO_CATS = 'PROMO_CONCERT,PROMO_SPACE';
+        const TRADE_CATS = 'TRADE_INSTRUMENT,TRADE_LESSON,TRADE_SPACE,TRADE_TICKET';
+
         const [jobs, promo, trade] = await Promise.all([
-          api.get('/posts?limit=3&status=ACTIVE').catch(() => ({ data: { data: [] } })),
-          api.get('/posts?category=PROMO_CONCERT&limit=3').catch(() => ({ data: { data: [] } })),
-          api.get('/posts?category=TRADE_INSTRUMENT&limit=3').catch(() => ({ data: { data: [] } })),
+          api.get(`/posts?limit=3&categories=${JOB_CATS}`).catch(() => ({ data: { items: [] } })),
+          api.get(`/posts?limit=3&categories=${PROMO_CATS}`).catch(() => ({ data: { items: [] } })),
+          api.get(`/posts?limit=3&categories=${TRADE_CATS}`).catch(() => ({ data: { items: [] } })),
         ]);
-        setJobPosts(jobs.data?.items || jobs.data?.data || jobs.data?.posts || []);
-        setPromoPosts(promo.data?.items || promo.data?.data || promo.data?.posts || []);
-        setTradePosts(trade.data?.items || trade.data?.data || trade.data?.posts || []);
+
+        const extract = (res: any) =>
+          res.data?.items || res.data?.data || res.data?.posts ||
+          (Array.isArray(res.data) ? res.data : []);
+
+        setJobPosts(extract(jobs));
+        setPromoPosts(extract(promo));
+        setTradePosts(extract(trade));
       } catch (e) {
         console.error('홈 데이터 로딩 실패:', e);
       } finally {

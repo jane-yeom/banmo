@@ -121,6 +121,10 @@ export class PostFilterDto {
 
   @IsOptional()
   @IsString()
+  categories?: string;
+
+  @IsOptional()
+  @IsString()
   instrument?: string;
 
   @IsOptional()

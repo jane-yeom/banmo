@@ -53,7 +53,7 @@ export class PostsService {
   }
 
   async findAll(filter: PostFilterDto): Promise<{ items: Post[]; total: number }> {
-    const { authorId, category, instrument, region, payMin, payMax, page = 1, limit = 20 } = filter;
+    const { authorId, category, categories, instrument, region, payMin, payMax, page = 1, limit = 20 } = filter;
 
     const qb = this.postsRepository
       .createQueryBuilder('post')
@@ -65,7 +65,14 @@ export class PostsService {
       qb.where('post.status = :status', { status: PostStatus.ACTIVE });
     }
 
-    if (category) qb.andWhere('post.category = :category', { category });
+    if (categories) {
+      const cats = categories.split(',').map((c) => c.trim()).filter(Boolean);
+      if (cats.length > 0) {
+        qb.andWhere('post.category IN (:...cats)', { cats });
+      }
+    } else if (category) {
+      qb.andWhere('post.category = :category', { category });
+    }
     if (region) qb.andWhere('post.region ILIKE :region', { region: `%${region}%` });
     if (instrument) qb.andWhere('post.instruments ILIKE :instrument', { instrument: `%${instrument}%` });
     if (payMin !== undefined) qb.andWhere('post.payMin >= :payMin', { payMin });
