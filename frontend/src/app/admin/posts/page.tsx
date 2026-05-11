@@ -54,6 +54,14 @@ export default function AdminPostsPage() {
     mutationFn: (id: string) => apiClient.patch(`/admin/posts/${id}/show`),
     onSuccess: invalidate,
   });
+  const closeMut = useMutation({
+    mutationFn: (id: string) => apiClient.patch(`/admin/posts/${id}/close`),
+    onSuccess: invalidate,
+  });
+  const reopenMut = useMutation({
+    mutationFn: (id: string) => apiClient.patch(`/admin/posts/${id}/reopen`),
+    onSuccess: invalidate,
+  });
   const deleteMut = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/admin/posts/${id}`),
     onSuccess: () => { setDeleteModal(null); invalidate(); },
@@ -117,7 +125,7 @@ export default function AdminPostsPage() {
     {
       key: 'actions', label: '작업',
       render: (p: AdminPost) => (
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           {p.status !== 'HIDDEN' ? (
             <button onClick={() => hideMut.mutate(p.id)}
               className="px-2 py-1 text-xs rounded bg-yellow-100 hover:bg-yellow-200 text-yellow-700">
@@ -127,6 +135,18 @@ export default function AdminPostsPage() {
             <button onClick={() => showMut.mutate(p.id)}
               className="px-2 py-1 text-xs rounded bg-green-100 hover:bg-green-200 text-green-700">
               공개
+            </button>
+          )}
+          {p.status === 'ACTIVE' && (
+            <button onClick={() => closeMut.mutate(p.id)}
+              className="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200 text-gray-600">
+              마감
+            </button>
+          )}
+          {p.status === 'CLOSED' && (
+            <button onClick={() => reopenMut.mutate(p.id)}
+              className="px-2 py-1 text-xs rounded bg-blue-100 hover:bg-blue-200 text-blue-700">
+              재등록
             </button>
           )}
           <button onClick={() => setDeleteModal(p)}

@@ -92,6 +92,9 @@ export class Post {
   @Column({ type: 'simple-array', nullable: true, default: '' })
   imageUrls: string[];
 
+  @Column({ type: 'timestamptz', nullable: true })
+  closedAt: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -173,6 +173,16 @@ export class AdminController {
     return this.adminService.showPost(id);
   }
 
+  @Patch('posts/:id/close')
+  adminClosePost(@Param('id') id: string) {
+    return this.adminService.adminClosePost(id);
+  }
+
+  @Patch('posts/:id/reopen')
+  adminReopenPost(@Param('id') id: string) {
+    return this.adminService.adminReopenPost(id);
+  }
+
   @Delete('posts/:id')
   deletePost(@Param('id') id: string) {
     return this.adminService.deletePost(id);

@@ -52,7 +52,7 @@ export default function MyPage() {
     queryKey: ['myPosts'],
     queryFn: () =>
       apiClient
-        .get<{ items: Post[]; total: number }>(`/posts?authorId=${user?.id}&limit=50`)
+        .get<{ items: Post[]; total: number }>(`/posts?authorId=${user?.id}&limit=50&status=ALL`)
         .then((r) => r.data),
     enabled: !!user && tab === 'posts',
   });
@@ -270,22 +270,70 @@ export default function MyPage() {
 }
 
 function PostRow({ post }: { post: Post }) {
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+
+  const handleClose = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!confirm('이 공고를 마감하시겠습니까?')) return;
+    setBusy(true);
+    try {
+      await apiClient.patch(`/posts/${post.id}/close`);
+      qc.invalidateQueries({ queryKey: ['myPosts'] });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleReopen = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await apiClient.patch(`/posts/${post.id}/reopen`);
+      qc.invalidateQueries({ queryKey: ['myPosts'] });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <Link href={`/jobs/${post.id}`}>
-      <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:border-indigo-200 transition-colors">
+      <div className={`rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:border-indigo-200 transition-colors ${post.status === 'CLOSED' ? 'opacity-70' : ''}`}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-900 truncate">{post.title}</p>
+            <p className={`font-semibold truncate ${post.status === 'CLOSED' ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+              {post.title}
+            </p>
             <p className="mt-0.5 text-xs text-gray-400">
               {CATEGORY_LABEL[post.category]} · {post.region ?? '지역 미정'} · 조회 {post.viewCount}
             </p>
           </div>
-          <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
-            post.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-            post.status === 'CLOSED' ? 'bg-gray-100 text-gray-500' : 'bg-yellow-100 text-yellow-700'
-          }`}>
-            {post.status === 'ACTIVE' ? '모집중' : post.status === 'CLOSED' ? '마감' : '숨김'}
-          </span>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+              post.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+              post.status === 'CLOSED' ? 'bg-gray-100 text-gray-500' : 'bg-yellow-100 text-yellow-700'
+            }`}>
+              {post.status === 'ACTIVE' ? '모집중' : post.status === 'CLOSED' ? '마감' : '숨김'}
+            </span>
+            {post.status === 'ACTIVE' && (
+              <button
+                onClick={handleClose}
+                disabled={busy}
+                className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-50"
+              >
+                마감
+              </button>
+            )}
+            {post.status === 'CLOSED' && (
+              <button
+                onClick={handleReopen}
+                disabled={busy}
+                className="rounded-lg bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 hover:bg-green-200 disabled:opacity-50"
+              >
+                재등록
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </Link>

@@ -323,6 +323,22 @@ export class AdminService {
     return this.postsRepo.save(post);
   }
 
+  async adminClosePost(id: string): Promise<Post> {
+    const post = await this.postsRepo.findOne({ where: { id } });
+    if (!post) throw new NotFoundException('공고를 찾을 수 없습니다.');
+    post.status = PostStatus.CLOSED;
+    post.closedAt = new Date();
+    return this.postsRepo.save(post);
+  }
+
+  async adminReopenPost(id: string): Promise<Post> {
+    const post = await this.postsRepo.findOne({ where: { id } });
+    if (!post) throw new NotFoundException('공고를 찾을 수 없습니다.');
+    post.status = PostStatus.ACTIVE;
+    post.closedAt = null;
+    return this.postsRepo.save(post);
+  }
+
   async deletePost(id: string): Promise<void> {
     const post = await this.postsRepo.findOne({ where: { id } });
     if (!post) throw new NotFoundException('공고를 찾을 수 없습니다.');

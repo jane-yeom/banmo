@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -39,6 +40,18 @@ export class PostsController {
   create(@CurrentUser() user: User, @Body() dto: CreatePostDto) {
     console.log('[Posts] 글 등록 요청 받음', user.id, dto);
     return this.postsService.create(user.id, dto);
+  }
+
+  @Patch(':id/close')
+  @UseGuards(AuthGuard('jwt'))
+  closePost(@Param('id') id: string, @Req() req: any) {
+    return this.postsService.closePost(id, req.user.id);
+  }
+
+  @Patch(':id/reopen')
+  @UseGuards(AuthGuard('jwt'))
+  reopenPost(@Param('id') id: string, @Req() req: any) {
+    return this.postsService.reopenPost(id, req.user.id);
   }
 
   @Patch(':id')

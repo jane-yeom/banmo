@@ -53,14 +53,20 @@ export class PostsService {
   }
 
   async findAll(filter: PostFilterDto): Promise<{ items: Post[]; total: number }> {
-    const { authorId, category, categories, instrument, region, payMin, payMax, page = 1, limit = 20 } = filter;
+    const { authorId, category, categories, instrument, region, payMin, payMax, page = 1, limit = 20, status } = filter;
 
     const qb = this.postsRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.author', 'author');
 
     if (authorId) {
-      qb.where('post.authorId = :authorId', { authorId });
+      if (status === 'ALL') {
+        qb.where('post.authorId = :authorId', { authorId });
+      } else if (status === 'CLOSED') {
+        qb.where('post.authorId = :authorId AND post.status = :status', { authorId, status: PostStatus.CLOSED });
+      } else {
+        qb.where('post.authorId = :authorId AND post.status = :status', { authorId, status: PostStatus.ACTIVE });
+      }
     } else {
       qb.where('post.status = :status', { status: PostStatus.ACTIVE });
     }
@@ -121,6 +127,27 @@ export class PostsService {
       .catch(() => {});
 
     return saved;
+  }
+
+  async closePost(postId: string, userId: string) {
+    const post = await this.postsRepository.findOne({ where: { id: postId }, relations: ['author'] });
+    if (!post) throw new NotFoundException('공고를 찾을 수 없습니다');
+    if (post.author.id !== userId) throw new ForbiddenException('본인 공고만 마감할 수 있습니다');
+    if (post.status === PostStatus.CLOSED) throw new BadRequestException('이미 마감된 공고입니다');
+    post.status = PostStatus.CLOSED;
+    post.closedAt = new Date();
+    await this.postsRepository.save(post);
+    return { success: true, message: '공고가 마감되었습니다' };
+  }
+
+  async reopenPost(postId: string, userId: string) {
+    const post = await this.postsRepository.findOne({ where: { id: postId }, relations: ['author'] });
+    if (!post) throw new NotFoundException('공고를 찾을 수 없습니다');
+    if (post.author.id !== userId) throw new ForbiddenException('본인 공고만 재등록할 수 있습니다');
+    post.status = PostStatus.ACTIVE;
+    post.closedAt = null;
+    await this.postsRepository.save(post);
+    return { success: true, message: '공고가 재등록되었습니다' };
   }
 
   async delete(userId: string, id: string): Promise<void> {

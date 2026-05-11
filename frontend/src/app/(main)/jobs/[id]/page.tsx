@@ -116,6 +116,7 @@ export default function JobDetailPage() {
   const createRoom = useCreateChatRoom();
   const qc = useQueryClient();
   const [showApply, setShowApply] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   // TODO: 유료 기능 활성화시 주석 해제
   // const [showPremium, setShowPremium] = useState(false);
 
@@ -165,6 +166,33 @@ export default function JobDetailPage() {
   const handleDelete = () => {
     if (!confirm('이 공고를 삭제하시겠습니까?')) return;
     deleteMutation.mutate();
+  };
+
+  const handleClose = async () => {
+    if (!confirm('이 공고를 마감하시겠습니까?')) return;
+    setIsClosing(true);
+    try {
+      await apiClient.patch(`/posts/${id}/close`);
+      toast.success('공고가 마감되었습니다');
+      qc.invalidateQueries({ queryKey: ['posts', id] });
+    } catch {
+      toast.error('오류가 발생했습니다');
+    } finally {
+      setIsClosing(false);
+    }
+  };
+
+  const handleReopen = async () => {
+    setIsClosing(true);
+    try {
+      await apiClient.patch(`/posts/${id}/reopen`);
+      toast.success('공고가 재등록되었습니다');
+      qc.invalidateQueries({ queryKey: ['posts', id] });
+    } catch {
+      toast.error('오류가 발생했습니다');
+    } finally {
+      setIsClosing(false);
+    }
   };
 
   if (isLoading)
@@ -349,6 +377,25 @@ export default function JobDetailPage() {
               </div>
             )}
             */}
+            {/* 마감/재등록 */}
+            {post.status === 'ACTIVE' ? (
+              <button
+                onClick={handleClose}
+                disabled={isClosing}
+                className="w-full rounded-xl border-2 border-gray-300 py-3 text-base font-semibold text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-60"
+              >
+                🔒 마감하기
+              </button>
+            ) : post.status === 'CLOSED' ? (
+              <button
+                onClick={handleReopen}
+                disabled={isClosing}
+                className="w-full rounded-xl py-3 text-base font-semibold text-white transition-colors disabled:opacity-60"
+                style={{ background: 'linear-gradient(135deg, #5AAB7A, #3d8a5e)' }}
+              >
+                🔓 재등록하기
+              </button>
+            ) : null}
             <div className="flex gap-3">
               <Link
                 href={`/jobs/${id}/edit`}
@@ -370,13 +417,13 @@ export default function JobDetailPage() {
           <div className="flex gap-3">
             <button
               onClick={handleChat}
-              disabled={createRoom.isPending}
+              disabled={createRoom.isPending || post.status === 'CLOSED'}
               className="flex-1 rounded-xl py-3.5 text-base font-semibold text-white transition-colors disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg, #7B82BE, #5A63A8)' }}
+            style={{ background: post.status === 'CLOSED' ? '#9CA3AF' : 'linear-gradient(135deg, #7B82BE, #5A63A8)' }}
             >
-              💬 채팅하기
+              {post.status === 'CLOSED' ? '마감된 공고' : '💬 채팅하기'}
             </button>
-            {canApply && (
+            {canApply && post.status !== 'CLOSED' && (
               <button
                 onClick={() => {
                   if (!user) { router.push('/login'); return; }

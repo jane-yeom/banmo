@@ -154,4 +154,8 @@ export class PostFilterDto {
   @IsInt()
   @Min(1)
   limit?: number = 20;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
 }
