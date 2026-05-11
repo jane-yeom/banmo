@@ -332,6 +332,16 @@ export default function WelcomePage() {
             </button>
           </div>
         )}
+
+        {/* 개인정보 안내 */}
+        <div style={{
+          marginTop: 24, padding: '10px 14px',
+          background: '#FFF7ED', borderRadius: 10,
+          border: '1px solid #FED7AA',
+          fontSize: 11, color: '#92400E', lineHeight: 1.6,
+        }}>
+          📌 카카오 로그인 시 수집된 원본 정보(닉네임·이메일·프로필 사진)는 서비스 약관 및 관련 법령에 따라 내부적으로 안전하게 보존됩니다. 해당 정보는 악의적 이용자 추적 및 법적 대응 목적으로만 사용되며, 외부에 공개되지 않습니다.
+        </div>
       </div>
     </div>
   );

@@ -207,6 +207,42 @@ export class AdminService {
     return { user, posts, reports, payments };
   }
 
+  async getUserTrace(id: string) {
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+
+    const boards = await this.boardsRepo.find({
+      where: { authorId: id },
+      order: { createdAt: 'DESC' },
+      take: 20,
+    });
+
+    const comments = await this.commentsRepo.find({
+      where: { authorId: id },
+      order: { createdAt: 'DESC' },
+      take: 20,
+    });
+
+    const reports = await this.reportsRepo.find({
+      where: { targetId: id, targetType: ReportTargetType.USER },
+      relations: ['reporter'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      userId: user.id,
+      kakaoId: user.kakaoId,
+      kakaoNickname: user.kakaoNickname,
+      kakaoEmail: user.kakaoEmail,
+      kakaoProfileImage: user.kakaoProfileImage,
+      displayNickname: user.nickname,
+      boards,
+      comments,
+      reports,
+      joinedAt: user.createdAt,
+    };
+  }
+
   async banUser(id: string, reason?: string): Promise<User> {
     const user = await this.usersRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');

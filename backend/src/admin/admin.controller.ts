@@ -124,6 +124,11 @@ export class AdminController {
     return this.adminService.getUserById(id);
   }
 
+  @Get('users/:id/trace')
+  getUserTrace(@Param('id') id: string) {
+    return this.adminService.getUserTrace(id);
+  }
+
   @Patch('users/:id/ban')
   banUser(@Param('id') id: string, @Body() dto: BanUserDto) {
     return this.adminService.banUser(id, dto.reason);

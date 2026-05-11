@@ -310,6 +310,10 @@ export default function ProfileEditPage() {
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5 space-y-4">
           <h2 className="text-sm font-semibold text-gray-700">기본 정보</h2>
 
+          <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5 text-xs text-amber-800">
+            📌 카카오 가입 시의 원본 정보(카카오 닉네임·이메일·프로필 사진)는 서비스 약관 및 법적 요구에 따라 내부적으로 보존되며, 악의적 이용 추적 목적으로만 사용됩니다.
+          </div>
+
           <div>
             <label className="mb-1 block text-xs font-medium text-gray-600">닉네임</label>
             <input

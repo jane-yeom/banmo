@@ -34,12 +34,26 @@ export class User {
   @Column({ unique: true, nullable: true })
   kakaoId: string;
 
+  // 카카오 원본 정보 (절대 수정 불가 - 악플러 추적용)
+  @Column({ nullable: true })
+  kakaoNickname: string;
+
+  @Column({ nullable: true })
+  kakaoEmail: string;
+
+  @Column({ nullable: true, type: 'text' })
+  kakaoProfileImage: string;
+
   @Exclude()
   @Column({ nullable: true })
   password: string;
 
   @Column({ nullable: true })
   nickname: string;
+
+  // 사용자가 설정한 반모 표시 닉네임 (프로필 편집용)
+  @Column({ nullable: true })
+  displayNickname: string;
 
   @Column({ nullable: true, unique: true })
   email: string;

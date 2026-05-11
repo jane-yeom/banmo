@@ -71,12 +71,18 @@ export class UsersService {
   async createKakaoUser(data: {
     kakaoId: string;
     nickname?: string;
+    kakaoNickname?: string;
+    kakaoEmail?: string;
+    kakaoProfileImage?: string;
     email?: string;
     profileImage?: string;
   }): Promise<User> {
     const partial: Partial<User> = {
       kakaoId: data.kakaoId,
       nickname: data.nickname ?? undefined,
+      kakaoNickname: data.kakaoNickname ?? undefined,
+      kakaoEmail: data.kakaoEmail ?? undefined,
+      kakaoProfileImage: data.kakaoProfileImage ?? undefined,
       email: data.email ?? undefined,
       profileImage: data.profileImage ?? undefined,
       loginType: LoginType.KAKAO,

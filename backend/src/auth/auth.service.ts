@@ -91,8 +91,15 @@ export class AuthService {
       let user = await this.usersService.findByKakaoId(kakaoId);
       const isNewUser = !user;
       if (!user) {
-        user = await this.usersService.createKakaoUser({ kakaoId, nickname, email, profileImage });
-      } else {
+        user = await this.usersService.createKakaoUser({
+          kakaoId,
+          nickname,
+          kakaoNickname: nickname,
+          kakaoEmail: email,
+          kakaoProfileImage: profileImage,
+          email,
+          profileImage,
+        });
       }
 
       // 4단계: JWT 발급
@@ -123,7 +130,15 @@ export class AuthService {
     let user = await this.usersService.findByKakaoId(kakaoId);
     const isNewUser = !user;
     if (!user) {
-      user = await this.usersService.createKakaoUser({ kakaoId, email, nickname, profileImage });
+      user = await this.usersService.createKakaoUser({
+        kakaoId,
+        nickname,
+        kakaoNickname: nickname,
+        kakaoEmail: email,
+        kakaoProfileImage: profileImage,
+        email,
+        profileImage,
+      });
     }
     return { accessToken: this.generateToken(user), user, isNewUser };
   }

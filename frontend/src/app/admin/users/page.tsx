@@ -31,6 +31,7 @@ export default function AdminUsersPage() {
   const [banModal, setBanModal] = useState<AdminUser | null>(null);
   const [gradeModal, setGradeModal] = useState<AdminUser | null>(null);
   const [detailModal, setDetailModal] = useState<string | null>(null);
+  const [traceModal, setTraceModal] = useState<string | null>(null);
   const [banReason, setBanReason] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('');
 
@@ -49,6 +50,15 @@ export default function AdminUsersPage() {
         ? apiClient.get(`/admin/users/${detailModal}`).then((r) => r.data)
         : null,
     enabled: !!detailModal,
+  });
+
+  const { data: traceData, isLoading: traceLoading } = useQuery({
+    queryKey: ['admin', 'users', traceModal, 'trace'],
+    queryFn: () =>
+      traceModal
+        ? apiClient.get(`/admin/users/${traceModal}/trace`).then((r) => r.data)
+        : null,
+    enabled: !!traceModal,
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['admin', 'users'] });
@@ -174,6 +184,12 @@ export default function AdminUsersPage() {
             className="px-2 py-1 text-xs rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
           >
             등급조정
+          </button>
+          <button
+            onClick={() => setTraceModal(u.id)}
+            className="px-2 py-1 text-xs rounded bg-orange-100 hover:bg-orange-200 text-orange-700"
+          >
+            추적
           </button>
           <button
             onClick={() => {
@@ -313,6 +329,90 @@ export default function AdminUsersPage() {
             </div>
           </div>
         )}
+      </AdminModal>
+
+      {/* 추적 모달 */}
+      <AdminModal
+        isOpen={!!traceModal}
+        onClose={() => setTraceModal(null)}
+        title="악플러 추적 정보"
+        maxWidth="max-w-2xl"
+      >
+        {traceLoading ? (
+          <div className="py-8 text-center text-gray-400">로딩 중...</div>
+        ) : traceData ? (
+          <div>
+            <div className="mb-4 rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+              ⚠️ 이 정보는 법적 목적의 악플러 추적용으로만 사용하며 외부 유출 금지
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {[
+                ['카카오 ID', traceData.kakaoId ?? '-'],
+                ['카카오 닉네임', traceData.kakaoNickname ?? '-'],
+                ['카카오 이메일', traceData.kakaoEmail ?? '-'],
+                ['현재 닉네임', traceData.displayNickname ?? '-'],
+                ['가입일', traceData.joinedAt ? new Date(traceData.joinedAt).toLocaleDateString('ko-KR') : '-'],
+              ].map(([label, value]) => (
+                <div key={label} className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+                  <p className="text-sm font-medium text-gray-800 break-all">{value}</p>
+                </div>
+              ))}
+              {traceData.kakaoProfileImage && (
+                <div className="bg-gray-50 rounded-lg p-3 flex flex-col gap-1">
+                  <p className="text-xs text-gray-400">카카오 프로필 사진</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={traceData.kakaoProfileImage} alt="카카오 프로필" className="h-12 w-12 rounded-full object-cover" />
+                </div>
+              )}
+            </div>
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">게시글 ({traceData.boards?.length ?? 0}건)</h3>
+              {(traceData.boards?.length ?? 0) === 0 ? (
+                <p className="text-xs text-gray-400">없음</p>
+              ) : (
+                <div className="space-y-1 max-h-28 overflow-y-auto">
+                  {traceData.boards.map((b: any) => (
+                    <div key={b.id} className="flex items-center justify-between text-xs px-2 py-1.5 bg-gray-50 rounded">
+                      <span className="text-gray-700 truncate flex-1">{b.title}</span>
+                      <span className="text-gray-400 ml-2">{new Date(b.createdAt).toLocaleDateString('ko-KR')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">댓글 ({traceData.comments?.length ?? 0}건)</h3>
+              {(traceData.comments?.length ?? 0) === 0 ? (
+                <p className="text-xs text-gray-400">없음</p>
+              ) : (
+                <div className="space-y-1 max-h-28 overflow-y-auto">
+                  {traceData.comments.map((c: any) => (
+                    <div key={c.id} className="flex items-center justify-between text-xs px-2 py-1.5 bg-gray-50 rounded">
+                      <span className="text-gray-700 truncate flex-1">{c.content}</span>
+                      <span className="text-gray-400 ml-2">{new Date(c.createdAt).toLocaleDateString('ko-KR')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">신고 내역 ({traceData.reports?.length ?? 0}건)</h3>
+              {(traceData.reports?.length ?? 0) === 0 ? (
+                <p className="text-xs text-gray-400">없음</p>
+              ) : (
+                <div className="space-y-1 max-h-28 overflow-y-auto">
+                  {traceData.reports.map((r: any) => (
+                    <div key={r.id} className="flex items-center justify-between text-xs px-2 py-1.5 bg-red-50 rounded">
+                      <span className="text-red-700">{r.reason}</span>
+                      <span className="text-gray-400">{new Date(r.createdAt).toLocaleDateString('ko-KR')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
       </AdminModal>
 
       {/* 유저 상세 모달 */}
