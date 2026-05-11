@@ -174,11 +174,11 @@ function SectionCard({ post }: { post: any }) {
     TRADE_TICKET: '티켓양도', TRADE_INSTRUMENT: '중고악기',
   };
 
-  const payText =
-    post.payType === 'NEGOTIABLE' ? '협의'
-    : post.payType === 'HOURLY' ? `${post.payMin?.toLocaleString()}원/시`
-    : post.payType === 'PER_SESSION' ? `${post.payMin?.toLocaleString()}원/회`
-    : `${post.payMin?.toLocaleString()}원/월`;
+  const payText = post.payText ||
+    (post.payType === 'NEGOTIABLE' ? '협의'
+    : post.payType === 'HOURLY' ? `시급 ${post.payMin?.toLocaleString()}원`
+    : post.payType === 'PER_SESSION' ? `회당 ${post.payMin?.toLocaleString()}원`
+    : `월 ${post.payMin?.toLocaleString()}원`);
 
   return (
     <Link href={`/jobs/${post.id}`} style={{ textDecoration: 'none' }}>

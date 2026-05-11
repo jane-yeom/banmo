@@ -26,10 +26,14 @@ export class PostsService {
 
   async create(userId: string, dto: CreatePostDto): Promise<Post> {
     console.log('[Posts] 저장 시도:', userId, dto);
-    this.validatePay(dto.payType, dto.payMin);
+    if (!dto.payText) {
+      this.validatePay(dto.payType, dto.payMin);
+    }
 
     const post = this.postsRepository.create({
       ...dto,
+      payType: dto.payText ? PayType.NEGOTIABLE : dto.payType,
+      payMin: dto.payText ? 0 : dto.payMin,
       authorId: userId,
       instruments: dto.instruments ?? [],
       imageUrls: dto.imageUrls ?? [],
@@ -97,7 +101,9 @@ export class PostsService {
 
     const payType = dto.payType ?? post.payType;
     const payMin = dto.payMin ?? post.payMin;
-    this.validatePay(payType, payMin);
+    if (!dto.payText) {
+      this.validatePay(payType, payMin);
+    }
 
     Object.assign(post, dto);
     const saved = await this.postsRepository.save(post);

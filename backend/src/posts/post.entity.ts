@@ -58,6 +58,9 @@ export class Post {
   @Column({ nullable: true })
   region: string;
 
+  @Column({ nullable: true })
+  payText: string;
+
   @Column({ type: 'enum', enum: PayType })
   payType: PayType;
 

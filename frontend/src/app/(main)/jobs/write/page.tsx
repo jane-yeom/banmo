@@ -12,7 +12,6 @@ import { useCreatePost } from '@/hooks/usePosts';
 import { useAuthStore } from '@/store/auth.store';
 import { uploadImage } from '@/lib/upload';
 
-const MIN_HOURLY = 10030;
 const MAX_IMAGES = 5;
 const DRAFT_KEY = 'job_write_draft';
 
@@ -22,9 +21,7 @@ const schema = z.object({
   category: z.string().min(1, '카테고리를 선택하세요'),
   province: z.string().optional(),
   district: z.string().optional(),
-  payType: z.enum(['HOURLY', 'PER_SESSION', 'MONTHLY', 'NEGOTIABLE']),
-  payMin: z.number().min(0),
-  payMax: z.number().min(0).optional(),
+  payText: z.string().max(50).optional(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -83,13 +80,10 @@ export default function JobWritePage() {
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { payType: 'NEGOTIABLE', payMin: 0 },
+    defaultValues: {},
   });
 
-  const payType = watch('payType');
-  const payMin = watch('payMin');
   const province = watch('province');
-  const isLowPay = payType === 'HOURLY' && payMin > 0 && payMin < MIN_HOURLY;
   const districts = province ? REGIONS[province] ?? [] : [];
 
   // 마운트 + 로그인 체크
@@ -146,9 +140,9 @@ export default function JobWritePage() {
       content: data.content,
       category: data.category as any,
       region,
-      payType: data.payType,
-      payMin: data.payMin,
-      payMax: data.payMax,
+      payText: data.payText || undefined,
+      payType: 'NEGOTIABLE' as const,
+      payMin: 0,
       instruments: selectedInstruments,
       imageUrls,
     };
@@ -250,38 +244,16 @@ export default function JobWritePage() {
         </Field>
 
         {/* 페이 */}
-        <Field label="급여 조건" error={errors.payMin?.message}>
-          <div className="flex gap-2 mb-3">
-            {(['NEGOTIABLE', 'HOURLY', 'PER_SESSION', 'MONTHLY'] as const).map((type) => (
-              <label key={type} className="cursor-pointer flex-1">
-                <input type="radio" value={type} {...register('payType')} className="sr-only peer" />
-                <span className="block rounded-lg border border-gray-200 py-2 text-center text-xs peer-checked:border-indigo-700 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 peer-checked:font-semibold transition-colors">
-                  {type === 'NEGOTIABLE' ? '협의' : type === 'HOURLY' ? '시급' : type === 'PER_SESSION' ? '회당' : '월급'}
-                </span>
-              </label>
-            ))}
-          </div>
-          {payType !== 'NEGOTIABLE' && (
-            <div className="space-y-2">
-              <input
-                {...register('payMin', { valueAsNumber: true })}
-                type="number"
-                placeholder="최소 금액 (원)"
-                className={`input-base ${isLowPay ? 'border-red-400 bg-red-50' : ''}`}
-              />
-              {isLowPay && (
-                <p className="text-xs text-red-500">
-                  ⚠️ 2024년 최저시급({MIN_HOURLY.toLocaleString()}원) 미만입니다.
-                </p>
-              )}
-              <input
-                {...register('payMax', { valueAsNumber: true })}
-                type="number"
-                placeholder="최대 금액 (원, 선택)"
-                className="input-base"
-              />
-            </div>
-          )}
+        <Field label="급여 조건" error={errors.payText?.message}>
+          <input
+            {...register('payText')}
+            placeholder="예) 시급 15,000원, 회당 8만원, 협의 가능"
+            maxLength={50}
+            className="input-base"
+          />
+          <p className="mt-1.5 text-xs text-gray-400">
+            페이를 자유롭게 입력해주세요. 예) 시급 15,000원 / 회당 8만원 / 월 30만원 / 협의 가능
+          </p>
         </Field>
 
         {/* 상세 내용 */}

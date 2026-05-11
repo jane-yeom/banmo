@@ -247,7 +247,11 @@ export default function JobDetailPage() {
         {/* 페이 */}
         <div className="mb-6 rounded-2xl p-5" style={{ background: '#ECEAF8', border: '1px solid #DDD9EF' }}>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: '#7B82BE' }}>급여 조건</p>
-          <PayBadge payType={post.payType} payMin={post.payMin} payMax={post.payMax ?? undefined} />
+          {(post as any).payText ? (
+            <p className="text-sm font-semibold text-gray-800">{(post as any).payText}</p>
+          ) : (
+            <PayBadge payType={post.payType} payMin={post.payMin} payMax={post.payMax ?? undefined} />
+          )}
         </div>
 
         {/* 기본 정보 */}

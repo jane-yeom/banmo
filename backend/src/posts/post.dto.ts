@@ -31,6 +31,11 @@ export class CreatePostDto {
   @IsString()
   region?: string;
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  payText?: string;
+
   @IsEnum(PayType)
   payType: PayType;
 
@@ -71,6 +76,11 @@ export class UpdatePostDto {
   @IsOptional()
   @IsString()
   region?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  payText?: string;
 
   @IsOptional()
   @IsEnum(PayType)

@@ -211,19 +211,26 @@ export default function JobsPage() {
             gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
             gap: 12,
           }}>
-            {sortedItems.map((post) => (
-              <Link key={post.id} href={`/jobs/${post.id}`}>
-                <PostCard
-                  title={post.title}
-                  category={post.category}
-                  region={post.region ?? ''}
-                  pay={post.payType === 'NEGOTIABLE' ? '협의' : `${(post.payMin / 10000).toFixed(0)}만원~`}
-                  noteGrade={post.author?.noteGrade}
-                  // TODO: 유료 기능 활성화시 주석 해제
-                  // isPremium={post.isPremium}
-                />
-              </Link>
-            ))}
+            {sortedItems.map((post) => {
+              const payDisplay = (post as any).payText ||
+                (post.payType === 'NEGOTIABLE' ? '협의' :
+                 post.payType === 'HOURLY' ? `시급 ${post.payMin?.toLocaleString()}원` :
+                 post.payType === 'PER_SESSION' ? `회당 ${post.payMin?.toLocaleString()}원` :
+                 `월 ${post.payMin?.toLocaleString()}원`);
+              return (
+                <Link key={post.id} href={`/jobs/${post.id}`}>
+                  <PostCard
+                    title={post.title}
+                    category={post.category}
+                    region={post.region ?? ''}
+                    pay={payDisplay}
+                    noteGrade={post.author?.noteGrade}
+                    // TODO: 유료 기능 활성화시 주석 해제
+                    // isPremium={post.isPremium}
+                  />
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
