@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 
 interface BackButtonProps {
   href?: string;
@@ -14,15 +15,14 @@ export default function BackButton({ href, label }: BackButtonProps) {
     <button
       onClick={() => (href ? router.push(href) : router.back())}
       style={{
-        display: 'flex', alignItems: 'center', gap: 6,
+        display: 'flex', alignItems: 'center', gap: 4,
         background: 'none', border: 'none',
-        color: '#374151', fontSize: 15,
-        cursor: 'pointer', padding: '8px 0',
-        fontWeight: 500,
+        color: '#1A1A1A', cursor: 'pointer',
+        padding: '8px 4px',
       }}
     >
-      <span style={{ fontSize: 20 }}>←</span>
-      {label && <span>{label}</span>}
+      <ChevronLeft size={24} strokeWidth={2} color="#7B82BE" />
+      {label && <span style={{ fontSize: 15, fontWeight: 500 }}>{label}</span>}
     </button>
   );
 }

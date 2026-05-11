@@ -1,9 +1,11 @@
+import { Music } from 'lucide-react';
+
 const GRADE_CONFIG = {
-  NONE:         { label: '등급없음', icon: '𝅝',  color: 'bg-gray-100 text-gray-400' },
-  BASIC:        { label: '초급',    icon: '♩',  color: 'bg-green-100 text-green-700' },
-  INTERMEDIATE: { label: '중급',    icon: '♪',  color: 'bg-blue-100 text-blue-700' },
-  ADVANCED:     { label: '고급',    icon: '♫',  color: 'bg-pink-100 text-pink-700' },
-  PROFESSIONAL: { label: '전문',    icon: '♬',  color: 'bg-amber-100 text-amber-700' },
+  NONE:         { label: '등급없음', icon: '♩', color: '#9CA3AF', bg: '#F3F4F6', border: '#E5E7EB' },
+  BASIC:        { label: '초급',    icon: '♩', color: '#5AAB7A', bg: '#EAF6EF', border: '#C0E8D0' },
+  INTERMEDIATE: { label: '중급',    icon: '♪', color: '#6A8FD4', bg: '#EAF0FB', border: '#C0D4F0' },
+  ADVANCED:     { label: '고급',    icon: '♫', color: '#5A63A8', bg: '#ECEAF8', border: '#C8C4E4' },
+  PROFESSIONAL: { label: '전문',    icon: '♬', color: '#D4A03A', bg: '#FEF6E4', border: '#F0DBA0' },
 } as const;
 
 type Grade = keyof typeof GRADE_CONFIG;
@@ -16,11 +18,22 @@ interface NoteGradeBadgeProps {
 
 export default function NoteGradeBadge({ grade, showLabel = true, size = 'sm' }: NoteGradeBadgeProps) {
   const config = GRADE_CONFIG[grade as Grade] ?? GRADE_CONFIG.NONE;
-  const sizeClass = size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1';
+  const fontSize = size === 'sm' ? 11 : 13;
+  const iconSize = size === 'sm' ? 11 : 13;
+  const px = size === 'sm' ? '8px' : '10px';
+  const py = size === 'sm' ? '2px' : '4px';
 
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full font-medium ${config.color} ${sizeClass}`}>
-      <span>{config.icon}</span>
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+      background: config.bg,
+      border: `1px solid ${config.border}`,
+      borderRadius: 99,
+      padding: `${py} ${px}`,
+      fontSize, fontWeight: 600,
+      color: config.color,
+    }}>
+      <Music size={iconSize} strokeWidth={2} color={config.color} />
       {showLabel && <span>{config.label}</span>}
     </span>
   );

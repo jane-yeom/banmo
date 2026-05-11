@@ -4,21 +4,29 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
+import { Home, Briefcase, PenLine, MessageCircle, User, LucideIcon } from 'lucide-react';
+
+interface Tab {
+  Icon: LucideIcon;
+  label: string;
+  href: string;
+  highlight?: boolean;
+  showBadge?: boolean;
+}
 
 export default function BottomNav() {
   const pathname = usePathname();
   const { isLoggedIn } = useAuthStore();
   const { unreadCount } = useChatStore();
 
-  const tabs = [
-    { icon: '🏠', label: '홈', href: '/' },
-    { icon: '💼', label: '구인구직', href: '/jobs' },
-    { icon: '✍️', label: '글쓰기', href: '/jobs/write', highlight: true },
-    { icon: '💬', label: '채팅', href: '/chat', showBadge: true },
-    { icon: '👤', label: '내정보', href: isLoggedIn ? '/mypage' : '/login' },
+  const tabs: Tab[] = [
+    { Icon: Home, label: '홈', href: '/' },
+    { Icon: Briefcase, label: '구인구직', href: '/jobs' },
+    { Icon: PenLine, label: '글쓰기', href: '/jobs/write', highlight: true },
+    { Icon: MessageCircle, label: '채팅', href: '/chat', showBadge: true },
+    { Icon: User, label: '내정보', href: isLoggedIn ? '/mypage' : '/login' },
   ];
 
-  // 숨길 페이지
   const hideOn = ['/login', '/welcome', '/auth/callback', '/admin'];
   if (hideOn.some((p) => pathname.startsWith(p))) return null;
 
@@ -26,15 +34,16 @@ export default function BottomNav() {
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
       background: 'white',
-      borderTop: '1px solid #F3F4F6',
+      borderTop: '1px solid #DDD9EF',
       display: 'flex',
       zIndex: 50,
       paddingBottom: 'env(safe-area-inset-bottom)',
-      boxShadow: '0 -4px 12px rgba(0,0,0,0.06)',
+      boxShadow: '0 -4px 16px rgba(90,99,168,0.08)',
     }}>
       {tabs.map((tab) => {
         const isActive =
           tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
+        const { Icon } = tab;
 
         if (tab.highlight) {
           return (
@@ -51,23 +60,22 @@ export default function BottomNav() {
               }}
             >
               <div style={{
-                width: 44, height: 44,
-                background: '#E8789A',
+                width: 46, height: 46,
+                background: 'linear-gradient(135deg, #7B82BE, #5A63A8)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 20,
                 marginBottom: 2,
-                boxShadow: '0 4px 12px rgba(232,120,154,0.4)',
-                transform: 'translateY(-8px)',
+                boxShadow: '0 4px 14px rgba(90,99,168,0.45)',
+                transform: 'translateY(-10px)',
               }}>
-                {tab.icon}
+                <Icon size={20} strokeWidth={2} color="white" />
               </div>
               <span style={{
-                fontSize: 10, color: '#E8789A',
+                fontSize: 10, color: '#7B82BE',
                 fontWeight: 600,
-                transform: 'translateY(-8px)',
+                transform: 'translateY(-10px)',
               }}>
                 {tab.label}
               </span>
@@ -89,11 +97,12 @@ export default function BottomNav() {
               position: 'relative',
             }}
           >
-            <span style={{
-              fontSize: 22, marginBottom: 2,
-              position: 'relative',
-            }}>
-              {tab.icon}
+            <div style={{ position: 'relative', marginBottom: 3 }}>
+              <Icon
+                size={24}
+                strokeWidth={isActive ? 2.2 : 1.6}
+                color={isActive ? '#7B82BE' : '#9CA3AF'}
+              />
               {tab.showBadge && unreadCount > 0 && (
                 <span style={{
                   position: 'absolute', top: -4, right: -8,
@@ -105,21 +114,19 @@ export default function BottomNav() {
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
-            </span>
+            </div>
             <span style={{
               fontSize: 10,
-              color: isActive ? '#E8789A' : '#9CA3AF',
+              color: isActive ? '#7B82BE' : '#9CA3AF',
               fontWeight: isActive ? 700 : 400,
             }}>
               {tab.label}
             </span>
             {isActive && (
               <div style={{
-                position: 'absolute',
-                bottom: 0,
-                width: 4, height: 4,
-                borderRadius: '50%',
-                background: '#E8789A',
+                position: 'absolute', bottom: 0,
+                width: 4, height: 4, borderRadius: '50%',
+                background: '#7B82BE',
               }} />
             )}
           </Link>

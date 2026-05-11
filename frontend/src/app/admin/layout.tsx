@@ -124,7 +124,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all"
                 style={
                   isActive
-                    ? { background: '#E8789A', color: '#fff' }
+                    ? { background: '#7B82BE', color: '#fff' }
                     : { color: '#9CA3AF' }
                 }
               >

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Bell } from 'lucide-react';
 import { useNotificationStore, AppNotification } from '@/store/notification.store';
 import { useMarkAsRead, useMarkAllAsRead, TYPE_ICON } from '@/hooks/useNotifications';
 
@@ -36,7 +37,7 @@ function NotificationItem({ notification, onClose }: { notification: AppNotifica
     <button
       onClick={handleClick}
       className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 ${
-        !notification.isRead ? 'bg-pink-50' : ''
+        !notification.isRead ? 'bg-indigo-50' : ''
       }`}
     >
       <span className="flex-shrink-0 text-xl leading-none mt-0.5">{icon}</span>
@@ -52,7 +53,7 @@ function NotificationItem({ notification, onClose }: { notification: AppNotifica
         </p>
       </div>
       {!notification.isRead && (
-        <span className="flex-shrink-0 mt-1.5 h-2 w-2 rounded-full bg-pink-600" />
+        <span className="flex-shrink-0 mt-1.5 h-2 w-2 rounded-full bg-indigo-600" />
       )}
     </button>
   );
@@ -93,17 +94,26 @@ export default function NotificationBell() {
       {/* 벨 아이콘 버튼 */}
       <button
         onClick={handleOpen}
-        className="relative p-1.5 text-gray-500 hover:text-pink-700 transition-colors"
+        style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center' }}
         aria-label="알림"
       >
-        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
+        <Bell
+          size={22}
+          strokeWidth={1.8}
+          color={unreadCount > 0 ? '#7B82BE' : '#9CA3AF'}
+          fill={unreadCount > 0 ? '#ECEAF8' : 'none'}
+        />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white leading-none">
-            {displayCount}
-          </span>
+          <div style={{
+            position: 'absolute', top: -2, right: -2,
+            background: '#7B82BE', color: 'white',
+            fontSize: 10, fontWeight: 700,
+            width: 18, height: 18, borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '2px solid white',
+          }}>
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </div>
         )}
       </button>
 

@@ -80,7 +80,7 @@ export default function MyPage() {
     <div className="mx-auto max-w-2xl px-4 py-8">
       {/* 프로필 헤더 */}
       <div className="mb-6 flex items-center gap-4">
-        <div className="h-14 w-14 rounded-full bg-pink-200 flex items-center justify-center text-pink-700 text-2xl font-bold flex-shrink-0 overflow-hidden">
+        <div className="h-14 w-14 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 text-2xl font-bold flex-shrink-0 overflow-hidden">
           {user.profileImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={user.profileImage} alt="프로필" className="h-14 w-14 rounded-full object-cover" />
@@ -91,7 +91,7 @@ export default function MyPage() {
         <div className="flex-1">
           <h1 className="text-xl font-bold text-gray-900">{user.nickname ?? '사용자'}</h1>
           <div className="flex flex-wrap items-center gap-1 text-sm">
-            <Link href={`/profile/${user.id}`} className="text-pink-600 hover:underline">
+            <Link href={`/profile/${user.id}`} className="text-indigo-600 hover:underline">
               프로필 보기
             </Link>
             <span className="text-gray-300">·</span>
@@ -145,7 +145,7 @@ export default function MyPage() {
           <div className="flex justify-end">
             <Link
               href="/jobs/write"
-              className="rounded-lg bg-pink-700 px-4 py-2 text-sm font-medium text-white hover:bg-pink-800"
+              className="rounded-lg bg-indigo-700 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-800"
             >
               + 공고 작성
             </Link>
@@ -169,7 +169,7 @@ export default function MyPage() {
               <div key={app.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <Link href={`/jobs/${app.postId}`} className="font-semibold text-gray-900 hover:text-pink-700 truncate block">
+                    <Link href={`/jobs/${app.postId}`} className="font-semibold text-gray-900 hover:text-indigo-700 truncate block">
                       {app.post?.title ?? '삭제된 공고'}
                     </Link>
                     <p className="mt-0.5 text-xs text-gray-400">
@@ -199,7 +199,7 @@ export default function MyPage() {
             const s = STATUS_LABEL[app.status];
             return (
               <div key={app.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                <div className="mb-2 text-xs text-pink-600 font-medium truncate">
+                <div className="mb-2 text-xs text-indigo-600 font-medium truncate">
                   📋 {app.post?.title ?? '공고'}
                 </div>
                 <div className="flex items-start justify-between gap-2">
@@ -252,7 +252,7 @@ export default function MyPage() {
 function PostRow({ post }: { post: Post }) {
   return (
     <Link href={`/jobs/${post.id}`}>
-      <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:border-pink-200 transition-colors">
+      <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:border-indigo-200 transition-colors">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-gray-900 truncate">{post.title}</p>

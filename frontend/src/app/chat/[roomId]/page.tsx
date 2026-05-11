@@ -40,7 +40,7 @@ function Avatar({ src, nickname }: { src: string | null; nickname: string | null
     );
   }
   return (
-    <div className="h-8 w-8 rounded-full bg-pink-200 flex items-center justify-center text-pink-700 text-sm font-bold flex-shrink-0">
+    <div className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ background: '#ECEAF8', color: '#7B82BE' }}>
       {(nickname ?? '?')[0]}
     </div>
   );
@@ -199,7 +199,7 @@ export default function ChatRoomPage() {
                 {room?.post?.title && (
                   <Link
                     href={`/jobs/${room.postId}`}
-                    className="text-xs text-pink-500 hover:underline truncate block"
+                    className="text-xs hover:underline truncate block" style={{ color: '#7B82BE' }}
                   >
                     📋 {room.post.title}
                   </Link>
@@ -207,7 +207,7 @@ export default function ChatRoomPage() {
               </div>
               <Link
                 href={`/profile/${other.id}`}
-                className="flex-shrink-0 text-xs text-gray-400 hover:text-pink-600"
+                className="flex-shrink-0 text-xs text-gray-400 hover:text-purple-600"
               >
                 프로필
               </Link>
@@ -263,9 +263,10 @@ export default function ChatRoomPage() {
                   <div
                     className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed break-words ${
                       isMine
-                        ? 'bg-pink-700 text-white rounded-br-sm'
+                        ? 'text-white rounded-br-sm'
                         : 'bg-white text-gray-800 border border-gray-100 shadow-sm rounded-bl-sm'
                     }`}
+                    style={isMine ? { background: 'linear-gradient(135deg, #7B82BE, #5A63A8)' } : undefined}
                   >
                     {msg.content}
                   </div>
@@ -274,7 +275,7 @@ export default function ChatRoomPage() {
                   {showTime && (
                     <div className={`flex items-center gap-1 px-1 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
                       {isMine && (
-                        <span className={`text-xs ${readByOther ? 'text-pink-400' : 'text-gray-300'}`}>
+                        <span className={`text-xs ${readByOther ? 'text-purple-400' : 'text-gray-300'}`}>
                           {readByOther ? '✓✓' : '✓'}
                         </span>
                       )}
@@ -299,13 +300,14 @@ export default function ChatRoomPage() {
             onKeyDown={handleKeyDown}
             placeholder="메시지를 입력하세요..."
             rows={1}
-            className="flex-1 resize-none rounded-2xl border border-gray-200 px-4 py-2.5 text-sm focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-100 max-h-32 transition-colors"
+            className="flex-1 resize-none rounded-2xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none max-h-32 transition-colors"
             style={{ overflowY: 'auto' }}
           />
           <button
             onClick={sendMessage}
             disabled={!input.trim() || !connected}
-            className="h-10 w-10 flex-shrink-0 rounded-full bg-pink-700 text-white flex items-center justify-center hover:bg-pink-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="h-10 w-10 flex-shrink-0 rounded-full text-white flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: 'linear-gradient(135deg, #7B82BE, #5A63A8)' }}
             aria-label="전송"
           >
             <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">

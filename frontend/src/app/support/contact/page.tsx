@@ -106,7 +106,7 @@ export default function SupportContactPage() {
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-white bg-pink-700 hover:bg-pink-800"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-white bg-indigo-700 hover:bg-indigo-800"
           >
             {showForm ? '취소' : '문의하기'}
           </button>
@@ -125,7 +125,7 @@ export default function SupportContactPage() {
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-pink-400 focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
               >
                 {CATEGORY_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -139,7 +139,7 @@ export default function SupportContactPage() {
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 placeholder="문의 제목을 입력하세요"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-pink-400 focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
                 required
               />
             </div>
@@ -151,7 +151,7 @@ export default function SupportContactPage() {
                 onChange={(e) => setForm({ ...form, content: e.target.value })}
                 placeholder="문의 내용을 자세히 입력해주세요"
                 rows={5}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm resize-none focus:border-pink-400 focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm resize-none focus:border-indigo-400 focus:outline-none"
                 required
               />
             </div>
@@ -163,7 +163,7 @@ export default function SupportContactPage() {
                   value={form.authorName}
                   onChange={(e) => setForm({ ...form, authorName: e.target.value })}
                   placeholder="이름을 입력하세요"
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-pink-400 focus:outline-none"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
                 />
               </div>
             )}
@@ -177,7 +177,7 @@ export default function SupportContactPage() {
                 value={form.authorEmail}
                 onChange={(e) => setForm({ ...form, authorEmail: e.target.value })}
                 placeholder="이메일 주소"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-pink-400 focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
                 required
               />
             </div>
@@ -187,7 +187,7 @@ export default function SupportContactPage() {
                 type="checkbox"
                 checked={form.isPrivate}
                 onChange={(e) => setForm({ ...form, isPrivate: e.target.checked })}
-                className="accent-pink-600"
+                className="accent-indigo-600"
               />
               <span className="text-sm text-gray-600">비공개 문의</span>
             </label>
@@ -195,7 +195,7 @@ export default function SupportContactPage() {
             <button
               type="submit"
               disabled={createMutation.isPending}
-              className="w-full rounded-lg bg-pink-700 py-2.5 text-sm font-medium text-white hover:bg-pink-800 disabled:opacity-50"
+              className="w-full rounded-lg bg-indigo-700 py-2.5 text-sm font-medium text-white hover:bg-indigo-800 disabled:opacity-50"
             >
               문의 등록
             </button>
@@ -247,8 +247,8 @@ export default function SupportContactPage() {
                         <p className="text-sm text-gray-700 whitespace-pre-wrap">{qna.content}</p>
                       </div>
                       {qna.status === 'ANSWERED' && qna.answer && (
-                        <div className="rounded-xl bg-pink-50 border border-pink-100 p-4">
-                          <p className="text-xs font-medium text-pink-600 mb-1">
+                        <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-4">
+                          <p className="text-xs font-medium text-indigo-600 mb-1">
                             관리자 답변 · {qna.answeredAt && new Date(qna.answeredAt).toLocaleDateString('ko-KR')}
                           </p>
                           <p className="text-sm text-gray-700 whitespace-pre-wrap">{qna.answer}</p>

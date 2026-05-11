@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
+import { Bell, MessageCircle, Menu, X, ChevronRight, LogOut } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
@@ -142,8 +143,8 @@ export default function Header() {
               <Link key={item.href} href={item.href} style={{
                 padding: '8px 14px',
                 borderRadius: 8,
-                color: pathname.startsWith(item.href) ? '#E8789A' : '#374151',
-                background: pathname.startsWith(item.href) ? '#FFF0F4' : 'transparent',
+                color: pathname.startsWith(item.href) ? '#7B82BE' : '#374151',
+                background: pathname.startsWith(item.href) ? '#ECEAF8' : 'transparent',
                 textDecoration: 'none',
                 fontSize: 14,
                 fontWeight: pathname.startsWith(item.href) ? 600 : 400,
@@ -158,15 +159,20 @@ export default function Header() {
             {isLoggedIn && (
               <>
                 <Link href="/notifications" style={{
-                  fontSize: 20, textDecoration: 'none',
-                  padding: '4px 8px',
-                }}>🔔</Link>
+                  position: 'relative',
+                  display: 'flex', alignItems: 'center',
+                  textDecoration: 'none', padding: '4px 8px',
+                  color: '#6B7280',
+                }}>
+                  <Bell size={22} strokeWidth={1.8} />
+                </Link>
                 <Link href="/chat" style={{
                   position: 'relative',
-                  fontSize: 20, textDecoration: 'none',
-                  padding: '4px 8px',
+                  display: 'flex', alignItems: 'center',
+                  textDecoration: 'none', padding: '4px 8px',
+                  color: '#6B7280',
                 }}>
-                  💬
+                  <MessageCircle size={22} strokeWidth={1.8} />
                   {unreadCount > 0 && (
                     <span style={{
                       position: 'absolute', top: 0, right: 0,
@@ -190,7 +196,7 @@ export default function Header() {
               }} className="desktop-only">
                 <div style={{
                   width: 32, height: 32, borderRadius: '50%',
-                  background: '#FFF0F4', overflow: 'hidden',
+                  background: '#ECEAF8', overflow: 'hidden',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {user?.profileImage ? (
@@ -210,7 +216,7 @@ export default function Header() {
                 style={{
                   display: 'none',
                   padding: '8px 16px',
-                  background: '#E8789A', color: 'white',
+                  background: '#7B82BE', color: 'white',
                   borderRadius: 8, textDecoration: 'none',
                   fontSize: 14, fontWeight: 600,
                 }}>
@@ -224,10 +230,10 @@ export default function Header() {
               className="mobile-menu-btn"
               style={{
                 background: 'none', border: 'none',
-                fontSize: 24, cursor: 'pointer',
-                padding: '4px 8px', color: '#374151',
+                cursor: 'pointer', padding: '4px 8px',
+                color: '#374151', display: 'flex', alignItems: 'center',
               }}>
-              ☰
+              <Menu size={24} strokeWidth={1.8} />
             </button>
           </div>
         </div>
@@ -266,8 +272,11 @@ export default function Header() {
             style={{ height: 28, width: 'auto', mixBlendMode: 'multiply' }}/>
           <button onClick={() => setMenuOpen(false)} style={{
             background: 'none', border: 'none',
-            fontSize: 24, cursor: 'pointer', color: '#6B7280',
-          }}>✕</button>
+            cursor: 'pointer', color: '#6B7280',
+            display: 'flex', alignItems: 'center', padding: 4,
+          }}>
+            <X size={22} strokeWidth={1.8} />
+          </button>
         </div>
 
         {/* 유저 정보 */}
@@ -279,7 +288,7 @@ export default function Header() {
           }}>
             <div style={{
               width: 48, height: 48, borderRadius: '50%',
-              background: '#FFF0F4', overflow: 'hidden',
+              background: '#ECEAF8', overflow: 'hidden',
               flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
@@ -287,14 +296,14 @@ export default function Header() {
                 <img src={user.profileImage} alt=""
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
               ) : (
-                <span style={{ fontSize: 24 }}>👤</span>
+                <span style={{ fontSize: 22 }}>👤</span>
               )}
             </div>
             <div>
               <div style={{ fontWeight: 600, fontSize: 15 }}>
                 {user.nickname}
               </div>
-              <div style={{ fontSize: 12, color: '#E8789A', marginTop: 2 }}>
+              <div style={{ fontSize: 12, color: '#7B82BE', marginTop: 2 }}>
                 {user.noteGrade === 'WHOLE' ? '♩ 온음표' :
                  user.noteGrade === 'HALF' ? '♩ 2분음표' :
                  user.noteGrade === 'QUARTER' ? '♩ 4분음표' :
@@ -316,13 +325,13 @@ export default function Header() {
           {navItems.map(item => (
             <Link key={item.href} href={item.href} style={{
               display: 'block', padding: '12px 20px',
-              color: pathname.startsWith(item.href) ? '#E8789A' : '#374151',
-              background: pathname.startsWith(item.href) ? '#FFF0F4' : 'transparent',
+              color: pathname.startsWith(item.href) ? '#7B82BE' : '#374151',
+              background: pathname.startsWith(item.href) ? '#ECEAF8' : 'transparent',
               textDecoration: 'none',
               fontSize: 15,
               fontWeight: pathname.startsWith(item.href) ? 600 : 400,
               borderLeft: pathname.startsWith(item.href)
-                ? '3px solid #E8789A' : '3px solid transparent',
+                ? '3px solid #7B82BE' : '3px solid transparent',
             }}>
               {item.label}
             </Link>
@@ -369,13 +378,15 @@ export default function Header() {
               background: '#FEF2F2', color: '#EF4444',
               border: '1px solid #FCA5A5', borderRadius: 8,
               fontSize: 15, fontWeight: 600, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             }}>
+              <LogOut size={16} strokeWidth={1.8} color="#EF4444" />
               로그아웃
             </button>
           ) : (
             <Link href="/login" style={{
               display: 'block', textAlign: 'center',
-              padding: '12px', background: '#E8789A',
+              padding: '12px', background: '#7B82BE',
               color: 'white', borderRadius: 8,
               fontSize: 15, fontWeight: 600,
               textDecoration: 'none',

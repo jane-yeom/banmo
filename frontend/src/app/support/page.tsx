@@ -8,9 +8,9 @@ const MENU_CARDS = [
     title: 'QnA',
     desc: '자주 묻는 질문을 확인하세요',
     href: '/support/qna',
-    color: 'from-pink-50 to-pink-100',
-    border: 'border-pink-200',
-    textColor: 'text-pink-700',
+    color: 'from-indigo-50 to-indigo-100',
+    border: 'border-indigo-200',
+    textColor: 'text-indigo-700',
   },
   {
     icon: '✉️',
@@ -36,7 +36,7 @@ export default function SupportPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 상단 배너 */}
-      <div className="py-12 text-center text-white" style={{ background: 'linear-gradient(135deg, #E8789A, #C45C7A)' }}>
+      <div className="py-12 text-center text-white" style={{ background: 'linear-gradient(135deg, #7B82BE, #4A52A0)' }}>
         <div className="mx-auto max-w-2xl px-4">
           <h1 className="text-3xl font-bold mb-2">고객센터</h1>
           <p className="text-white/80 text-base mb-6">무엇을 도와드릴까요?</p>

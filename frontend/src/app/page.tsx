@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import api from '@/lib/axios';
+import { Music2, Mic, BookOpen, Star, Building2, Guitar, MessageSquare, MessageCircle, LucideIcon } from 'lucide-react';
 
 // 슬라이딩 배너 컴포넌트
 function HeroBanner() {
@@ -13,7 +14,7 @@ function HeroBanner() {
 
   const banners = [
     {
-      bg: 'linear-gradient(135deg, #E8789A 0%, #C45C7A 100%)',
+      bg: 'linear-gradient(135deg, #7B82BE, #5A63A8)',
       emoji: '🎹',
       title: '반주자를 찾고 계신가요?',
       sub: '피아노, 바이올린, 첼로 등\n다양한 반주자를 만나보세요',
@@ -21,7 +22,7 @@ function HeroBanner() {
       href: '/jobs?category=JOB_OFFER',
     },
     {
-      bg: 'linear-gradient(135deg, #F09AB5, #E8789A)',
+      bg: 'linear-gradient(135deg, #6A8FD4, #4A6AB8)',
       emoji: '🎵',
       title: '반주 활동을 원하시나요?',
       sub: '나에게 맞는 연주 기회를\n찾아보세요',
@@ -29,7 +30,7 @@ function HeroBanner() {
       href: '/jobs?category=JOB_SEEK',
     },
     {
-      bg: 'linear-gradient(135deg, #C45C7A, #A84060)',
+      bg: 'linear-gradient(135deg, #9070C8, #7050A8)',
       emoji: '🎭',
       title: '공연을 홍보해보세요',
       sub: '연주회, 공연 소식을\n많은 분들께 알려보세요',
@@ -101,7 +102,7 @@ function HeroBanner() {
       <Link href={b.href} style={{
         display: 'inline-block',
         background: 'white',
-        color: '#374151',
+        color: '#5A63A8',
         padding: '10px 24px',
         borderRadius: 99,
         fontWeight: 700,
@@ -194,7 +195,7 @@ function SectionCard({ post }: { post: any }) {
           <div style={{ flex: 1 }}>
             <span style={{
               display: 'inline-block',
-              background: '#FFF0F4', color: '#E8789A',
+              background: '#ECEAF8', color: '#7B82BE',
               fontSize: 11, fontWeight: 600,
               padding: '3px 8px', borderRadius: 6,
               marginBottom: 8,
@@ -218,7 +219,7 @@ function SectionCard({ post }: { post: any }) {
           </div>
           <div style={{
             fontSize: 14, fontWeight: 700,
-            color: '#E8789A', marginLeft: 12,
+            color: '#7B82BE', marginLeft: 12,
             flexShrink: 0,
           }}>
             {payText}
@@ -245,7 +246,7 @@ function SectionTitle({ icon, title, href }: { icon: string; title: string; href
         {title}
       </h2>
       <Link href={href} style={{
-        fontSize: 13, color: '#E8789A',
+        fontSize: 13, color: '#7B82BE',
         textDecoration: 'none', fontWeight: 500,
       }}>
         더보기 →
@@ -257,14 +258,14 @@ function SectionTitle({ icon, title, href }: { icon: string; title: string; href
 // 빠른 메뉴
 function QuickMenu() {
   const menus = [
-    { icon: '🎹', label: '반주자\n구인', href: '/jobs?category=JOB_OFFER' },
-    { icon: '🎵', label: '반주자\n구직', href: '/jobs?category=JOB_SEEK' },
-    { icon: '📚', label: '레슨\n구인', href: '/jobs?category=LESSON_OFFER' },
-    { icon: '🎭', label: '공연\n홍보', href: '/promo' },
-    { icon: '🏠', label: '연습실\n대여', href: '/promo?category=PROMO_SPACE' },
-    { icon: '🎸', label: '중고\n악기', href: '/trade?category=TRADE_INSTRUMENT' },
-    { icon: '💬', label: '자유\n게시판', href: '/board?type=FREE' },
-    { icon: '🔒', label: '익명\n게시판', href: '/board?type=ANONYMOUS' },
+    { Icon: Music2, label: '반주자\n구인', href: '/jobs?category=JOB_OFFER', iconBg: '#ECEAF8', iconColor: '#7B82BE' },
+    { Icon: Mic, label: '반주자\n구직', href: '/jobs?category=JOB_SEEK', iconBg: '#EAF0FB', iconColor: '#6A8FD4' },
+    { Icon: BookOpen, label: '레슨\n구인', href: '/jobs?category=LESSON_OFFER', iconBg: '#EAF6EF', iconColor: '#5AAB7A' },
+    { Icon: Star, label: '공연\n홍보', href: '/promo', iconBg: '#FEF6E4', iconColor: '#D4A03A' },
+    { Icon: Building2, label: '연습실\n대여', href: '/promo?category=PROMO_SPACE', iconBg: '#F3EAF8', iconColor: '#A06EC0' },
+    { Icon: Guitar, label: '중고\n악기', href: '/trade?category=TRADE_INSTRUMENT', iconBg: '#FEF0EA', iconColor: '#D4784A' },
+    { Icon: MessageSquare, label: '자유\n게시판', href: '/board?type=FREE', iconBg: '#ECEAF8', iconColor: '#7B82BE' },
+    { Icon: MessageCircle, label: '익명\n게시판', href: '/board?type=ANONYMOUS', iconBg: '#F0EAFA', iconColor: '#9070C8' },
   ];
 
   return (
@@ -274,28 +275,38 @@ function QuickMenu() {
         gridTemplateColumns: 'repeat(4, 1fr)',
         gap: 10,
       }}>
-        {menus.map((m) => (
-          <Link key={m.href} href={m.href} style={{ textDecoration: 'none' }}>
-            <div style={{
-              background: 'white',
-              borderRadius: 14,
-              padding: '12px 8px',
-              textAlign: 'center',
-              border: '1px solid #F3F4F6',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-              cursor: 'pointer',
-            }}>
-              <div style={{ fontSize: 24, marginBottom: 6 }}>{m.icon}</div>
+        {menus.map((m) => {
+          const { Icon } = m;
+          return (
+            <Link key={m.href} href={m.href} style={{ textDecoration: 'none' }}>
               <div style={{
-                fontSize: 11, color: '#374151',
-                fontWeight: 500, lineHeight: 1.4,
-                whiteSpace: 'pre-line',
+                background: 'white',
+                borderRadius: 12,
+                padding: '12px 8px',
+                textAlign: 'center',
+                border: '0.5px solid #DDD9EF',
+                cursor: 'pointer',
               }}>
-                {m.label}
+                <div style={{
+                  width: 34, height: 34,
+                  borderRadius: 10,
+                  background: m.iconBg,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 6px',
+                }}>
+                  <Icon size={20} strokeWidth={1.8} color={m.iconColor} />
+                </div>
+                <div style={{
+                  fontSize: 11, color: '#374151',
+                  fontWeight: 500, lineHeight: 1.4,
+                  whiteSpace: 'pre-line',
+                }}>
+                  {m.label}
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

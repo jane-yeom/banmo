@@ -287,7 +287,7 @@ export default function ProfileEditPage() {
                 className="rounded-full object-cover border-2 border-gray-200"
               />
             ) : (
-              <div className="h-[72px] w-[72px] rounded-full bg-pink-200 flex items-center justify-center text-pink-700 text-2xl font-bold border-2 border-gray-200">
+              <div className="h-[72px] w-[72px] rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 text-2xl font-bold border-2 border-gray-200">
                 {(profileUser.nickname ?? '?')[0]}
               </div>
             )}
@@ -314,7 +314,7 @@ export default function ProfileEditPage() {
             <label className="mb-1 block text-xs font-medium text-gray-600">닉네임</label>
             <input
               {...register('nickname', { required: '닉네임을 입력하세요' })}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-pink-400"
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
               placeholder="닉네임"
             />
             {errors.nickname && (
@@ -327,7 +327,7 @@ export default function ProfileEditPage() {
             <textarea
               {...register('bio')}
               rows={4}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-pink-400 resize-none"
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400 resize-none"
               placeholder="자신을 소개해주세요"
             />
           </div>
@@ -336,7 +336,7 @@ export default function ProfileEditPage() {
             <label className="mb-1 block text-xs font-medium text-gray-600">활동 지역</label>
             <input
               {...register('region')}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-pink-400"
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
               placeholder="예: 서울 강남구"
             />
           </div>
@@ -353,8 +353,8 @@ export default function ProfileEditPage() {
                   key={inst}
                   className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${
                     checked
-                      ? 'border-pink-400 bg-pink-50 text-pink-700'
-                      : 'border-gray-200 text-gray-600 hover:border-pink-200'
+                      ? 'border-indigo-400 bg-indigo-50 text-indigo-700'
+                      : 'border-gray-200 text-gray-600 hover:border-indigo-200'
                   }`}
                 >
                   <input
@@ -363,7 +363,7 @@ export default function ProfileEditPage() {
                     checked={checked}
                     onChange={() => toggleInstrument(inst)}
                   />
-                  <span className={`h-4 w-4 flex-shrink-0 rounded border-2 flex items-center justify-center ${checked ? 'border-pink-500 bg-pink-500' : 'border-gray-300'}`}>
+                  <span className={`h-4 w-4 flex-shrink-0 rounded border-2 flex items-center justify-center ${checked ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'}`}>
                     {checked && (
                       <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 12 12" fill="currentColor">
                         <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
@@ -426,7 +426,7 @@ export default function ProfileEditPage() {
               {item.status === 'uploading' && (
                 <div className="h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-pink-500 transition-all duration-300"
+                    className="h-full rounded-full bg-indigo-500 transition-all duration-300"
                     style={{ width: `${item.progress}%` }}
                   />
                 </div>
@@ -451,8 +451,8 @@ export default function ProfileEditPage() {
               onClick={() => videoInputRef.current?.click()}
               className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 cursor-pointer transition-colors ${
                 dragging
-                  ? 'border-pink-400 bg-pink-50'
-                  : 'border-gray-200 hover:border-pink-300 hover:bg-gray-50'
+                  ? 'border-indigo-400 bg-indigo-50'
+                  : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
               }`}
             >
               <svg className="h-8 w-8 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -485,7 +485,7 @@ export default function ProfileEditPage() {
         <button
           type="submit"
           disabled={saving}
-          className="w-full rounded-xl bg-pink-700 py-3.5 text-sm font-semibold text-white hover:bg-pink-800 transition-colors disabled:opacity-60"
+          className="w-full rounded-xl bg-indigo-700 py-3.5 text-sm font-semibold text-white hover:bg-indigo-800 transition-colors disabled:opacity-60"
         >
           {saving ? '저장 중...' : '저장하기'}
         </button>

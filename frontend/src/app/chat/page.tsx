@@ -80,7 +80,7 @@ export default function ChatListPage() {
         <div className="flex flex-col items-center justify-center py-32 text-gray-400">
           <span className="text-5xl mb-3">💬</span>
           <p>채팅 내역이 없습니다.</p>
-          <Link href="/jobs" className="mt-4 text-pink-600 hover:underline text-sm">
+          <Link href="/jobs" className="mt-4 text-indigo-600 hover:underline text-sm">
             공고 보러가기 →
           </Link>
         </div>
@@ -106,7 +106,7 @@ export default function ChatListPage() {
                       className="rounded-full object-cover"
                     />
                   ) : (
-                    <div className="h-12 w-12 rounded-full bg-pink-200 flex items-center justify-center text-pink-700 font-bold text-lg">
+                    <div className="h-12 w-12 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-lg">
                       {(other.nickname ?? '?')[0]}
                     </div>
                   )}
@@ -118,7 +118,7 @@ export default function ChatListPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between mb-0.5">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <p className={`text-sm font-semibold truncate ${isUnread ? 'text-pink-700' : 'text-gray-900'}`}>
+                      <p className={`text-sm font-semibold truncate ${isUnread ? 'text-indigo-700' : 'text-gray-900'}`}>
                         {other.nickname ?? '익명'}
                       </p>
                       <NoteGradeBadge grade={other.noteGrade} showLabel={false} size="sm" />
@@ -130,7 +130,7 @@ export default function ChatListPage() {
 
                   {/* 연결된 공고 */}
                   {(room as any).post?.title && (
-                    <p className="text-xs text-pink-500 truncate mb-0.5">
+                    <p className="text-xs text-indigo-500 truncate mb-0.5">
                       📋 {(room as any).post.title}
                     </p>
                   )}

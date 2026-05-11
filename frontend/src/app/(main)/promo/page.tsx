@@ -21,7 +21,7 @@ function PromoCard({ post }: { post: Post }) {
     <Link href={`/promo/${post.id}`}>
       <div className={`group relative flex flex-col rounded-2xl bg-white shadow-sm border overflow-hidden transition-shadow hover:shadow-md ${isPremium ? 'border-amber-300' : 'border-gray-100'}`}>
         {/* 썸네일 */}
-        <div className="relative h-44 bg-gradient-to-br from-pink-50 to-pink-100 overflow-hidden">
+        <div className="relative h-44 bg-gradient-to-br from-indigo-50 to-indigo-100 overflow-hidden">
           {firstImage ? (
             <Image src={firstImage} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
           ) : (
@@ -43,7 +43,7 @@ function PromoCard({ post }: { post: Post }) {
           <div className="flex items-center justify-between text-xs text-gray-400 mt-1">
             <span>📍 {post.region ?? '지역 미정'}</span>
             {post.payMin > 0 && (
-              <span className="font-medium text-pink-700">
+              <span className="font-medium text-indigo-700">
                 {post.payType === 'NEGOTIABLE' ? '협의' : `${(post.payMin / 10000).toFixed(0)}만원~`}
               </span>
             )}
@@ -79,7 +79,7 @@ export default function PromoPage() {
                 onClick={() => setTab(t.value)}
                 className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   tab === t.value
-                    ? 'bg-pink-600 text-white'
+                    ? 'bg-indigo-600 text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -97,7 +97,7 @@ export default function PromoPage() {
           <select
             value={region}
             onChange={(e) => setRegion(e.target.value)}
-            className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-pink-400 focus:outline-none"
+            className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
           >
             <option value="">전체 지역</option>
             {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -108,7 +108,7 @@ export default function PromoPage() {
             </span>
             <Link
               href="/jobs/write"
-              className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white hover:bg-pink-700 transition-colors"
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
             >
               + 공연/연습실 등록
             </Link>

@@ -82,7 +82,7 @@ export default function SupportQnaPage() {
               onClick={() => { setActiveCategory(cat.key); setOpenIndex(null); }}
               className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 activeCategory === cat.key
-                  ? 'bg-pink-700 text-white'
+                  ? 'bg-indigo-700 text-white'
                   : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -101,7 +101,7 @@ export default function SupportQnaPage() {
                 className="w-full flex items-start justify-between gap-4 px-5 py-4 text-left hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-start gap-3">
-                  <span className="flex-shrink-0 text-pink-600 font-bold text-sm mt-0.5">Q</span>
+                  <span className="flex-shrink-0 text-indigo-600 font-bold text-sm mt-0.5">Q</span>
                   <span className="text-sm font-medium text-gray-800">{item.q}</span>
                 </div>
                 <span className={`flex-shrink-0 text-gray-400 transition-transform ${openIndex === idx ? 'rotate-180' : ''}`}>
@@ -119,11 +119,11 @@ export default function SupportQnaPage() {
         </div>
 
         {/* 더 궁금한 점 */}
-        <div className="mt-6 rounded-2xl bg-pink-50 border border-pink-100 p-5 text-center">
+        <div className="mt-6 rounded-2xl bg-indigo-50 border border-indigo-100 p-5 text-center">
           <p className="text-sm text-gray-700 mb-3">원하는 답변을 찾지 못하셨나요?</p>
           <Link
             href="/support/contact"
-            className="inline-block rounded-lg bg-pink-700 px-5 py-2 text-sm font-medium text-white hover:bg-pink-800 transition-colors"
+            className="inline-block rounded-lg bg-indigo-700 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-800 transition-colors"
           >
             1:1 문의하기
           </Link>

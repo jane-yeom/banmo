@@ -126,7 +126,7 @@ export default function WelcomePage() {
           {[1, 2].map(s => (
             <div key={s} style={{
               flex: 1, height: 4, borderRadius: 2,
-              background: s <= step ? '#E8789A' : '#E5E7EB',
+              background: s <= step ? '#7B82BE' : '#E5E7EB',
               transition: 'background 0.3s',
             }}/>
           ))}
@@ -141,11 +141,11 @@ export default function WelcomePage() {
                 style={{
                   width: 100, height: 100,
                   borderRadius: '50%', margin: '0 auto 12px',
-                  background: profileImage ? 'transparent' : '#FFF0F4',
+                  background: profileImage ? 'transparent' : '#ECEAF8',
                   cursor: 'pointer', overflow: 'hidden',
                   display: 'flex', alignItems: 'center',
                   justifyContent: 'center', position: 'relative',
-                  border: '3px solid #E8789A',
+                  border: '3px solid #7B82BE',
                 }}>
                 {profileImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -169,7 +169,7 @@ export default function WelcomePage() {
               <input ref={fileRef} type="file"
                 accept="image/*" onChange={handleImageChange}
                 style={{ display: 'none' }}/>
-              <p style={{ fontSize: 13, color: '#E8789A', cursor: 'pointer' }}
+              <p style={{ fontSize: 13, color: '#7B82BE', cursor: 'pointer' }}
                 onClick={() => fileRef.current?.click()}>
                 프로필 사진 변경
               </p>
@@ -231,7 +231,7 @@ export default function WelcomePage() {
               }}
               style={{
                 width: '100%', padding: '14px',
-                background: '#E8789A', color: 'white',
+                background: '#7B82BE', color: 'white',
                 border: 'none', borderRadius: 12,
                 fontSize: 16, fontWeight: 600,
                 cursor: 'pointer',
@@ -259,9 +259,9 @@ export default function WelcomePage() {
                     style={{
                       padding: '8px 14px',
                       borderRadius: 99,
-                      border: `1px solid ${selectedInstruments.includes(inst) ? '#E8789A' : '#E5E7EB'}`,
-                      background: selectedInstruments.includes(inst) ? '#FFF0F4' : 'white',
-                      color: selectedInstruments.includes(inst) ? '#E8789A' : '#374151',
+                      border: `1px solid ${selectedInstruments.includes(inst) ? '#7B82BE' : '#E5E7EB'}`,
+                      background: selectedInstruments.includes(inst) ? '#ECEAF8' : 'white',
+                      color: selectedInstruments.includes(inst) ? '#7B82BE' : '#374151',
                       fontSize: 13, cursor: 'pointer',
                       fontWeight: selectedInstruments.includes(inst) ? 600 : 400,
                     }}>
@@ -311,7 +311,7 @@ export default function WelcomePage() {
                 disabled={saving}
                 style={{
                   flex: 2, padding: '14px',
-                  background: saving ? '#9CA3AF' : '#E8789A',
+                  background: saving ? '#9CA3AF' : '#7B82BE',
                   color: 'white', border: 'none',
                   borderRadius: 12, fontSize: 16,
                   fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer',

@@ -19,7 +19,7 @@ export default function LoginPage() {
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: '100vh',
-      background: 'linear-gradient(160deg, #FFFFFF 0%, #FFF0F4 50%, #FFFFFF 100%)',
+      background: 'linear-gradient(160deg, #FFFFFF 0%, #ECEAF8 50%, #FFFFFF 100%)',
       padding: '20px',
     }}>
       <div style={{
@@ -29,7 +29,7 @@ export default function LoginPage() {
         width: '100%',
         maxWidth: 380,
         textAlign: 'center',
-        boxShadow: '0 8px 40px rgba(232,120,154,0.15)',
+        boxShadow: '0 8px 40px rgba(123,130,190,0.15)',
       }}>
         {/* 로고 중앙 정렬 */}
         <div style={{
@@ -49,7 +49,7 @@ export default function LoginPage() {
         </div>
 
         <p style={{
-          color: '#E8789A',
+          color: '#7B82BE',
           fontSize: 14,
           marginBottom: 40,
           lineHeight: 1.5,
