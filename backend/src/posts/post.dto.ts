@@ -158,4 +158,8 @@ export class PostFilterDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

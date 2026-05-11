@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
@@ -93,6 +92,12 @@ export default function SupportPage() {
           <p className="text-sm font-semibold text-gray-700 mb-1">고객센터 운영시간</p>
           <p className="text-sm text-gray-500">평일 09:00 ~ 18:00 (주말·공휴일 휴무)</p>
           <p className="text-xs text-gray-400 mt-2">문의하기를 통해 접수하시면 영업일 기준 3일 이내 답변드립니다.</p>
+        </div>
+
+        {/* 약관 링크 */}
+        <div className="mt-6 flex justify-center gap-6 text-xs text-gray-400">
+          <Link href="/terms" className="hover:underline">이용약관</Link>
+          <Link href="/privacy" className="hover:underline">개인정보처리방침</Link>
         </div>
       </div>
     </div>

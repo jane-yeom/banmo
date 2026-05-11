@@ -53,7 +53,7 @@ export class PostsService {
   }
 
   async findAll(filter: PostFilterDto): Promise<{ items: Post[]; total: number }> {
-    const { authorId, category, categories, instrument, region, payMin, payMax, page = 1, limit = 20, status } = filter;
+    const { authorId, category, categories, instrument, region, payMin, payMax, page = 1, limit = 20, status, search } = filter;
 
     const qb = this.postsRepository
       .createQueryBuilder('post')
@@ -83,6 +83,7 @@ export class PostsService {
     if (instrument) qb.andWhere('post.instruments ILIKE :instrument', { instrument: `%${instrument}%` });
     if (payMin !== undefined) qb.andWhere('post.payMin >= :payMin', { payMin });
     if (payMax !== undefined) qb.andWhere('post.payMin <= :payMax', { payMax });
+    if (search) qb.andWhere('(post.title LIKE :search OR post.content LIKE :search)', { search: `%${search}%` });
 
     // TODO: 프리미엄 정렬 - 유료 기능 활성화시 주석 해제
     // qb.orderBy('post.isPremium', 'DESC')

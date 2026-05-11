@@ -31,6 +31,8 @@ export default function WelcomePage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(1);
+  const [agreed, setAgreed] = useState(false);
+  const [agreedPrivacy, setAgreedPrivacy] = useState(false);
 
   // 로그인 안된 경우 리다이렉트
   useEffect(() => {
@@ -221,10 +223,74 @@ export default function WelcomePage() {
                 }}/>
             </div>
 
+            {/* 약관 동의 */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{
+                display: 'flex', alignItems: 'center',
+                gap: 8, marginBottom: 8,
+              }}>
+                <input
+                  type="checkbox"
+                  id="agree-all"
+                  checked={agreed && agreedPrivacy}
+                  onChange={e => {
+                    setAgreed(e.target.checked);
+                    setAgreedPrivacy(e.target.checked);
+                  }}
+                  style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#7B82BE' }}
+                />
+                <label htmlFor="agree-all" style={{ fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
+                  전체 동의
+                </label>
+              </div>
+              <div style={{
+                borderTop: '0.5px solid #DDD9EF',
+                paddingTop: 8, display: 'flex',
+                flexDirection: 'column', gap: 8,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <input type="checkbox" id="agree-terms"
+                      checked={agreed}
+                      onChange={e => setAgreed(e.target.checked)}
+                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#7B82BE' }}
+                    />
+                    <label htmlFor="agree-terms" style={{ fontSize: 13, cursor: 'pointer' }}>
+                      <span style={{ color: '#7B82BE', fontWeight: 600 }}>[필수] </span>
+                      이용약관 동의
+                    </label>
+                  </div>
+                  <a href="/terms" target="_blank" style={{ fontSize: 12, color: '#9CA3AF', textDecoration: 'underline' }}>
+                    보기
+                  </a>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <input type="checkbox" id="agree-privacy"
+                      checked={agreedPrivacy}
+                      onChange={e => setAgreedPrivacy(e.target.checked)}
+                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#7B82BE' }}
+                    />
+                    <label htmlFor="agree-privacy" style={{ fontSize: 13, cursor: 'pointer' }}>
+                      <span style={{ color: '#7B82BE', fontWeight: 600 }}>[필수] </span>
+                      개인정보처리방침 동의
+                    </label>
+                  </div>
+                  <a href="/privacy" target="_blank" style={{ fontSize: 12, color: '#9CA3AF', textDecoration: 'underline' }}>
+                    보기
+                  </a>
+                </div>
+              </div>
+            </div>
+
             <button
               onClick={() => {
                 if (!nickname.trim() || nickname.trim().length < 2) {
                   alert('닉네임을 2자 이상 입력해주세요');
+                  return;
+                }
+                if (!agreed || !agreedPrivacy) {
+                  alert('이용약관과 개인정보처리방침에 동의해주세요');
                   return;
                 }
                 setStep(2);

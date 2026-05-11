@@ -140,4 +140,22 @@ export class UsersService {
     const { kakaoId, email, isBanned, password, sanitizeArrays, ...profile } = user as any;
     return profile;
   }
+
+  async deleteAccount(userId: string) {
+    const user = await this.findById(userId);
+    if (!user) throw new NotFoundException('유저를 찾을 수 없습니다');
+
+    const u = user as any;
+    u.deletedAt = new Date();
+    u.nickname = '탈퇴한 회원';
+    u.email = null;
+    u.kakaoId = `deleted_${userId}`;
+    u.profileImage = null;
+    u.bio = null;
+    u.isBanned = true;
+
+    await this.usersRepository.save(user);
+    console.log('[User] 회원 탈퇴:', userId);
+    return { success: true, message: '탈퇴가 완료되었습니다' };
+  }
 }

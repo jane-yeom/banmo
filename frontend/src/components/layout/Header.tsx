@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Bell, MessageCircle, Menu, X, ChevronRight, LogOut } from 'lucide-react';
+import { Bell, MessageCircle, Menu, X, ChevronRight, LogOut, Search } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
@@ -156,6 +156,13 @@ export default function Header() {
 
           {/* 우측 아이콘들 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Link href="/search" style={{
+              display: 'flex', alignItems: 'center',
+              textDecoration: 'none', padding: '4px 8px',
+              color: '#6B7280',
+            }}>
+              <Search size={22} strokeWidth={1.8} color="#555" />
+            </Link>
             {isLoggedIn && (
               <>
                 <Link href="/notifications" style={{
@@ -277,6 +284,18 @@ export default function Header() {
           }}>
             <X size={22} strokeWidth={1.8} />
           </button>
+        </div>
+
+        {/* 드로어 검색창 */}
+        <div style={{ padding: '12px 16px', borderBottom: '0.5px solid #F4F3F9' }}>
+          <Link href="/search" style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: '#F4F3F9', borderRadius: 10,
+            padding: '10px 14px', textDecoration: 'none',
+          }}>
+            <Search size={16} color="#9CA3AF" strokeWidth={1.8} />
+            <span style={{ fontSize: 14, color: '#9CA3AF' }}>공고 검색하기</span>
+          </Link>
         </div>
 
         {/* 유저 정보 */}

@@ -60,4 +60,10 @@ export class UsersController {
   removeVideo(@Request() req: any, @Body() dto: RemoveVideoDto) {
     return this.usersService.removeVideo(req.user.id, dto.videoUrl);
   }
+
+  @Delete('me')
+  @UseGuards(AuthGuard('jwt'))
+  async deleteAccount(@Request() req: any) {
+    return this.usersService.deleteAccount(req.user.id);
+  }
 }

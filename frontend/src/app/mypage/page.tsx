@@ -75,6 +75,30 @@ export default function MyPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['receivedApplications'] }),
   });
 
+  const handleDeleteAccount = async () => {
+    const confirmed = confirm(
+      '정말 탈퇴하시겠어요?\n\n' +
+      '• 작성한 공고와 채팅 내역이 삭제됩니다\n' +
+      '• 탈퇴 후 30일간 재가입이 제한됩니다\n' +
+      '• 이 작업은 되돌릴 수 없습니다'
+    );
+    if (!confirmed) return;
+
+    const reconfirmed = confirm('마지막으로 확인합니다. 탈퇴하시겠습니까?');
+    if (!reconfirmed) return;
+
+    try {
+      await apiClient.delete('/users/me');
+      logout();
+      localStorage.removeItem('accessToken');
+      document.cookie = 'accessToken=;max-age=0;path=/';
+      alert('탈퇴가 완료되었습니다. 이용해주셔서 감사합니다.');
+      router.replace('/');
+    } catch (e: any) {
+      alert(e.response?.data?.message || '오류가 발생했습니다');
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -264,6 +288,41 @@ export default function MyPage() {
           })}
         </div>
       )}
+      {/* 약관 링크 */}
+      <div style={{
+        marginTop: 24, paddingTop: 16,
+        borderTop: '0.5px solid #F3F4F6',
+        display: 'flex', justifyContent: 'center', gap: 16,
+      }}>
+        <Link href="/terms" style={{ fontSize: 12, color: '#9CA3AF', textDecoration: 'underline' }}>
+          이용약관
+        </Link>
+        <Link href="/privacy" style={{ fontSize: 12, color: '#9CA3AF', textDecoration: 'underline' }}>
+          개인정보처리방침
+        </Link>
+      </div>
+
+      {/* 회원 탈퇴 */}
+      <div style={{ marginTop: 32, padding: '0 0px' }}>
+        <button
+          onClick={handleDeleteAccount}
+          style={{
+            width: '100%', padding: '14px',
+            background: 'white', color: '#EF4444',
+            border: '1px solid #FCA5A5',
+            borderRadius: 12, fontSize: 14,
+            fontWeight: 600, cursor: 'pointer',
+          }}>
+          회원 탈퇴
+        </button>
+        <p style={{
+          fontSize: 11, color: '#9CA3AF',
+          textAlign: 'center', marginTop: 8,
+          lineHeight: 1.5,
+        }}>
+          탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다
+        </p>
+      </div>
     </div>
     </>
   );
