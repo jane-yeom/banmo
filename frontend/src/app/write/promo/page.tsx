@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
@@ -17,11 +18,22 @@ const REGIONS = [
   '충북', '충남', '전북', '전남', '경북', '경남', '제주',
 ];
 
-export default function WritePromoPage() {
+const CATEGORY_GUIDE: Record<string, string> = {
+  PROMO_CONCERT: '공연/연주회 정보를 홍보해보세요. 날짜, 장소, 입장료를 입력해주세요.',
+  PROMO_SPACE: '연습실/공연장 대여 정보예요. 위치, 시설, 대여료를 입력해주세요.',
+};
+
+const VALID_PROMO_CATEGORIES = PROMO_CATEGORIES.map(c => c.value);
+
+function WritePromoContent() {
   const router = useRouter();
   const { isLoggedIn } = useAuthStore();
+  const searchParams = useSearchParams();
+  const rawCategory = searchParams.get('category') ?? 'PROMO_CONCERT';
+  const initialCategory = VALID_PROMO_CATEGORIES.includes(rawCategory) ? rawCategory : 'PROMO_CONCERT';
+
   const [form, setForm] = useState({
-    category: 'PROMO_CONCERT',
+    category: initialCategory,
     title: '',
     content: '',
     region: '',
@@ -57,6 +69,8 @@ export default function WritePromoPage() {
     router.replace('/login');
     return null;
   }
+
+  const guide = CATEGORY_GUIDE[form.category];
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', background: 'white', minHeight: '100vh' }}>
@@ -101,12 +115,22 @@ export default function WritePromoPage() {
                   background: form.category === c.value ? '#ECEAF8' : 'white',
                   color: form.category === c.value ? '#5A63A8' : '#666',
                   fontSize: 13, fontWeight: form.category === c.value ? 700 : 400,
-                  cursor: 'pointer',
+                  cursor: 'pointer', transition: 'all 0.15s',
                 }}>
                 {c.label}
               </button>
             ))}
           </div>
+          {guide && (
+            <div style={{
+              marginTop: 10, padding: '10px 12px',
+              background: '#F4F3F9', borderRadius: 8,
+              fontSize: 12, color: '#6B7280', lineHeight: 1.5,
+              borderLeft: '3px solid #7B82BE',
+            }}>
+              💡 {guide}
+            </div>
+          )}
         </div>
 
         {/* 제목 */}
@@ -221,5 +245,13 @@ export default function WritePromoPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WritePromoPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#9CA3AF' }}>로딩 중...</div>}>
+      <WritePromoContent />
+    </Suspense>
   );
 }

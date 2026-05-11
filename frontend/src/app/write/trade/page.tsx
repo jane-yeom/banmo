@@ -1,17 +1,18 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { ChevronLeft, Camera } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
 
 const TRADE_CATEGORIES = [
+  { value: 'TRADE_INSTRUMENT', label: '중고악기 거래' },
   { value: 'TRADE_LESSON', label: '레슨 양도' },
   { value: 'TRADE_SPACE', label: '연습실 양도' },
   { value: 'TRADE_TICKET', label: '공연티켓 양도' },
-  { value: 'TRADE_INSTRUMENT', label: '중고악기 거래' },
 ];
 
 const REGIONS = [
@@ -19,6 +20,15 @@ const REGIONS = [
   '광주', '대전', '울산', '세종', '강원',
   '충북', '충남', '전북', '전남', '경북', '경남', '제주',
 ];
+
+const CATEGORY_GUIDE: Record<string, string> = {
+  TRADE_INSTRUMENT: '중고 악기 거래예요. 브랜드, 연식, 상태를 상세히 적어주세요.',
+  TRADE_LESSON: '레슨 양도 정보예요. 선생님 정보, 남은 횟수, 양도 사유를 적어주세요.',
+  TRADE_SPACE: '연습실 양도 정보예요. 위치, 계약 기간, 양도 조건을 적어주세요.',
+  TRADE_TICKET: '공연 티켓 양도예요. 공연명, 날짜, 좌석 정보를 적어주세요.',
+};
+
+const VALID_TRADE_CATEGORIES = TRADE_CATEGORIES.map(c => c.value);
 
 type TradeMethod = 'direct' | 'delivery' | 'both';
 
@@ -28,12 +38,16 @@ const TRADE_METHOD_LABELS: Record<TradeMethod, string> = {
   both: '모두 가능',
 };
 
-export default function WriteTradeePage() {
+function WriteTradeContent() {
   const router = useRouter();
   const { isLoggedIn } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const searchParams = useSearchParams();
+  const rawCategory = searchParams.get('category') ?? 'TRADE_INSTRUMENT';
+  const initialCategory = VALID_TRADE_CATEGORIES.includes(rawCategory) ? rawCategory : 'TRADE_INSTRUMENT';
+
   const [form, setForm] = useState({
-    category: 'TRADE_INSTRUMENT',
+    category: initialCategory,
     title: '',
     content: '',
     region: '',
@@ -94,6 +108,8 @@ export default function WriteTradeePage() {
     return null;
   }
 
+  const guide = CATEGORY_GUIDE[form.category];
+
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', background: 'white', minHeight: '100vh' }}>
       {/* 헤더 */}
@@ -137,12 +153,22 @@ export default function WriteTradeePage() {
                   background: form.category === c.value ? '#ECEAF8' : 'white',
                   color: form.category === c.value ? '#5A63A8' : '#666',
                   fontSize: 13, fontWeight: form.category === c.value ? 700 : 400,
-                  cursor: 'pointer',
+                  cursor: 'pointer', transition: 'all 0.15s',
                 }}>
                 {c.label}
               </button>
             ))}
           </div>
+          {guide && (
+            <div style={{
+              marginTop: 10, padding: '10px 12px',
+              background: '#F4F3F9', borderRadius: 8,
+              fontSize: 12, color: '#6B7280', lineHeight: 1.5,
+              borderLeft: '3px solid #7B82BE',
+            }}>
+              💡 {guide}
+            </div>
+          )}
         </div>
 
         {/* 제목 */}
@@ -284,5 +310,13 @@ export default function WriteTradeePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WriteTradeePage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#9CA3AF' }}>로딩 중...</div>}>
+      <WriteTradeContent />
+    </Suspense>
   );
 }

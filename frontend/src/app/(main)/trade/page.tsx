@@ -120,7 +120,7 @@ export default function TradePage() {
             {filtered ? `총 ${filtered.length}건` : ''}
           </p>
           <Link
-            href="/jobs/write"
+            href={`/write/trade?category=${tab}`}
             className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 transition-colors"
           >
             + 글쓰기

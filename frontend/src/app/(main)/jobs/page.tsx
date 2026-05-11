@@ -110,7 +110,7 @@ export default function JobsPage() {
               🎛 필터{activeFilters > 0 ? ` (${activeFilters})` : ''}
             </button>
             <Link
-              href="/jobs/write"
+              href={`/write/jobs?category=${category || 'JOB_OFFER'}`}
               style={{
                 padding: '7px 14px', borderRadius: 8,
                 background: '#7B82BE', color: 'white',

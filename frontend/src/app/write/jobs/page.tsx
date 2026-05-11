@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
@@ -27,11 +28,35 @@ const REGIONS = [
   '충북', '충남', '전북', '전남', '경북', '경남', '제주',
 ];
 
-export default function WriteJobsPage() {
+const CATEGORY_GUIDE: Record<string, string> = {
+  JOB_OFFER: '반주자/연주자를 구하는 공고예요. 레퍼토리, 일정, 연습 횟수를 상세히 적어주세요.',
+  JOB_SEEK: '반주/연주 활동을 원하는 구직 공고예요. 경력, 가능한 악기, 활동 가능 지역을 적어주세요.',
+  LESSON_OFFER: '레슨 선생님을 구하는 공고예요. 수준, 희망 횟수, 방문/화상 여부를 적어주세요.',
+  LESSON_SEEK: '레슨 가능하다는 공고예요. 전공, 경력, 가능한 수준을 적어주세요.',
+  PERFORMANCE: '공연 도우미를 구하는 공고예요. 공연 날짜, 장소, 역할을 적어주세요.',
+  AFTERSCHOOL: '방과후 교사를 구하는 공고예요. 학교 위치, 수업 시간, 대상 학년을 적어주세요.',
+};
+
+const CATEGORY_PLACEHOLDER: Record<string, string> = {
+  JOB_OFFER: '예) 매주 화/목 오전 10시 성악 레슨 반주입니다.\n레퍼토리: 이탈리아 가곡, 독일 가곡\n연습 3회 + 본 연주 1회 예정입니다.',
+  JOB_SEEK: '예) 음대 피아노과 졸업 후 반주 활동 중입니다.\n성악, 기악 반주 모두 가능합니다.\n강남/서초 지역 선호합니다.',
+  LESSON_OFFER: '예) 초등학생 피아노 레슨 선생님을 구합니다.\n바이엘 수준이며 주 2회 방문 레슨 원합니다.',
+  LESSON_SEEK: '예) 음대 출신으로 피아노 레슨 가능합니다.\n초급~중급 지도 가능하며 콩쿠르 준비 경험 있습니다.',
+  PERFORMANCE: '예) 결혼식 피아노 연주자를 구합니다.\n날짜: 2026년 6월 15일 오후 2시\n장소: 서울 강남구 OO웨딩홀',
+  AFTERSCHOOL: '예) 초등학교 방과후 바이올린 강사를 구합니다.\n월~금 오후 2-4시, 학교 내 악기 구비되어 있습니다.',
+};
+
+const VALID_JOB_CATEGORIES = JOB_CATEGORIES.map(c => c.value);
+
+function WriteJobsContent() {
   const router = useRouter();
   const { isLoggedIn } = useAuthStore();
+  const searchParams = useSearchParams();
+  const rawCategory = searchParams.get('category') ?? 'JOB_OFFER';
+  const initialCategory = VALID_JOB_CATEGORIES.includes(rawCategory) ? rawCategory : 'JOB_OFFER';
+
   const [form, setForm] = useState({
-    category: 'JOB_OFFER',
+    category: initialCategory,
     title: '',
     content: '',
     instruments: [] as string[],
@@ -73,6 +98,9 @@ export default function WriteJobsPage() {
     router.replace('/login');
     return null;
   }
+
+  const guide = CATEGORY_GUIDE[form.category];
+  const placeholder = CATEGORY_PLACEHOLDER[form.category] ?? '공고 내용을 자세히 입력해주세요';
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', background: 'white', minHeight: '100vh' }}>
@@ -117,12 +145,22 @@ export default function WriteJobsPage() {
                   background: form.category === c.value ? '#ECEAF8' : 'white',
                   color: form.category === c.value ? '#5A63A8' : '#666',
                   fontSize: 13, fontWeight: form.category === c.value ? 700 : 400,
-                  cursor: 'pointer',
+                  cursor: 'pointer', transition: 'all 0.15s',
                 }}>
                 {c.label}
               </button>
             ))}
           </div>
+          {guide && (
+            <div style={{
+              marginTop: 10, padding: '10px 12px',
+              background: '#F4F3F9', borderRadius: 8,
+              fontSize: 12, color: '#6B7280', lineHeight: 1.5,
+              borderLeft: '3px solid #7B82BE',
+            }}>
+              💡 {guide}
+            </div>
+          )}
         </div>
 
         {/* 제목 */}
@@ -141,6 +179,9 @@ export default function WriteJobsPage() {
               fontSize: 15, outline: 'none', boxSizing: 'border-box',
             }}
           />
+          <div style={{ textAlign: 'right', fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
+            {form.title.length}/50
+          </div>
         </div>
 
         {/* 악기 */}
@@ -213,7 +254,7 @@ export default function WriteJobsPage() {
           <textarea
             value={form.content}
             onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
-            placeholder={'공고 내용을 자세히 입력해주세요\n예) 레퍼토리, 일정, 연습 횟수, 기타 조건 등'}
+            placeholder={placeholder}
             rows={8}
             style={{
               width: '100%', padding: '12px 14px',
@@ -223,8 +264,19 @@ export default function WriteJobsPage() {
               lineHeight: 1.6,
             }}
           />
+          <div style={{ textAlign: 'right', fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
+            {form.content.length}자
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WriteJobsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#9CA3AF' }}>로딩 중...</div>}>
+      <WriteJobsContent />
+    </Suspense>
   );
 }

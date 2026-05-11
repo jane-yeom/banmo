@@ -107,7 +107,7 @@ export default function PromoPage() {
               {data ? `총 ${data.total}건` : ''}
             </span>
             <Link
-              href="/jobs/write"
+              href={`/write/promo?category=${tab}`}
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
             >
               + 공연/연습실 등록
