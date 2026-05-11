@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import BackButton from '@/components/common/BackButton';
+import { ChevronLeft } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/axios';
@@ -63,12 +63,25 @@ export default function NotificationSettingsPage() {
   if (!user) return null;
 
   return (
+    <>
+    <div style={{
+      position: 'sticky', top: 0, zIndex: 10,
+      background: 'white',
+      borderBottom: '0.5px solid #DDD9EF',
+      padding: '12px 16px',
+      display: 'flex', alignItems: 'center', gap: 12,
+    }}>
+      <button onClick={() => router.back()} style={{
+        background: 'none', border: 'none',
+        cursor: 'pointer', padding: 4,
+        display: 'flex', alignItems: 'center',
+      }}>
+        <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+      </button>
+      <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>알림 설정</h1>
+    </div>
     <div className="mx-auto max-w-lg px-4 py-8">
       <div className="mb-6">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, padding: '8px 0' }}>
-          <BackButton />
-          <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>알림 설정</h1>
-        </div>
         <p className="text-sm text-gray-500">받고 싶은 알림을 선택하세요</p>
       </div>
 
@@ -106,5 +119,6 @@ export default function NotificationSettingsPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

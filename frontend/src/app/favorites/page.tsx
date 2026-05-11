@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import BackButton from '@/components/common/BackButton';
+import { ChevronLeft } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/axios';
@@ -44,14 +44,24 @@ export default function FavoritesPage() {
   if (!user) return null;
 
   return (
+    <>
+    <div style={{
+      position: 'sticky', top: 0, zIndex: 10,
+      background: 'white',
+      borderBottom: '0.5px solid #DDD9EF',
+      padding: '12px 16px',
+      display: 'flex', alignItems: 'center', gap: 12,
+    }}>
+      <button onClick={() => router.back()} style={{
+        background: 'none', border: 'none',
+        cursor: 'pointer', padding: 4,
+        display: 'flex', alignItems: 'center',
+      }}>
+        <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+      </button>
+      <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>찜한 공고</h1>
+    </div>
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-6">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4, padding: '8px 0' }}>
-          <BackButton />
-          <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>찜한 공고</h1>
-          <span className="text-sm text-gray-400">{favorites.length}개</span>
-        </div>
-      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -103,5 +113,6 @@ export default function FavoritesPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

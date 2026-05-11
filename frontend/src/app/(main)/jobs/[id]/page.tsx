@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import BackButton from '@/components/common/BackButton';
+import { ChevronLeft } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { usePost } from '@/hooks/usePosts';
@@ -204,11 +204,25 @@ export default function JobDetailPage() {
       )}
       */}
 
+      {/* 헤더 */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: 'white',
+        borderBottom: '0.5px solid #DDD9EF',
+        padding: '12px 16px',
+        display: 'flex', alignItems: 'center', gap: 12,
+      }}>
+        <button onClick={() => router.back()} style={{
+          background: 'none', border: 'none',
+          cursor: 'pointer', padding: 4,
+          display: 'flex', alignItems: 'center',
+        }}>
+          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+        </button>
+        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>공고 상세</h1>
+      </div>
+
       <div className="mx-auto max-w-3xl px-4 py-8">
-        {/* 뒤로가기 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: '8px 0' }}>
-          <BackButton />
-        </div>
 
         {/* 카테고리 + 상태 */}
         <div className="flex items-center gap-2 mb-3">

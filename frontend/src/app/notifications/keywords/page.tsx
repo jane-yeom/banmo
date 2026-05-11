@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import BackButton from '@/components/common/BackButton';
+import { ChevronLeft } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/axios';
@@ -71,12 +71,25 @@ export default function KeywordsPage() {
   if (!user) return null;
 
   return (
+    <>
+    <div style={{
+      position: 'sticky', top: 0, zIndex: 10,
+      background: 'white',
+      borderBottom: '0.5px solid #DDD9EF',
+      padding: '12px 16px',
+      display: 'flex', alignItems: 'center', gap: 12,
+    }}>
+      <button onClick={() => router.back()} style={{
+        background: 'none', border: 'none',
+        cursor: 'pointer', padding: 4,
+        display: 'flex', alignItems: 'center',
+      }}>
+        <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+      </button>
+      <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>키워드 알림</h1>
+    </div>
     <div className="mx-auto max-w-lg px-4 py-8">
       <div className="mb-6">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, padding: '8px 0' }}>
-          <BackButton />
-          <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>키워드 알림</h1>
-        </div>
         <p className="text-sm text-gray-500">
           원하는 키워드를 등록하면 관련 공고가 올라올 때 알려드려요
         </p>
@@ -168,5 +181,6 @@ export default function KeywordsPage() {
         </p>
       </div>
     </div>
+    </>
   );
 }

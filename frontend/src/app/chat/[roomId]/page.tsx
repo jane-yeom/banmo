@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ChevronLeft, User } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useChatMessages } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
@@ -177,51 +178,45 @@ export default function ChatRoomPage() {
   return (
     <div className="flex h-[100dvh] flex-col bg-gray-50">
       {/* 채팅방 헤더 */}
-      <div className="flex-shrink-0 border-b border-gray-100 bg-white px-4 py-3 shadow-sm">
-        <div className="mx-auto flex max-w-3xl items-center gap-3">
-          <button
-            onClick={() => router.push('/chat')}
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 transition-colors"
-            aria-label="뒤로"
-          >
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M19 12H5M12 5l-7 7 7 7" />
-            </svg>
-          </button>
-
-          {other && (
-            <>
-              <Avatar src={other.profileImage} nickname={other.nickname} />
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 truncate">
-                  {other.nickname ?? '익명'}
-                </p>
-                {room?.post?.title && (
-                  <Link
-                    href={`/jobs/${room.postId}`}
-                    className="text-xs hover:underline truncate block" style={{ color: '#7B82BE' }}
-                  >
-                    📋 {room.post.title}
-                  </Link>
-                )}
-              </div>
-              <Link
-                href={`/profile/${other.id}`}
-                className="flex-shrink-0 text-xs text-gray-400 hover:text-purple-600"
-              >
-                프로필
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* 연결 상태 */}
-        {!connected && (
-          <div className="mt-1.5 text-center text-xs text-amber-600">
-            ⚡ 연결 중...
-          </div>
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: 'white',
+        borderBottom: '0.5px solid #DDD9EF',
+        padding: '12px 16px',
+        display: 'flex', alignItems: 'center', gap: 12,
+      }}>
+        <button onClick={() => router.push('/chat')} style={{
+          background: 'none', border: 'none',
+          cursor: 'pointer', padding: 4,
+          display: 'flex', alignItems: 'center',
+        }}>
+          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+        </button>
+        {other && (
+          <>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#ECEAF8', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+              {other.profileImage ? (
+                <Image src={other.profileImage} alt={other.nickname ?? '?'} width={36} height={36} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+              ) : (
+                <User size={20} color="#7B82BE" />
+              )}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>{other.nickname ?? '익명'}</div>
+              <div style={{ fontSize: 11, color: '#7B82BE' }}>{other.noteGrade}</div>
+            </div>
+            <Link href={`/profile/${other.id}`} className="flex-shrink-0 text-xs text-gray-400 hover:text-purple-600">
+              프로필
+            </Link>
+          </>
         )}
       </div>
+      {/* 연결 상태 */}
+      {!connected && (
+        <div className="text-center text-xs text-amber-600 py-1 bg-amber-50">
+          ⚡ 연결 중...
+        </div>
+      )}
 
       {/* 메시지 목록 */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">

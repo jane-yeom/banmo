@@ -78,16 +78,24 @@ export default function MyPage() {
   if (!user) return null;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      {/* 뒤로가기 */}
+    <>
+    <div style={{
+      position: 'sticky', top: 0, zIndex: 10,
+      background: 'white',
+      borderBottom: '0.5px solid #DDD9EF',
+      padding: '12px 16px',
+      display: 'flex', alignItems: 'center', gap: 12,
+    }}>
       <button onClick={() => router.back()} style={{
         background: 'none', border: 'none',
-        cursor: 'pointer', padding: '4px 8px 4px 0',
+        cursor: 'pointer', padding: 4,
         display: 'flex', alignItems: 'center',
-        marginBottom: 12,
       }}>
         <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
       </button>
+      <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>마이페이지</h1>
+    </div>
+    <div className="mx-auto max-w-2xl px-4 py-8">
 
       {/* 프로필 헤더 */}
       <div className="mb-6 flex items-center gap-4">
@@ -257,6 +265,7 @@ export default function MyPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

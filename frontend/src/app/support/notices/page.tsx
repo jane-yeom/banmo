@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import BackButton from '@/components/common/BackButton';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/lib/axios';
 
@@ -27,17 +28,28 @@ function useNotices() {
 }
 
 export default function SupportNoticesPage() {
+  const router = useRouter();
   const { data: notices, isLoading } = useNotices();
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
-      <div className="bg-white border-b border-gray-100 px-4 py-2">
-        <div className="mx-auto max-w-3xl flex items-center gap-2">
-          <BackButton href="/support" />
-          <span className="text-sm font-medium text-gray-700">공지사항</span>
-        </div>
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: 'white',
+        borderBottom: '0.5px solid #DDD9EF',
+        padding: '12px 16px',
+        display: 'flex', alignItems: 'center', gap: 12,
+      }}>
+        <button onClick={() => router.back()} style={{
+          background: 'none', border: 'none',
+          cursor: 'pointer', padding: 4,
+          display: 'flex', alignItems: 'center',
+        }}>
+          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+        </button>
+        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>공지사항</h1>
       </div>
 
       <div className="mx-auto max-w-3xl px-4 py-8">

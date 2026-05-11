@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 
 const MENU_CARDS = [
   {
@@ -33,8 +35,27 @@ const MENU_CARDS = [
 ];
 
 export default function SupportPage() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 헤더 */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: 'white',
+        borderBottom: '0.5px solid #DDD9EF',
+        padding: '12px 16px',
+        display: 'flex', alignItems: 'center', gap: 12,
+      }}>
+        <button onClick={() => router.back()} style={{
+          background: 'none', border: 'none',
+          cursor: 'pointer', padding: 4,
+          display: 'flex', alignItems: 'center',
+        }}>
+          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+        </button>
+        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>고객센터</h1>
+      </div>
       {/* 상단 배너 */}
       <div className="py-12 text-center text-white" style={{ background: 'linear-gradient(135deg, #7B82BE, #4A52A0)' }}>
         <div className="mx-auto max-w-2xl px-4">

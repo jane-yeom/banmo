@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import BackButton from '@/components/common/BackButton';
+import { ChevronLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -212,13 +212,24 @@ export default function JobEditPage() {
   }
 
   return (
+    <>
+    <div style={{
+      position: 'sticky', top: 0, zIndex: 10,
+      background: 'white',
+      borderBottom: '0.5px solid #DDD9EF',
+      padding: '12px 16px',
+      display: 'flex', alignItems: 'center', gap: 12,
+    }}>
+      <button onClick={() => router.back()} style={{
+        background: 'none', border: 'none',
+        cursor: 'pointer', padding: 4,
+        display: 'flex', alignItems: 'center',
+      }}>
+        <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+      </button>
+      <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>공고 수정</h1>
+    </div>
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="mb-6">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, padding: '8px 0' }}>
-          <BackButton href="/jobs" />
-          <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>공고 수정</h1>
-        </div>
-      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* 카테고리 */}
@@ -395,6 +406,7 @@ export default function JobEditPage() {
         </div>
       </form>
     </div>
+    </>
   );
 }
 

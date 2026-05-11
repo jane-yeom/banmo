@@ -93,15 +93,23 @@ export default function ProfilePage() {
         <VideoModal url={modalUrl} onClose={() => setModalUrl(null)} />
       )}
 
-      <div className="mx-auto max-w-2xl px-4 py-8 space-y-5">
-        {/* 뒤로가기 */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: 'white',
+        borderBottom: '0.5px solid #DDD9EF',
+        padding: '12px 16px',
+        display: 'flex', alignItems: 'center', gap: 12,
+      }}>
         <button onClick={() => router.back()} style={{
           background: 'none', border: 'none',
-          cursor: 'pointer', padding: '4px 8px 4px 0',
+          cursor: 'pointer', padding: 4,
           display: 'flex', alignItems: 'center',
         }}>
           <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
         </button>
+        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>프로필</h1>
+      </div>
+      <div className="mx-auto max-w-2xl px-4 py-8 space-y-5">
 
         {/* 프로필 카드 */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
