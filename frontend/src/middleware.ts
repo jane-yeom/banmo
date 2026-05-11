@@ -18,6 +18,9 @@ const AUTH_ONLY = ['/login', '/signup'];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // 관리자 로그인 페이지는 항상 허용
+  if (pathname === '/admin/login') return NextResponse.next();
+
   const token = request.cookies.get('accessToken')?.value;
 
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
@@ -26,6 +29,10 @@ export function middleware(request: NextRequest) {
   console.log('[Middleware] path:', pathname, 'token:', !!token);
 
   if (isProtected && !token) {
+    // /admin 하위 경로는 /admin/login 으로 리다이렉트
+    if (pathname.startsWith('/admin')) {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);

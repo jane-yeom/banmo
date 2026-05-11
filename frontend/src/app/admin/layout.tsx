@@ -54,11 +54,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (!hydrated) return;
     if (!user) {
-      router.push('/login?redirect=/admin');
+      router.replace('/admin/login');
       return;
     }
     if (user.role !== 'ADMIN') {
-      router.push('/');
+      router.replace('/admin/login');
     }
   }, [hydrated, user, router]);
 
@@ -72,7 +72,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = () => {
     logout();
-    window.location.href = '/login';
+    window.location.href = '/admin/login';
   };
 
   const getPageTitle = () => {

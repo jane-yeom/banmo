@@ -46,6 +46,28 @@ export class AuthService {
     return { accessToken: this.generateToken(user), user };
   }
 
+  // ── 관리자 전용 이메일 로그인 ───────────────────────────────────────────
+  async adminLogin(email: string, password: string): Promise<{ accessToken: string; user: User }> {
+    console.log('[Admin] 로그인 시도:', email);
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      throw new UnauthorizedException('존재하지 않는 계정입니다.');
+    }
+    if (user.role !== 'ADMIN' as any) {
+      throw new UnauthorizedException('관리자 계정이 아닙니다.');
+    }
+    if (!user.password) {
+      throw new UnauthorizedException('비밀번호가 설정되지 않은 계정입니다.');
+    }
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      throw new UnauthorizedException('비밀번호가 틀렸습니다.');
+    }
+    console.log('[Admin] 로그인 성공:', user.id);
+    return { accessToken: this.generateToken(user), user };
+  }
+
   // ── 카카오 AccessToken 방식 (레거시) ──────────────────────────────────
   async kakaoLogin(accessToken: string): Promise<{ accessToken: string; user: User; isNewUser: boolean }> {
     const userRes = await axios.get('https://kapi.kakao.com/v2/user/me', {

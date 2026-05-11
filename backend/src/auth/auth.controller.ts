@@ -2,7 +2,7 @@
 // 추후 필요시 register/login 주석 해제
 
 import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
-import { IsString } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './auth.dto';
@@ -17,6 +17,14 @@ class KakaoLoginDto {
 class KakaoCallbackDto {
   @IsString()
   code: string;
+}
+
+class AdminLoginDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  password: string;
 }
 
 @Controller('auth')
@@ -48,6 +56,13 @@ export class AuthController {
   @HttpCode(200)
   async kakaoCallback(@Body() body: KakaoCallbackDto) {
     return this.authService.kakaoLoginWithCode(body.code);
+  }
+
+  /** 관리자 전용 이메일 로그인 */
+  @Post('admin/login')
+  @HttpCode(200)
+  async adminLogin(@Body() dto: AdminLoginDto) {
+    return this.authService.adminLogin(dto.email, dto.password);
   }
 
   /** 현재 유저 정보 */
