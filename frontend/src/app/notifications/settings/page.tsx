@@ -7,6 +7,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
+import {
+  IconChat, IconNewApplicant, IconResult,
+  IconKeyword, IconComment, IconFavorite, IconNotice,
+} from '@/components/common/SectionIcons';
 
 interface NotificationSettings {
   chatMessage: boolean;
@@ -20,15 +24,68 @@ interface NotificationSettings {
   pushEnabled: boolean;
 }
 
-const SETTINGS_ITEMS = [
-  { key: 'chatMessage',       icon: '💬', label: '채팅 메시지',         desc: '새 채팅 메시지가 왔을 때' },
-  { key: 'application',       icon: '📝', label: '새 지원자',           desc: '내 공고에 지원자가 생겼을 때' },
-  { key: 'applicationStatus', icon: '🎉', label: '지원 결과',           desc: '지원한 공고의 합/불합격 결과' },
-  { key: 'keyword',           icon: '🔍', label: '키워드 알림',         desc: '등록한 키워드가 포함된 공고 등록 시' },
-  { key: 'comment',           icon: '💭', label: '댓글 알림',           desc: '내 게시글에 댓글이 달렸을 때' },
-  { key: 'favoritePost',      icon: '⭐', label: '찜한 공고 업데이트',  desc: '찜한 공고가 수정됐을 때' },
-  { key: 'notice',            icon: '📢', label: '공지사항',            desc: '새 공지사항이 등록됐을 때' },
-] as const;
+function NotifRow({
+  icon,
+  bg,
+  title,
+  sub,
+  value,
+  onChange,
+}: {
+  icon: React.ReactNode;
+  bg: string;
+  title: string;
+  sub: string;
+  value: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center',
+      gap: 12, padding: '14px 0',
+      borderBottom: '0.5px solid #F4F3F9',
+    }}>
+      <div style={{
+        width: 40, height: 40,
+        background: bg, borderRadius: 11,
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'center', flexShrink: 0,
+      }}>
+        {icon}
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: '#1A1A1A', marginBottom: 2 }}>
+          {title}
+        </div>
+        <div style={{ fontSize: 12, color: '#888' }}>
+          {sub}
+        </div>
+      </div>
+      <div
+        onClick={onChange}
+        style={{
+          width: 44, height: 24,
+          background: value ? '#7B82BE' : '#DDD9EF',
+          borderRadius: 12, position: 'relative',
+          cursor: 'pointer', transition: 'background 0.2s',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{
+          position: 'absolute',
+          width: 18, height: 18,
+          background: 'white',
+          borderRadius: '50%',
+          top: 3,
+          right: value ? 3 : 'auto',
+          left: value ? 'auto' : 3,
+          transition: 'all 0.2s',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+        }} />
+      </div>
+    </div>
+  );
+}
 
 export default function NotificationSettingsPage() {
   const { user } = useAuthStore();
@@ -56,69 +113,81 @@ export default function NotificationSettingsPage() {
     onError: () => toast.error('저장에 실패했습니다'),
   });
 
-  const handleToggle = (key: string, value: boolean) => {
-    updateMutation.mutate({ [key]: value });
+  const toggle = (key: keyof NotificationSettings) => {
+    if (!settings) return;
+    updateMutation.mutate({ [key]: !settings[key] });
   };
 
   if (!user) return null;
 
   return (
     <>
-    <div style={{
-      position: 'sticky', top: 0, zIndex: 10,
-      background: 'white',
-      borderBottom: '0.5px solid #DDD9EF',
-      padding: '12px 16px',
-      display: 'flex', alignItems: 'center', gap: 12,
-    }}>
-      <button onClick={() => router.back()} style={{
-        background: 'none', border: 'none',
-        cursor: 'pointer', padding: 4,
-        display: 'flex', alignItems: 'center',
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: 'white',
+        borderBottom: '0.5px solid #DDD9EF',
+        padding: '12px 16px',
+        display: 'flex', alignItems: 'center', gap: 12,
       }}>
-        <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-      </button>
-      <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>알림 설정</h1>
-    </div>
-    <div className="mx-auto max-w-lg px-4 py-8">
-      <div className="mb-6">
-        <p className="text-sm text-gray-500">받고 싶은 알림을 선택하세요</p>
+        <button onClick={() => router.back()} style={{
+          background: 'none', border: 'none',
+          cursor: 'pointer', padding: 4,
+          display: 'flex', alignItems: 'center',
+        }}>
+          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+        </button>
+        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>알림 설정</h1>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-16 rounded-2xl bg-gray-100 animate-pulse" />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {SETTINGS_ITEMS.map(({ key, icon, label, desc }) => (
-            <div
-              key={key}
-              className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">{icon}</span>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">{label}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
-                </div>
-              </div>
-              <label className="relative inline-flex cursor-pointer items-center">
-                <input
-                  type="checkbox"
-                  checked={settings?.[key] ?? true}
-                  onChange={(e) => handleToggle(key, e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600" />
-              </label>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+      <div style={{ maxWidth: 512, margin: '0 auto', padding: '8px 16px 40px' }}>
+        <p style={{ fontSize: 13, color: '#888', margin: '12px 0 4px' }}>받고 싶은 알림을 선택하세요</p>
+
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div key={i} style={{ height: 64, borderRadius: 12, background: '#F3F4F6' }} />
+            ))}
+          </div>
+        ) : settings ? (
+          <div>
+            <NotifRow
+              icon={<IconChat />} bg="#EAF6EF"
+              title="채팅 메시지" sub="새 채팅 메시지가 왔을 때"
+              value={settings.chatMessage} onChange={() => toggle('chatMessage')}
+            />
+            <NotifRow
+              icon={<IconNewApplicant />} bg="#ECEAF8"
+              title="새 지원자" sub="내 공고에 지원자가 생겼을 때"
+              value={settings.application} onChange={() => toggle('application')}
+            />
+            <NotifRow
+              icon={<IconResult />} bg="#ECEAF8"
+              title="지원 결과" sub="지원한 공고의 합/불합격 결과"
+              value={settings.applicationStatus} onChange={() => toggle('applicationStatus')}
+            />
+            <NotifRow
+              icon={<IconKeyword />} bg="#F3EAF8"
+              title="키워드 알림" sub="등록한 키워드가 포함된 공고 등록 시"
+              value={settings.keyword} onChange={() => toggle('keyword')}
+            />
+            <NotifRow
+              icon={<IconComment />} bg="#EAF6EF"
+              title="댓글 알림" sub="내 게시글에 댓글이 달렸을 때"
+              value={settings.comment} onChange={() => toggle('comment')}
+            />
+            <NotifRow
+              icon={<IconFavorite />} bg="#ECEAF8"
+              title="찜한 공고 업데이트" sub="찜한 공고가 수정됐을 때"
+              value={settings.favoritePost} onChange={() => toggle('favoritePost')}
+            />
+            <NotifRow
+              icon={<IconNotice />} bg="#FEF6E4"
+              title="공지사항" sub="새 공지사항이 등록됐을 때"
+              value={settings.notice} onChange={() => toggle('notice')}
+            />
+          </div>
+        ) : null}
+      </div>
     </>
   );
 }

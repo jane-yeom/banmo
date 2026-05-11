@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import api from '@/lib/axios';
 import { Music2, Mic, BookOpen, Star, Building2, Guitar, MessageSquare, MessageCircle, LucideIcon } from 'lucide-react';
+import { IconJob, IconPromo, IconTrade } from '@/components/common/SectionIcons';
 
 // 슬라이딩 배너 컴포넌트
 function HeroBanner() {
@@ -231,7 +232,18 @@ function SectionCard({ post }: { post: any }) {
 }
 
 // 섹션 타이틀
-function SectionTitle({ icon, title, href }: { icon: string; title: string; href: string }) {
+function SectionTitle({ type, title, href }: {
+  type: 'job' | 'promo' | 'trade'
+  title: string
+  href: string
+}) {
+  const iconMap = {
+    job:   { Icon: IconJob,   bg: '#ECEAF8' },
+    promo: { Icon: IconPromo, bg: '#FEF6E4' },
+    trade: { Icon: IconTrade, bg: '#FEF0EA' },
+  };
+  const { Icon, bg } = iconMap[type];
+
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-between',
@@ -239,14 +251,21 @@ function SectionTitle({ icon, title, href }: { icon: string; title: string; href
     }}>
       <h2 style={{
         fontSize: 17, fontWeight: 700,
-        color: '#111827', margin: 0,
-        display: 'flex', alignItems: 'center', gap: 6,
+        color: '#1A1A1A', margin: 0,
+        display: 'flex', alignItems: 'center', gap: 8,
       }}>
-        <span>{icon}</span>
+        <div style={{
+          width: 32, height: 32,
+          background: bg, borderRadius: 9,
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <Icon />
+        </div>
         {title}
       </h2>
       <Link href={href} style={{
-        fontSize: 13, color: '#7B82BE',
+        fontSize: 13, color: '#5A63A8',
         textDecoration: 'none', fontWeight: 500,
       }}>
         더보기 →
@@ -364,7 +383,7 @@ export default function HomePage() {
 
         {/* 구인구직 섹션 */}
         <div style={{ marginBottom: 28 }}>
-          <SectionTitle icon="💼" title="구인구직" href="/jobs" />
+          <SectionTitle type="job" title="구인구직" href="/jobs" />
           {loading ? (
             [1, 2, 3].map((i) => (
               <div key={i} style={{
@@ -388,7 +407,7 @@ export default function HomePage() {
 
         {/* 공연/연습실 섹션 */}
         <div style={{ marginBottom: 28 }}>
-          <SectionTitle icon="🎭" title="공연/연습실" href="/promo" />
+          <SectionTitle type="promo" title="공연/연습실" href="/promo" />
           {!loading && promoPosts.length === 0 ? (
             <div style={{
               textAlign: 'center', padding: '24px',
@@ -404,7 +423,7 @@ export default function HomePage() {
 
         {/* 중고거래 섹션 */}
         <div style={{ marginBottom: 28 }}>
-          <SectionTitle icon="🎸" title="중고악기" href="/trade" />
+          <SectionTitle type="trade" title="중고악기" href="/trade" />
           {!loading && tradePosts.length === 0 ? (
             <div style={{
               textAlign: 'center', padding: '24px',
