@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
 import { usePost } from '@/hooks/usePosts';
 import { useCreateChatRoom } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
@@ -51,6 +52,17 @@ export default function PromoDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
+      {/* 뒤로가기 */}
+      <div style={{ marginBottom: 12 }}>
+        <button onClick={() => router.back()} style={{
+          background: 'none', border: 'none',
+          cursor: 'pointer', padding: '4px 8px 4px 0',
+          display: 'flex', alignItems: 'center',
+        }}>
+          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+        </button>
+      </div>
+
       {/* 카테고리 배지 */}
       <div className="mb-3 flex items-center gap-2 flex-wrap">
         <span className="rounded-full bg-pink-100 px-3 py-1 text-sm font-medium text-pink-700">

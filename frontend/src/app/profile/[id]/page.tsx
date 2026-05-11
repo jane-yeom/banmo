@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
@@ -59,6 +60,7 @@ function VideoModal({ url, onClose }: { url: string; onClose: () => void }) {
 
 export default function ProfilePage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const { user: me } = useAuthStore();
   const [modalUrl, setModalUrl] = useState<string | null>(null);
 
@@ -92,6 +94,15 @@ export default function ProfilePage() {
       )}
 
       <div className="mx-auto max-w-2xl px-4 py-8 space-y-5">
+        {/* 뒤로가기 */}
+        <button onClick={() => router.back()} style={{
+          background: 'none', border: 'none',
+          cursor: 'pointer', padding: '4px 8px 4px 0',
+          display: 'flex', alignItems: 'center',
+        }}>
+          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+        </button>
+
         {/* 프로필 카드 */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
           <div className="h-24" style={{ background: 'linear-gradient(135deg, #7B82BE, #4A52A0)' }} />

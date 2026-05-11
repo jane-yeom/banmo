@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
@@ -78,6 +79,16 @@ export default function MyPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
+      {/* 뒤로가기 */}
+      <button onClick={() => router.back()} style={{
+        background: 'none', border: 'none',
+        cursor: 'pointer', padding: '4px 8px 4px 0',
+        display: 'flex', alignItems: 'center',
+        marginBottom: 12,
+      }}>
+        <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+      </button>
+
       {/* 프로필 헤더 */}
       <div className="mb-6 flex items-center gap-4">
         <div className="h-14 w-14 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 text-2xl font-bold flex-shrink-0 overflow-hidden">

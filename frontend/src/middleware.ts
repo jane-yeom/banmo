@@ -10,6 +10,7 @@ const protectedPaths = [
   '/favorites',
   '/notifications',
   '/board/write',
+  '/write',
 ];
 
 const AUTH_ONLY = ['/login', '/signup'];
@@ -47,6 +48,7 @@ export const config = {
     '/favorites/:path*',
     '/notifications/:path*',
     '/board/write/:path*',
+    '/write/:path*',
     '/login',
     '/signup',
   ],

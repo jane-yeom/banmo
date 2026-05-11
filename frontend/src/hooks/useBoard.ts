@@ -61,7 +61,7 @@ export function useBoardPost(id: string) {
 export function useCreateBoardPost() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { type: string; title: string; content: string }) =>
+    mutationFn: (data: { type: string; title: string; content: string; isAnonymous?: boolean }) =>
       apiClient.post('/board', data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['board'] }),
   });
