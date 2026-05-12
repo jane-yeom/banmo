@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
+import SubHeader from '@/components/layout/SubHeader';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/lib/axios';
 
@@ -34,23 +34,7 @@ export default function SupportNoticesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        background: 'white',
-        borderBottom: '0.5px solid #DDD9EF',
-        padding: '12px 16px',
-        display: 'flex', alignItems: 'center', gap: 12,
-      }}>
-        <button onClick={() => router.back()} style={{
-          background: 'none', border: 'none',
-          cursor: 'pointer', padding: 4,
-          display: 'flex', alignItems: 'center',
-        }}>
-          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-        </button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>공지사항</h1>
-      </div>
+      <SubHeader title="공지사항" />
 
       <div className="mx-auto max-w-3xl px-4 py-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">📢 공지사항</h1>

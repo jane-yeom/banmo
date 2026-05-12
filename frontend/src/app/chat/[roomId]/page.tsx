@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, User, MoreVertical } from 'lucide-react';
+import { ChevronLeft, User, MoreVertical, Home } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useChatMessages } from '@/hooks/useChat';
@@ -227,6 +227,10 @@ export default function ChatRoomPage() {
         }}>
           <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
         </button>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0, marginRight: 4 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/banmo-logo.png" alt="홈" style={{ height: 24, width: 'auto', opacity: 0.6 }} />
+        </Link>
         {other && (
           <>
             <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#ECEAF8', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>

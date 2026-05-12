@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
+import SubHeader from '@/components/layout/SubHeader';
 import { usePost } from '@/hooks/usePosts';
 import { useCreateChatRoom } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
@@ -52,22 +52,7 @@ export default function PromoDetailPage() {
 
   return (
     <>
-    <div style={{
-      position: 'sticky', top: 0, zIndex: 10,
-      background: 'white',
-      borderBottom: '0.5px solid #DDD9EF',
-      padding: '12px 16px',
-      display: 'flex', alignItems: 'center', gap: 12,
-    }}>
-      <button onClick={() => router.back()} style={{
-        background: 'none', border: 'none',
-        cursor: 'pointer', padding: 4,
-        display: 'flex', alignItems: 'center',
-      }}>
-        <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-      </button>
-      <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>공연/연습실</h1>
-    </div>
+    <SubHeader title="공연/연습실" />
     <div className="mx-auto max-w-3xl px-4 py-8">
 
       {/* 카테고리 배지 */}

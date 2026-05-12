@@ -64,6 +64,30 @@ export class User {
   @Column({ nullable: true, type: 'text' })
   bio: string;
 
+  @Column({ nullable: true, type: 'text' })
+  career: string;
+
+  @Column({ nullable: true })
+  attachmentUrl: string;
+
+  @Column({ nullable: true })
+  attachmentName: string;
+
+  @Column({ default: true })
+  isBioPublic: boolean;
+
+  @Column({ default: false })
+  isCareerPublic: boolean;
+
+  @Column({ default: false })
+  isAttachmentPublic: boolean;
+
+  @Column({ default: true })
+  isInstrumentsPublic: boolean;
+
+  @Column({ default: true })
+  isRegionPublic: boolean;
+
   @Column({ nullable: true })
   region: string;
 

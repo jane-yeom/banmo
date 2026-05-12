@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
+import SubHeader from '@/components/layout/SubHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/axios';
@@ -122,22 +122,7 @@ export default function NotificationSettingsPage() {
 
   return (
     <>
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        background: 'white',
-        borderBottom: '0.5px solid #DDD9EF',
-        padding: '12px 16px',
-        display: 'flex', alignItems: 'center', gap: 12,
-      }}>
-        <button onClick={() => router.back()} style={{
-          background: 'none', border: 'none',
-          cursor: 'pointer', padding: 4,
-          display: 'flex', alignItems: 'center',
-        }}>
-          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-        </button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>알림 설정</h1>
-      </div>
+      <SubHeader title="알림 설정" />
 
       <div style={{ maxWidth: 512, margin: '0 auto', padding: '8px 16px 40px' }}>
         <p style={{ fontSize: 13, color: '#888', margin: '12px 0 4px' }}>받고 싶은 알림을 선택하세요</p>

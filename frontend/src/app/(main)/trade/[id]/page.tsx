@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
+import SubHeader from '@/components/layout/SubHeader';
 import { useMutation } from '@tanstack/react-query';
 import { usePost } from '@/hooks/usePosts';
 import { useCreateChatRoom } from '@/hooks/useChat';
@@ -152,22 +152,7 @@ export default function TradeDetailPage() {
         />
       )}
 
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        background: 'white',
-        borderBottom: '0.5px solid #DDD9EF',
-        padding: '12px 16px',
-        display: 'flex', alignItems: 'center', gap: 12,
-      }}>
-        <button onClick={() => router.back()} style={{
-          background: 'none', border: 'none',
-          cursor: 'pointer', padding: 4,
-          display: 'flex', alignItems: 'center',
-        }}>
-          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-        </button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>양도/중고</h1>
-      </div>
+      <SubHeader title="양도/중고" />
       <div className="mx-auto max-w-3xl px-4 py-6">
 
         {/* 이미지 슬라이더 */}

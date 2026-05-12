@@ -26,12 +26,39 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
+  career?: string;
+
+  @IsOptional()
+  @IsString()
+  attachmentUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  attachmentName?: string;
+
+  @IsOptional()
+  @IsString()
   region?: string;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   instruments?: string[];
+
+  @IsOptional()
+  isBioPublic?: boolean;
+
+  @IsOptional()
+  isCareerPublic?: boolean;
+
+  @IsOptional()
+  isAttachmentPublic?: boolean;
+
+  @IsOptional()
+  isInstrumentsPublic?: boolean;
+
+  @IsOptional()
+  isRegionPublic?: boolean;
 }
 
 @Injectable()
@@ -109,8 +136,16 @@ export class UsersService {
     const user = await this.usersRepository.findOneOrFail({ where: { id } });
     if (dto.nickname !== undefined) user.nickname = dto.nickname;
     if (dto.bio !== undefined) user.bio = dto.bio;
+    if (dto.career !== undefined) (user as any).career = dto.career;
+    if (dto.attachmentUrl !== undefined) (user as any).attachmentUrl = dto.attachmentUrl;
+    if (dto.attachmentName !== undefined) (user as any).attachmentName = dto.attachmentName;
     if (dto.region !== undefined) user.region = dto.region;
     if (dto.instruments !== undefined) user.instruments = dto.instruments;
+    if (dto.isBioPublic !== undefined) (user as any).isBioPublic = dto.isBioPublic;
+    if (dto.isCareerPublic !== undefined) (user as any).isCareerPublic = dto.isCareerPublic;
+    if (dto.isAttachmentPublic !== undefined) (user as any).isAttachmentPublic = dto.isAttachmentPublic;
+    if (dto.isInstrumentsPublic !== undefined) (user as any).isInstrumentsPublic = dto.isInstrumentsPublic;
+    if (dto.isRegionPublic !== undefined) (user as any).isRegionPublic = dto.isRegionPublic;
     return this.usersRepository.save(user);
   }
 
@@ -136,12 +171,28 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async getPublicProfile(id: string): Promise<Partial<User>> {
+  async getPublicProfile(id: string, viewerType: 'public' | 'owner' | 'recruiter' = 'public'): Promise<Partial<User>> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { kakaoId, email, isBanned, password, sanitizeArrays, ...profile } = user as any;
+
+    if (viewerType === 'owner' || viewerType === 'recruiter') {
+      return profile;
+    }
+
+    // 일반 공개 조회: 비공개 필드 마스킹
+    if (!profile.isBioPublic) profile.bio = null;
+    if (!profile.isCareerPublic) { profile.career = null; }
+    if (!profile.isAttachmentPublic) { profile.attachmentUrl = null; profile.attachmentName = null; }
+    if (!profile.isInstrumentsPublic) profile.instruments = [];
+    if (!profile.isRegionPublic) profile.region = null;
+
     return profile;
+  }
+
+  async getFullProfile(id: string): Promise<Partial<User>> {
+    return this.getPublicProfile(id, 'recruiter');
   }
 
   async blockUser(blockerId: string, blockedId: string) {

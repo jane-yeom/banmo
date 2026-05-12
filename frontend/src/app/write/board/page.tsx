@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
+import SubHeader from '@/components/layout/SubHeader';
 import { useAuthStore } from '@/store/auth.store';
 import { useCreateBoardPost } from '@/hooks/useBoard';
 import toast from 'react-hot-toast';
@@ -70,33 +70,26 @@ function WriteBoardContent() {
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', background: 'white', minHeight: '100vh' }}>
-      {/* 헤더 */}
-      <div style={{
-        position: 'sticky', top: 0, background: 'white',
-        borderBottom: '0.5px solid #DDD9EF',
-        padding: '12px 16px', display: 'flex',
-        alignItems: 'center', gap: 12, zIndex: 10,
-      }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
-          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-        </button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>{pageTitle}</h1>
-        {draftSaved && (
-          <span style={{ fontSize: 11, color: '#9CA3AF', marginRight: 4 }}>초안 저장됨</span>
-        )}
-        <button
-          onClick={handleSubmit}
-          disabled={createPost.isPending}
-          style={{
-            marginLeft: 'auto', padding: '8px 18px',
-            background: createPost.isPending ? '#ccc' : '#7B82BE',
-            color: 'white', border: 'none',
-            borderRadius: 99, fontSize: 14,
-            fontWeight: 700, cursor: createPost.isPending ? 'not-allowed' : 'pointer',
-          }}>
-          {createPost.isPending ? '등록 중...' : '등록'}
-        </button>
-      </div>
+      <SubHeader
+        title={pageTitle}
+        rightElement={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {draftSaved && <span style={{ fontSize: 11, color: '#9CA3AF' }}>초안 저장됨</span>}
+            <button
+              onClick={handleSubmit}
+              disabled={createPost.isPending}
+              style={{
+                padding: '8px 18px',
+                background: createPost.isPending ? '#ccc' : '#7B82BE',
+                color: 'white', border: 'none',
+                borderRadius: 99, fontSize: 14,
+                fontWeight: 700, cursor: createPost.isPending ? 'not-allowed' : 'pointer',
+              }}>
+              {createPost.isPending ? '등록 중...' : '등록'}
+            </button>
+          </div>
+        }
+      />
 
       <div style={{ padding: '20px 16px 100px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 

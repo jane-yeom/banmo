@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
+import SubHeader from '@/components/layout/SubHeader';
 
 const INSTRUMENTS = [
   '피아노', '바이올린', '비올라', '첼로', '콘트라베이스',
@@ -101,11 +102,12 @@ export default function WelcomePage() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh', background: '#F9FAFB',
-      display: 'flex', alignItems: 'center',
-      justifyContent: 'center', padding: '20px',
-    }}>
+    <div style={{ minHeight: '100vh', background: '#F9FAFB' }}>
+      <SubHeader title="반모 시작하기" hideBack />
+      <div style={{
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'center', padding: '20px',
+      }}>
       <div style={{
         background: 'white', borderRadius: 16,
         padding: '40px', width: '100%', maxWidth: 480,
@@ -408,6 +410,7 @@ export default function WelcomePage() {
         }}>
           📌 카카오 로그인 시 수집된 원본 정보(닉네임·이메일·프로필 사진)는 서비스 약관 및 관련 법령에 따라 내부적으로 안전하게 보존됩니다. 해당 정보는 악의적 이용자 추적 및 법적 대응 목적으로만 사용되며, 외부에 공개되지 않습니다.
         </div>
+      </div>
       </div>
     </div>
   );

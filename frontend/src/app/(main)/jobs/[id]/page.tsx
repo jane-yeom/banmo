@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, Share2 } from 'lucide-react';
+import { Share2 } from 'lucide-react';
+import SubHeader from '@/components/layout/SubHeader';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { usePost } from '@/hooks/usePosts';
@@ -88,6 +89,14 @@ function ApplyModal({
             {(applyMutation.error as any)?.response?.data?.message ?? '지원에 실패했습니다.'}
           </p>
         )}
+        <div style={{
+          background: '#FEF6E4', borderRadius: 8,
+          padding: '10px 12px', fontSize: 12,
+          color: '#B7770D', marginTop: 10,
+          lineHeight: 1.5,
+        }}>
+          📋 지원 시 프로필의 모든 정보(비공개 포함)가 채용 담당자에게 공개됩니다
+        </div>
         <div className="mt-4 flex gap-2">
           <button
             onClick={onClose}
@@ -266,30 +275,18 @@ export default function JobDetailPage() {
       )}
       */}
 
-      {/* 헤더 */}
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        background: 'white',
-        borderBottom: '0.5px solid #DDD9EF',
-        padding: '12px 16px',
-        display: 'flex', alignItems: 'center', gap: 12,
-      }}>
-        <button onClick={() => router.back()} style={{
-          background: 'none', border: 'none',
-          cursor: 'pointer', padding: 4,
-          display: 'flex', alignItems: 'center',
-        }}>
-          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-        </button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>공고 상세</h1>
-        <button onClick={handleShare} style={{
-          background: 'none', border: 'none',
-          cursor: 'pointer', padding: 4,
-          display: 'flex', alignItems: 'center',
-        }}>
-          <Share2 size={22} color="#6B7280" strokeWidth={1.8} />
-        </button>
-      </div>
+      <SubHeader
+        title="공고 상세"
+        rightElement={
+          <button onClick={handleShare} style={{
+            background: 'none', border: 'none',
+            cursor: 'pointer', padding: 4,
+            display: 'flex', alignItems: 'center',
+          }}>
+            <Share2 size={22} color="#6B7280" strokeWidth={1.8} />
+          </button>
+        }
+      />
 
       <div className="mx-auto max-w-3xl px-4 py-8">
 

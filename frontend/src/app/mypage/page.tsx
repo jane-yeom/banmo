@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import SubHeader from '@/components/layout/SubHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
@@ -218,22 +219,7 @@ export default function MyPage() {
         onClose={() => setSelectedApplicantId(null)}
       />
     )}
-    <div style={{
-      position: 'sticky', top: 0, zIndex: 10,
-      background: 'white',
-      borderBottom: '0.5px solid #DDD9EF',
-      padding: '12px 16px',
-      display: 'flex', alignItems: 'center', gap: 12,
-    }}>
-      <button onClick={() => router.back()} style={{
-        background: 'none', border: 'none',
-        cursor: 'pointer', padding: 4,
-        display: 'flex', alignItems: 'center',
-      }}>
-        <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-      </button>
-      <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>마이페이지</h1>
-    </div>
+    <SubHeader title="마이페이지" />
     <div className="mx-auto max-w-2xl px-4 py-8">
 
       {/* 프로필 헤더 */}

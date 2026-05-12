@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft } from 'lucide-react';
+import SubHeader from '@/components/layout/SubHeader';
 import { useChatRooms } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
@@ -63,22 +63,7 @@ export default function ChatListPage() {
 
   return (
     <>
-    <div style={{
-      position: 'sticky', top: 0, zIndex: 10,
-      background: 'white',
-      borderBottom: '0.5px solid #DDD9EF',
-      padding: '12px 16px',
-      display: 'flex', alignItems: 'center', gap: 12,
-    }}>
-      <button onClick={() => router.back()} style={{
-        background: 'none', border: 'none',
-        cursor: 'pointer', padding: 4,
-        display: 'flex', alignItems: 'center',
-      }}>
-        <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-      </button>
-      <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>채팅</h1>
-    </div>
+    <SubHeader title="채팅" />
     <div className="mx-auto max-w-2xl px-0 sm:px-4 py-4">
 
       {isLoading ? (

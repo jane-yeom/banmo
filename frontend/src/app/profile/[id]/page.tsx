@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
+import SubHeader from '@/components/layout/SubHeader';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
@@ -93,22 +93,7 @@ export default function ProfilePage() {
         <VideoModal url={modalUrl} onClose={() => setModalUrl(null)} />
       )}
 
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        background: 'white',
-        borderBottom: '0.5px solid #DDD9EF',
-        padding: '12px 16px',
-        display: 'flex', alignItems: 'center', gap: 12,
-      }}>
-        <button onClick={() => router.back()} style={{
-          background: 'none', border: 'none',
-          cursor: 'pointer', padding: 4,
-          display: 'flex', alignItems: 'center',
-        }}>
-          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-        </button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>프로필</h1>
-      </div>
+      <SubHeader title="프로필" />
       <div className="mx-auto max-w-2xl px-4 py-8 space-y-5">
 
         {/* 프로필 카드 */}
@@ -184,13 +169,48 @@ export default function ProfilePage() {
             )}
 
             {/* 자기소개 */}
-            {user.bio && (
+            {(user as any).isBioPublic !== false && user.bio && (
               <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed bg-gray-50 rounded-xl p-4">
                 {user.bio}
               </p>
             )}
           </div>
         </div>
+
+        {/* 이력사항 */}
+        {(user as any).isCareerPublic && (user as any).career && (
+          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
+            <h2 className="text-base font-bold text-gray-800 mb-3">📄 이력사항</h2>
+            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{(user as any).career}</p>
+          </div>
+        )}
+
+        {/* 첨부파일 */}
+        {(user as any).isAttachmentPublic && (user as any).attachmentUrl && (
+          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
+            <h2 className="text-base font-bold text-gray-800 mb-3">📎 첨부파일</h2>
+            <a
+              href={(user as any).attachmentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-indigo-600 text-sm hover:underline"
+            >
+              <span>📋</span>
+              <span>{(user as any).attachmentName || '첨부파일 다운로드'}</span>
+            </a>
+          </div>
+        )}
+
+        {/* 비공개 항목 안내 */}
+        {!isMyProfile && ((user as any).isCareerPublic === false || (user as any).isAttachmentPublic === false) && (
+          <div style={{
+            background: '#F4F3F9', borderRadius: 10,
+            padding: '10px 14px', fontSize: 12,
+            color: '#9CA3AF', textAlign: 'center',
+          }}>
+            🔒 일부 정보는 비공개 설정되어 있습니다
+          </div>
+        )}
 
         {/* 연주 영상 */}
         {videos.length > 0 && (

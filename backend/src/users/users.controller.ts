@@ -35,7 +35,13 @@ export class UsersController {
 
   @Get(':id')
   getProfile(@Param('id') id: string) {
-    return this.usersService.getPublicProfile(id);
+    return this.usersService.getPublicProfile(id, 'public');
+  }
+
+  @Get(':id/full')
+  @UseGuards(AuthGuard('jwt'))
+  getFullProfile(@Param('id') id: string) {
+    return this.usersService.getFullProfile(id);
   }
 
   @Patch('me')

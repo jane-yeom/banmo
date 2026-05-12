@@ -1,16 +1,11 @@
 'use client';
-
-import { useState, useEffect, useRef, useCallback, DragEvent, ChangeEvent } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { ChevronLeft } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
-import { User } from '@/types';
-import { useToast } from '@/hooks/useToast';
-import ToastContainer from '@/components/common/Toast';
+import api from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
+import SubHeader from '@/components/layout/SubHeader';
+import { Eye, EyeOff, Upload, X, FileText } from 'lucide-react';
 
 const INSTRUMENTS = [
   '피아노', '바이올린', '비올라', '첼로', '콘트라베이스',
@@ -18,495 +13,428 @@ const INSTRUMENTS = [
   '트럼펫', '트롬본', '타악기', '기타', '하프',
 ];
 
-const VIDEO_MAX_BYTES = 500 * 1024 * 1024;
-const IMAGE_MAX_BYTES = 10 * 1024 * 1024;
-const MAX_VIDEOS = 5;
+const REGIONS = [
+  '서울', '경기', '인천', '부산', '대구',
+  '광주', '대전', '울산', '세종', '강원',
+  '충북', '충남', '전북', '전남', '경북', '경남', '제주',
+];
 
-interface ProfileForm {
-  nickname: string;
-  bio: string;
-  region: string;
-}
-
-interface VideoUploadItem {
-  id: string;
-  file: File;
-  progress: number;  // 0~100
-  status: 'pending' | 'uploading' | 'done' | 'error';
-  fileUrl?: string;
-  error?: string;
-}
-
-async function getVideoPresignedUrl(
-  fileName: string,
-): Promise<{ uploadUrl: string; fileUrl: string }> {
-  const ext = fileName.split('.').pop()?.toLowerCase() ?? 'mp4';
-  const mimeMap: Record<string, string> = {
-    mp4: 'video/mp4',
-    mov: 'video/quicktime',
-    avi: 'video/x-msvideo',
-  };
-  const { data } = await apiClient.post<{ success: boolean; data: { uploadUrl: string; fileUrl: string; key: string } }>(
-    '/media/presigned-url',
-    { fileName, fileType: mimeMap[ext] ?? 'video/mp4', folder: 'videos' },
+function VisibilityToggle({
+  value, onChange,
+}: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!value)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 4,
+        background: value ? '#ECEAF8' : '#F4F3F9',
+        border: `1px solid ${value ? '#7B82BE' : '#DDD9EF'}`,
+        borderRadius: 99, padding: '4px 10px',
+        cursor: 'pointer', fontSize: 12,
+        color: value ? '#5A63A8' : '#9CA3AF',
+        fontWeight: 600, flexShrink: 0,
+      }}
+    >
+      {value
+        ? <><Eye size={12} strokeWidth={2} /> 공개</>
+        : <><EyeOff size={12} strokeWidth={2} /> 비공개</>}
+    </button>
   );
-  return data.data;
-}
-
-function uploadToS3(
-  uploadUrl: string,
-  file: File,
-  contentType: string,
-  onProgress: (pct: number) => void,
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('PUT', uploadUrl);
-    xhr.setRequestHeader('Content-Type', contentType);
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
-    };
-    xhr.onload = () => (xhr.status === 200 ? resolve() : reject(new Error(`HTTP ${xhr.status}`)));
-    xhr.onerror = () => reject(new Error('네트워크 오류'));
-    xhr.send(file);
-  });
 }
 
 export default function ProfileEditPage() {
   const router = useRouter();
-  const { user: me, setAuth, accessToken } = useAuthStore();
-  const { toasts, show: showToast, dismiss } = useToast();
+  const { user, accessToken, setAuth } = useAuthStore();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const attachRef = useRef<HTMLInputElement>(null);
 
-  const [profileUser, setProfileUser] = useState<User | null>(null);
-  const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
-  const [currentVideos, setCurrentVideos] = useState<string[]>([]);
-  const [uploadQueue, setUploadQueue] = useState<VideoUploadItem[]>([]);
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-  const [imageUploading, setImageUploading] = useState(false);
+  const [form, setForm] = useState({
+    nickname: '',
+    profileImage: '',
+    bio: '',
+    career: '',
+    region: '',
+    instruments: [] as string[],
+    attachmentUrl: '',
+    attachmentName: '',
+    isBioPublic: true,
+    isCareerPublic: false,
+    isAttachmentPublic: false,
+    isInstrumentsPublic: true,
+    isRegionPublic: true,
+  });
+  const [uploading, setUploading] = useState(false);
+  const [attachUploading, setAttachUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [dragging, setDragging] = useState(false);
 
-  const videoInputRef = useRef<HTMLInputElement>(null);
-
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileForm>();
-
-  // 초기 프로필 로드
   useEffect(() => {
-    if (!me) {
-      router.replace('/login');
-      return;
-    }
-    apiClient.get<User>(`/users/${me.id}`).then(({ data }) => {
-      setProfileUser(data);
-      setProfileImageUrl(data.profileImage);
-      setSelectedInstruments(data.instruments?.filter(Boolean) ?? []);
-      setCurrentVideos(data.videoUrls?.filter(Boolean) ?? []);
-      reset({
-        nickname: data.nickname ?? '',
-        bio: data.bio ?? '',
-        region: data.region ?? '',
+    if (user) {
+      setForm({
+        nickname: user.nickname || '',
+        profileImage: user.profileImage || '',
+        bio: (user as any).bio || '',
+        career: (user as any).career || '',
+        region: (user as any).region || '',
+        instruments: (user as any).instruments || [],
+        attachmentUrl: (user as any).attachmentUrl || '',
+        attachmentName: (user as any).attachmentName || '',
+        isBioPublic: (user as any).isBioPublic ?? true,
+        isCareerPublic: (user as any).isCareerPublic ?? false,
+        isAttachmentPublic: (user as any).isAttachmentPublic ?? false,
+        isInstrumentsPublic: (user as any).isInstrumentsPublic ?? true,
+        isRegionPublic: (user as any).isRegionPublic ?? true,
       });
-    });
-  }, [me, reset, router]);
+    }
+  }, [user]);
 
-  // 악기 토글
   const toggleInstrument = (inst: string) => {
-    setSelectedInstruments((prev) =>
-      prev.includes(inst) ? prev.filter((i) => i !== inst) : [...prev, inst],
-    );
+    setForm(prev => ({
+      ...prev,
+      instruments: prev.instruments.includes(inst)
+        ? prev.instruments.filter(i => i !== inst)
+        : [...prev.instruments, inst],
+    }));
   };
 
-  // 프로필 이미지 업로드 (미리보기만, 저장 버튼 클릭시 함께 저장)
-  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > IMAGE_MAX_BYTES) {
-      alert('이미지는 10MB 이하만 업로드 가능합니다.');
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      setForm(prev => ({ ...prev, profileImage: url }));
+    } catch { alert('이미지 업로드 실패'); }
+    finally { setUploading(false); }
+  };
+
+  const handleAttachChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert('파일 크기는 10MB 이하만 가능합니다');
       return;
     }
-    setImageUploading(true);
+    setAttachUploading(true);
     try {
-      const fileUrl = await uploadImage(file);
-      setProfileImageUrl(fileUrl);
-    } catch {
-      alert('이미지 업로드에 실패했습니다.');
-    } finally {
-      setImageUploading(false);
-    }
+      const url = await uploadImage(file);
+      setForm(prev => ({ ...prev, attachmentUrl: url, attachmentName: file.name }));
+    } catch { alert('파일 업로드 실패'); }
+    finally { setAttachUploading(false); }
   };
 
-  // 영상 파일 처리
-  const processVideoFiles = useCallback(
-    (files: File[]) => {
-      const totalAfter = currentVideos.length + uploadQueue.filter((q) => q.status === 'done').length + files.length;
-      if (totalAfter > MAX_VIDEOS) {
-        alert(`연주 영상은 최대 ${MAX_VIDEOS}개까지 등록할 수 있습니다.`);
-        return;
-      }
-
-      const newItems: VideoUploadItem[] = files
-        .filter((file) => {
-          if (file.size > VIDEO_MAX_BYTES) {
-            alert(`${file.name}: 500MB를 초과하는 파일은 업로드할 수 없습니다.`);
-            return false;
-          }
-          const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-          if (!['mp4', 'mov', 'avi'].includes(ext)) {
-            alert(`${file.name}: mp4, mov, avi 형식만 업로드 가능합니다.`);
-            return false;
-          }
-          return true;
-        })
-        .map((file) => ({
-          id: `${Date.now()}-${Math.random()}`,
-          file,
-          progress: 0,
-          status: 'pending' as const,
-        }));
-
-      if (newItems.length === 0) return;
-      setUploadQueue((prev) => [...prev, ...newItems]);
-
-      // 업로드 시작
-      newItems.forEach((item) => startUpload(item));
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentVideos.length, uploadQueue],
-  );
-
-  const startUpload = async (item: VideoUploadItem) => {
-    setUploadQueue((prev) =>
-      prev.map((q) => (q.id === item.id ? { ...q, status: 'uploading' } : q)),
-    );
-    try {
-      const { uploadUrl, fileUrl } = await getVideoPresignedUrl(item.file.name);
-      await uploadToS3(uploadUrl, item.file, item.file.type, (pct) => {
-        setUploadQueue((prev) =>
-          prev.map((q) => (q.id === item.id ? { ...q, progress: pct } : q)),
-        );
-      });
-      // 백엔드에 영상 URL 저장
-      await apiClient.post('/users/me/videos', { videoUrl: fileUrl });
-      setUploadQueue((prev) =>
-        prev.map((q) =>
-          q.id === item.id ? { ...q, status: 'done', progress: 100, fileUrl } : q,
-        ),
-      );
-      setCurrentVideos((prev) => [...prev, fileUrl]);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : '업로드 실패';
-      setUploadQueue((prev) =>
-        prev.map((q) => (q.id === item.id ? { ...q, status: 'error', error: message } : q)),
-      );
-    }
-  };
-
-  // 드래그앤드롭
-  const onDragOver = (e: DragEvent) => { e.preventDefault(); setDragging(true); };
-  const onDragLeave = () => setDragging(false);
-  const onDrop = (e: DragEvent) => {
-    e.preventDefault();
-    setDragging(false);
-    const files = Array.from(e.dataTransfer.files);
-    processVideoFiles(files);
-  };
-
-  // 현재 영상 삭제
-  const deleteVideo = async (videoUrl: string) => {
-    if (!confirm('이 영상을 삭제하시겠습니까?')) return;
-    try {
-      await apiClient.delete('/users/me/videos', { data: { videoUrl } });
-      setCurrentVideos((prev) => prev.filter((v) => v !== videoUrl));
-    } catch {
-      alert('영상 삭제에 실패했습니다.');
-    }
-  };
-
-  // 업로드 큐에서 제거 (done 이후)
-  const removeFromQueue = (id: string) => {
-    setUploadQueue((prev) => prev.filter((q) => q.id !== id));
-  };
-
-  // 프로필 저장 (닉네임 + 이미지 + 나머지 한번에)
-  const onSubmit = async (data: ProfileForm) => {
+  const handleSave = async () => {
+    if (!form.nickname.trim()) return alert('닉네임을 입력해주세요');
+    if (form.nickname.trim().length < 2) return alert('닉네임은 2자 이상이어야 합니다');
     setSaving(true);
-    setSaveError(null);
     try {
-      const res = await apiClient.patch('/users/me', {
-        ...data,
-        profileImage: profileImageUrl,
-        instruments: selectedInstruments,
-      });
-      if (me && accessToken) {
-        const updatedUser = res.data?.data || res.data;
-        setAuth({ ...me, ...updatedUser }, accessToken);
-      }
-      showToast('프로필이 저장되었습니다.', 'success');
-      setTimeout(() => router.push(`/profile/${me?.id}`), 1000);
-    } catch {
-      setSaveError('저장에 실패했습니다. 다시 시도해주세요.');
-      showToast('저장에 실패했습니다.', 'error');
+      const res = await api.patch('/users/me', form);
+      const updated = res.data?.data || res.data;
+      setAuth(updated, accessToken!);
+      alert('프로필이 저장되었습니다');
+      router.back();
+    } catch (e: any) {
+      alert(e.response?.data?.message || '저장 실패');
     } finally {
       setSaving(false);
     }
   };
 
-  if (!profileUser) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-10 space-y-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-16 rounded-2xl bg-gray-200 animate-pulse" />
-        ))}
-      </div>
-    );
-  }
-
-  const pendingVideoCount = currentVideos.length + uploadQueue.filter((q) => q.status === 'done').length;
+  if (!user) return null;
 
   return (
-    <>
-    <ToastContainer toasts={toasts} dismiss={dismiss} />
-    <div style={{
-      position: 'sticky', top: 0, zIndex: 10,
-      background: 'white',
-      borderBottom: '0.5px solid #DDD9EF',
-      padding: '12px 16px',
-      display: 'flex', alignItems: 'center', gap: 12,
-    }}>
-      <button onClick={() => router.back()} style={{
-        background: 'none', border: 'none',
-        cursor: 'pointer', padding: 4,
-        display: 'flex', alignItems: 'center',
-      }}>
-        <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
-      </button>
-      <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>프로필 편집</h1>
-    </div>
-    <div className="mx-auto max-w-xl px-4 py-8">
+    <div style={{ maxWidth: 600, margin: '0 auto', background: 'white', minHeight: '100vh' }}>
+      <SubHeader
+        title="프로필 편집"
+        rightElement={
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            style={{
+              padding: '8px 18px',
+              background: saving ? '#ccc' : '#7B82BE',
+              color: 'white', border: 'none',
+              borderRadius: 99, fontSize: 14,
+              fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {saving ? '저장 중...' : '저장'}
+          </button>
+        }
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div style={{ padding: '24px 16px 100px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+
         {/* 프로필 이미지 */}
-        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
-          <h2 className="text-sm font-semibold text-gray-700 mb-4">프로필 사진</h2>
-          <div className="flex items-center gap-4">
-            {profileImageUrl ? (
-              <Image
-                src={profileImageUrl}
-                alt="프로필"
-                width={72}
-                height={72}
-                className="rounded-full object-cover border-2 border-gray-200"
-              />
-            ) : (
-              <div className="h-[72px] w-[72px] rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 text-2xl font-bold border-2 border-gray-200">
-                {(profileUser.nickname ?? '?')[0]}
-              </div>
-            )}
-            <label className="cursor-pointer">
-              <span className={`rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors ${imageUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                {imageUploading ? '업로드 중...' : '사진 변경'}
-              </span>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                onChange={handleImageChange}
-                disabled={imageUploading}
-              />
-            </label>
-          </div>
-        </div>
-
-        {/* 기본 정보 */}
-        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-700">기본 정보</h2>
-
-          <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5 text-xs text-amber-800">
-            📌 카카오 가입 시의 원본 정보(카카오 닉네임·이메일·프로필 사진)는 서비스 약관 및 법적 요구에 따라 내부적으로 보존되며, 악의적 이용 추적 목적으로만 사용됩니다.
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">닉네임</label>
-            <input
-              {...register('nickname', { required: '닉네임을 입력하세요' })}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
-              placeholder="닉네임"
-            />
-            {errors.nickname && (
-              <p className="mt-1 text-xs text-red-500">{errors.nickname.message}</p>
+        <div style={{ textAlign: 'center' }}>
+          <div
+            onClick={() => fileRef.current?.click()}
+            style={{
+              width: 90, height: 90, borderRadius: '50%',
+              margin: '0 auto 10px',
+              background: form.profileImage ? 'transparent' : '#ECEAF8',
+              cursor: 'pointer', overflow: 'hidden',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '3px solid #7B82BE', position: 'relative',
+            }}
+          >
+            {form.profileImage
+              ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={form.profileImage} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              )
+              : <span style={{ fontSize: 36 }}>👤</span>}
+            {uploading && (
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'rgba(0,0,0,0.4)',
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'center', color: 'white', fontSize: 12,
+              }}>업로드 중...</div>
             )}
           </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">자기소개</label>
-            <textarea
-              {...register('bio')}
-              rows={4}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400 resize-none"
-              placeholder="자신을 소개해주세요"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">활동 지역</label>
-            <input
-              {...register('region')}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
-              placeholder="예: 서울 강남구"
-            />
-          </div>
+          <input ref={fileRef} type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+          <button type="button" onClick={() => fileRef.current?.click()} style={{
+            background: 'none', border: 'none',
+            color: '#7B82BE', fontSize: 13,
+            fontWeight: 600, cursor: 'pointer',
+          }}>
+            사진 변경
+          </button>
         </div>
 
-        {/* 악기 선택 */}
-        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">담당 악기</h2>
-          <div className="grid grid-cols-3 gap-2">
-            {INSTRUMENTS.map((inst) => {
-              const checked = selectedInstruments.includes(inst);
-              return (
-                <label
-                  key={inst}
-                  className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${
-                    checked
-                      ? 'border-indigo-400 bg-indigo-50 text-indigo-700'
-                      : 'border-gray-200 text-gray-600 hover:border-indigo-200'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    className="hidden"
-                    checked={checked}
-                    onChange={() => toggleInstrument(inst)}
-                  />
-                  <span className={`h-4 w-4 flex-shrink-0 rounded border-2 flex items-center justify-center ${checked ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'}`}>
-                    {checked && (
-                      <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 12 12" fill="currentColor">
-                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
-                  </span>
-                  {inst}
-                </label>
-              );
-            })}
-          </div>
+        {/* 닉네임 */}
+        <div>
+          <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 8 }}>
+            닉네임 <span style={{ color: '#7B82BE' }}>*</span>
+          </label>
+          <input
+            value={form.nickname}
+            onChange={e => setForm(p => ({ ...p, nickname: e.target.value }))}
+            placeholder="닉네임 입력"
+            maxLength={20}
+            style={{
+              width: '100%', padding: '12px 14px',
+              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              fontSize: 15, outline: 'none', boxSizing: 'border-box',
+            }}
+          />
+          <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
+            카카오 계정 원본 정보는 보존됩니다
+          </p>
         </div>
 
-        {/* 연주 영상 업로드 */}
-        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-gray-700">연주 영상</h2>
-            <span className="text-xs text-gray-400">{pendingVideoCount} / {MAX_VIDEOS}</span>
+        {/* 악기 */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>악기</label>
+            <VisibilityToggle
+              value={form.isInstrumentsPublic}
+              onChange={v => setForm(p => ({ ...p, isInstrumentsPublic: v }))}
+            />
           </div>
-
-          {/* 기존 영상 목록 */}
-          {currentVideos.length > 0 && (
-            <div className="mb-4 space-y-2">
-              {currentVideos.map((url, i) => (
-                <div key={url} className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
-                  <video src={url} className="h-12 w-20 rounded-lg object-cover bg-black" preload="metadata" />
-                  <span className="flex-1 truncate text-xs text-gray-600">영상 {i + 1}</span>
-                  <button
-                    type="button"
-                    onClick={() => deleteVideo(url)}
-                    className="text-xs text-red-500 hover:text-red-700"
-                  >
-                    삭제
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* 업로드 진행 중인 영상 */}
-          {uploadQueue.map((item) => (
-            <div key={item.id} className="mb-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
-              <div className="flex items-center justify-between mb-1">
-                <span className="truncate text-xs text-gray-600 max-w-[200px]">{item.file.name}</span>
-                <div className="flex items-center gap-2">
-                  {item.status === 'error' && (
-                    <span className="text-xs text-red-500">{item.error}</span>
-                  )}
-                  {item.status === 'done' && (
-                    <button
-                      type="button"
-                      onClick={() => removeFromQueue(item.id)}
-                      className="text-xs text-gray-400 hover:text-gray-600"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </div>
-              {item.status === 'uploading' && (
-                <div className="h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-indigo-500 transition-all duration-300"
-                    style={{ width: `${item.progress}%` }}
-                  />
-                </div>
-              )}
-              {item.status === 'done' && (
-                <div className="h-1.5 w-full rounded-full bg-green-200">
-                  <div className="h-full w-full rounded-full bg-green-500" />
-                </div>
-              )}
-              {item.status === 'error' && (
-                <div className="h-1.5 w-full rounded-full bg-red-200" />
-              )}
-            </div>
-          ))}
-
-          {/* 드래그앤드롭 업로드 영역 */}
-          {pendingVideoCount < MAX_VIDEOS && (
-            <div
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-              onDrop={onDrop}
-              onClick={() => videoInputRef.current?.click()}
-              className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 cursor-pointer transition-colors ${
-                dragging
-                  ? 'border-indigo-400 bg-indigo-50'
-                  : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
-              }`}
-            >
-              <svg className="h-8 w-8 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-              </svg>
-              <p className="text-sm text-gray-500">
-                클릭하거나 파일을 여기로 드래그하세요
-              </p>
-              <p className="text-xs text-gray-400">mp4, mov, avi · 최대 500MB</p>
-              <input
-                ref={videoInputRef}
-                type="file"
-                accept="video/mp4,video/quicktime,video/x-msvideo"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                  const files = Array.from(e.target.files ?? []);
-                  processVideoFiles(files);
-                  e.target.value = '';
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {INSTRUMENTS.map(inst => (
+              <button
+                key={inst}
+                type="button"
+                onClick={() => toggleInstrument(inst)}
+                style={{
+                  padding: '7px 12px', borderRadius: 99,
+                  border: `1.5px solid ${form.instruments.includes(inst) ? '#7B82BE' : '#DDD9EF'}`,
+                  background: form.instruments.includes(inst) ? '#ECEAF8' : 'white',
+                  color: form.instruments.includes(inst) ? '#5A63A8' : '#666',
+                  fontSize: 13,
+                  fontWeight: form.instruments.includes(inst) ? 700 : 400,
+                  cursor: 'pointer',
                 }}
-              />
-            </div>
+              >
+                {inst}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 활동 지역 */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>활동 지역</label>
+            <VisibilityToggle
+              value={form.isRegionPublic}
+              onChange={v => setForm(p => ({ ...p, isRegionPublic: v }))}
+            />
+          </div>
+          <select
+            value={form.region}
+            onChange={e => setForm(p => ({ ...p, region: e.target.value }))}
+            style={{
+              width: '100%', padding: '12px 14px',
+              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              fontSize: 15, background: 'white',
+              outline: 'none', boxSizing: 'border-box',
+            }}
+          >
+            <option value="">지역 선택</option>
+            {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+          </select>
+        </div>
+
+        {/* 자기소개 */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>
+              자기소개
+              <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 400, marginLeft: 6 }}>간략하게</span>
+            </label>
+            <VisibilityToggle
+              value={form.isBioPublic}
+              onChange={v => setForm(p => ({ ...p, isBioPublic: v }))}
+            />
+          </div>
+          <textarea
+            value={form.bio}
+            onChange={e => setForm(p => ({ ...p, bio: e.target.value }))}
+            placeholder={`간단한 자기소개를 입력해주세요\n예) 음대 피아노과 졸업, 반주 경력 5년입니다.`}
+            maxLength={200}
+            rows={6}
+            style={{
+              width: '100%', padding: '14px',
+              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              fontSize: 14, outline: 'none',
+              resize: 'none', boxSizing: 'border-box',
+              lineHeight: 1.7, minHeight: 120,
+            }}
+          />
+          <div style={{ textAlign: 'right', fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
+            {form.bio.length}/200
+          </div>
+          {!form.isBioPublic && (
+            <p style={{ fontSize: 11, color: '#D4A03A', marginTop: 4 }}>
+              🔒 비공개 설정 시 다른 사람에게 보이지 않지만, 공고 지원 시 채용자에게는 공개됩니다
+            </p>
           )}
         </div>
 
-        {/* 저장 버튼 */}
-        {saveError && (
-          <p className="text-sm text-red-500 text-center">{saveError}</p>
-        )}
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full rounded-xl bg-indigo-700 py-3.5 text-sm font-semibold text-white hover:bg-indigo-800 transition-colors disabled:opacity-60"
-        >
-          {saving ? '저장 중...' : '저장하기'}
-        </button>
-      </form>
+        {/* 이력사항 */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>
+              이력사항
+              <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 400, marginLeft: 6 }}>경력, 학력, 수상 이력 등</span>
+            </label>
+            <VisibilityToggle
+              value={form.isCareerPublic}
+              onChange={v => setForm(p => ({ ...p, isCareerPublic: v }))}
+            />
+          </div>
+          <textarea
+            value={form.career}
+            onChange={e => setForm(p => ({ ...p, career: e.target.value }))}
+            placeholder={`이력사항을 자세히 입력해주세요\n\n예)\n학력\n- 서울대학교 음악대학 피아노과 졸업 (2020)\n\n경력\n- OO 합창단 반주 (2020~현재)\n- OO 음악학원 강사 (2021~2023)\n\n수상\n- 제○회 한국음악협회 콩쿠르 입상 (2019)`}
+            rows={10}
+            style={{
+              width: '100%', padding: '14px',
+              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              fontSize: 14, outline: 'none',
+              resize: 'vertical', boxSizing: 'border-box',
+              lineHeight: 1.8, minHeight: 200,
+            }}
+          />
+          <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
+            {form.isCareerPublic
+              ? '✅ 프로필에 공개됩니다'
+              : '🔒 기본 비공개. 공고 지원 시 채용자에게만 공개됩니다'}
+          </p>
+        </div>
+
+        {/* 첨부파일 */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>
+              첨부파일
+              <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 400, marginLeft: 6 }}>포트폴리오, 졸업증명서 등</span>
+            </label>
+            <VisibilityToggle
+              value={form.isAttachmentPublic}
+              onChange={v => setForm(p => ({ ...p, isAttachmentPublic: v }))}
+            />
+          </div>
+
+          {form.attachmentUrl ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '12px 14px',
+              background: '#F4F3F9', borderRadius: 12,
+              border: '1.5px solid #DDD9EF',
+            }}>
+              <FileText size={20} color="#7B82BE" strokeWidth={1.8} />
+              <span style={{ flex: 1, fontSize: 13, color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {form.attachmentName || '첨부파일'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setForm(p => ({ ...p, attachmentUrl: '', attachmentName: '' }))}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
+              >
+                <X size={16} color="#9CA3AF" />
+              </button>
+            </div>
+          ) : (
+            <div
+              onClick={() => attachRef.current?.click()}
+              style={{
+                border: '1.5px dashed #DDD9EF', borderRadius: 12,
+                padding: '28px 20px', textAlign: 'center',
+                cursor: 'pointer', background: '#FAFAFA',
+                minHeight: 100, display: 'flex',
+                flexDirection: 'column', alignItems: 'center',
+                justifyContent: 'center', gap: 8,
+              }}
+            >
+              {attachUploading ? (
+                <p style={{ fontSize: 13, color: '#9CA3AF' }}>업로드 중...</p>
+              ) : (
+                <>
+                  <Upload size={24} color="#9CA3AF" strokeWidth={1.5} />
+                  <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>파일을 탭해서 업로드하세요</p>
+                  <p style={{ fontSize: 11, color: '#C8C4E4', margin: 0 }}>PDF, 이미지 등 최대 10MB</p>
+                </>
+              )}
+            </div>
+          )}
+          <input
+            ref={attachRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+            onChange={handleAttachChange}
+            style={{ display: 'none' }}
+          />
+          <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6 }}>
+            {form.isAttachmentPublic
+              ? '✅ 프로필에 공개됩니다'
+              : '🔒 기본 비공개. 공고 지원 시 채용자에게만 공개됩니다'}
+          </p>
+        </div>
+
+        {/* 공개 안내 박스 */}
+        <div style={{
+          background: '#FEF6E4', borderRadius: 12,
+          padding: '14px 16px',
+          border: '1px solid #F5D99A',
+        }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#B7770D', marginBottom: 6 }}>
+            📋 지원 시 공개 정책
+          </div>
+          <p style={{ fontSize: 12, color: '#8B6914', lineHeight: 1.6, margin: 0 }}>
+            비공개로 설정한 항목도 공고에 지원할 때는
+            채용 담당자에게 <strong>모든 정보가 공개</strong>됩니다.
+            이력사항과 첨부파일을 충실히 작성해두면
+            채용 가능성이 높아져요!
+          </p>
+        </div>
+
+      </div>
     </div>
-    </>
   );
 }
