@@ -11,6 +11,16 @@ import { useAuthStore } from '@/store/auth.store';
 import { User, Post } from '@/types';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
 import PostCard from '@/components/common/PostCard';
+import { extractYoutubeId, getYoutubeEmbedUrl, getYoutubeThumbnail } from '@/lib/youtube';
+import { Play } from 'lucide-react';
+
+function YoutubeIcon({ size = 20, color = 'white' }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    </svg>
+  );
+}
 
 function useUserProfile(id: string) {
   return useQuery({
@@ -31,29 +41,50 @@ function useUserPosts(userId: string) {
   });
 }
 
-function VideoModal({ url, onClose }: { url: string; onClose: () => void }) {
+function VideoCard({ videoId, url }: { videoId: string; url: string }) {
+  const [playing, setPlaying] = useState(false);
+  const embedUrl = getYoutubeEmbedUrl(videoId);
+  const thumbnail = getYoutubeThumbnail(videoId);
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="relative w-full max-w-3xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          className="absolute -top-10 right-0 text-white text-sm hover:text-gray-300"
-        >
-          닫기 ✕
-        </button>
-        <video
-          src={url}
-          controls
-          autoPlay
-          className="w-full rounded-xl max-h-[80vh] bg-black"
+    <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid #DDD9EF', background: '#000' }}>
+      {playing ? (
+        <iframe
+          src={`${embedUrl}?autoplay=1&rel=0`}
+          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block' }}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
         />
-      </div>
+      ) : (
+        <div
+          onClick={() => setPlaying(true)}
+          style={{ position: 'relative', cursor: 'pointer', aspectRatio: '16/9' }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={thumbnail}
+            alt="영상 썸네일"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0,0,0,0.3)',
+          }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.9)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            }}>
+              <Play size={24} color="#FF0000" fill="#FF0000" />
+            </div>
+          </div>
+          <div style={{ position: 'absolute', bottom: 8, right: 8 }}>
+            <YoutubeIcon size={20} color="white" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -62,13 +93,12 @@ export default function ProfilePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user: me } = useAuthStore();
-  const [modalUrl, setModalUrl] = useState<string | null>(null);
 
   const { data: user, isLoading } = useUserProfile(id);
   const { data: postsData } = useUserPosts(id);
 
   const isMyProfile = me?.id === id;
-  const videos = user?.videoUrls?.filter(Boolean) ?? [];
+  const videos = (user?.videoUrls ?? []).filter(v => v && extractYoutubeId(v));
   const instruments = user?.instruments?.filter(Boolean) ?? [];
 
   if (isLoading)
@@ -89,10 +119,6 @@ export default function ProfilePage() {
 
   return (
     <>
-      {modalUrl && (
-        <VideoModal url={modalUrl} onClose={() => setModalUrl(null)} />
-      )}
-
       <SubHeader title="프로필" />
       <div className="mx-auto max-w-2xl px-4 py-8 space-y-5">
 
@@ -215,35 +241,16 @@ export default function ProfilePage() {
         {/* 연주 영상 */}
         {videos.length > 0 && (
           <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
-            <h2 className="text-base font-bold text-gray-800 mb-4">
-              🎬 연주 영상
+            <h2 className="text-base font-bold text-gray-800 mb-4" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <YoutubeIcon size={18} color="#FF0000" />
+              연주 영상
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {videos.map((url, i) => (
-                <div
-                  key={i}
-                  className="group relative rounded-xl overflow-hidden bg-black aspect-video cursor-pointer"
-                  onClick={() => setModalUrl(url)}
-                >
-                  <video
-                    src={url}
-                    className="w-full h-full object-contain"
-                    preload="metadata"
-                  />
-                  {/* 재생 오버레이 */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="h-12 w-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-                      <svg
-                        className="h-5 w-5 text-indigo-700 ml-0.5"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {videos.map((url, i) => {
+                const videoId = extractYoutubeId(url);
+                if (!videoId) return null;
+                return <VideoCard key={i} videoId={videoId} url={url} />;
+              })}
             </div>
           </div>
         )}

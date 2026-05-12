@@ -5,7 +5,16 @@ import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
 import SubHeader from '@/components/layout/SubHeader';
-import { Eye, EyeOff, Upload, X, FileText } from 'lucide-react';
+import { Eye, EyeOff, Upload, X, FileText, Plus, ExternalLink } from 'lucide-react';
+import { extractYoutubeId, getYoutubeThumbnail, isValidYoutubeUrl } from '@/lib/youtube';
+
+function YoutubeIcon({ size = 20, color = '#FF0000' }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ flexShrink: 0 }}>
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    </svg>
+  );
+}
 
 const INSTRUMENTS = [
   '피아노', '바이올린', '비올라', '첼로', '콘트라베이스',
@@ -64,6 +73,9 @@ export default function ProfileEditPage() {
     isInstrumentsPublic: true,
     isRegionPublic: true,
   });
+  const [videoUrls, setVideoUrls] = useState<string[]>([]);
+  const [videoInput, setVideoInput] = useState('');
+  const [videoError, setVideoError] = useState('');
   const [uploading, setUploading] = useState(false);
   const [attachUploading, setAttachUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -85,6 +97,7 @@ export default function ProfileEditPage() {
         isInstrumentsPublic: (user as any).isInstrumentsPublic ?? true,
         isRegionPublic: (user as any).isRegionPublic ?? true,
       });
+      setVideoUrls((user as any).videoUrls?.filter(Boolean) || []);
     }
   }, [user]);
 
@@ -123,12 +136,35 @@ export default function ProfileEditPage() {
     finally { setAttachUploading(false); }
   };
 
+  const handleAddVideo = () => {
+    setVideoError('');
+    if (!videoInput.trim()) return;
+    if (!isValidYoutubeUrl(videoInput)) {
+      setVideoError('올바른 유튜브 URL을 입력해주세요');
+      return;
+    }
+    if (videoUrls.length >= 5) {
+      setVideoError('최대 5개까지 등록 가능합니다');
+      return;
+    }
+    if (videoUrls.includes(videoInput.trim())) {
+      setVideoError('이미 추가된 영상입니다');
+      return;
+    }
+    setVideoUrls(prev => [...prev, videoInput.trim()]);
+    setVideoInput('');
+  };
+
+  const handleRemoveVideo = (url: string) => {
+    setVideoUrls(prev => prev.filter(v => v !== url));
+  };
+
   const handleSave = async () => {
     if (!form.nickname.trim()) return alert('닉네임을 입력해주세요');
     if (form.nickname.trim().length < 2) return alert('닉네임은 2자 이상이어야 합니다');
     setSaving(true);
     try {
-      const res = await api.patch('/users/me', form);
+      const res = await api.patch('/users/me', { ...form, videoUrls });
       const updated = res.data?.data || res.data;
       setAuth(updated, accessToken!);
       alert('프로필이 저장되었습니다');
@@ -415,6 +451,125 @@ export default function ProfileEditPage() {
               ? '✅ 프로필에 공개됩니다'
               : '🔒 기본 비공개. 공고 지원 시 채용자에게만 공개됩니다'}
           </p>
+        </div>
+
+        {/* 연주 영상 */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <label style={{ fontSize: 13, fontWeight: 700, color: '#444' }}>
+              연주 영상
+              <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 400, marginLeft: 6 }}>
+                유튜브 링크 (최대 5개)
+              </span>
+            </label>
+            <span style={{ fontSize: 11, color: '#9CA3AF' }}>{videoUrls.length}/5</span>
+          </div>
+
+          {/* URL 입력 */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+            <div style={{
+              flex: 1, display: 'flex', alignItems: 'center', gap: 8,
+              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              padding: '0 12px', background: 'white',
+            }}>
+              <YoutubeIcon size={18} />
+              <input
+                value={videoInput}
+                onChange={e => { setVideoInput(e.target.value); setVideoError(''); }}
+                onKeyDown={e => e.key === 'Enter' && handleAddVideo()}
+                placeholder="유튜브 링크를 붙여넣으세요"
+                style={{
+                  flex: 1, border: 'none', outline: 'none',
+                  fontSize: 14, padding: '12px 0', background: 'transparent',
+                }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleAddVideo}
+              style={{
+                width: 44, height: 44, borderRadius: 12,
+                background: '#7B82BE', border: 'none',
+                cursor: 'pointer', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+              <Plus size={20} color="white" strokeWidth={2.5} />
+            </button>
+          </div>
+
+          {/* 에러 메시지 */}
+          {videoError && (
+            <p style={{ fontSize: 12, color: '#EF4444', marginBottom: 8 }}>⚠️ {videoError}</p>
+          )}
+
+          {/* 안내 문구 */}
+          <div style={{
+            background: '#F4F3F9', borderRadius: 10,
+            padding: '10px 12px', marginBottom: 12,
+            fontSize: 12, color: '#6B7280', lineHeight: 1.6,
+          }}>
+            💡 유튜브에 <strong>비공개</strong>로 올린 영상도 링크만 있으면 등록 가능해요.<br />
+            일반 공개 또는 링크 공개로 설정된 영상을 추천드려요.
+          </div>
+
+          {/* 등록된 영상 목록 */}
+          {videoUrls.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {videoUrls.map((url, i) => {
+                const videoId = extractYoutubeId(url);
+                return (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    background: 'white', borderRadius: 12,
+                    border: '1px solid #DDD9EF', padding: '8px',
+                  }}>
+                    {videoId ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={getYoutubeThumbnail(videoId)}
+                        alt="썸네일"
+                        style={{
+                          width: 80, height: 54, borderRadius: 8,
+                          objectFit: 'cover', flexShrink: 0, background: '#F4F3F9',
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: 80, height: 54, borderRadius: 8,
+                        background: '#F4F3F9', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <YoutubeIcon size={20} />
+                      </div>
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{
+                        fontSize: 12, color: '#444',
+                        overflow: 'hidden', textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap', margin: 0,
+                      }}>
+                        {url}
+                      </p>
+                      <a href={url} target="_blank" rel="noopener noreferrer"
+                        style={{
+                          fontSize: 11, color: '#7B82BE',
+                          display: 'flex', alignItems: 'center', gap: 3,
+                          textDecoration: 'none', marginTop: 3,
+                        }}>
+                        <ExternalLink size={10} /> 열어보기
+                      </a>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveVideo(url)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, flexShrink: 0 }}>
+                      <X size={18} color="#9CA3AF" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* 공개 안내 박스 */}

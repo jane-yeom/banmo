@@ -6,6 +6,16 @@ import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
 import SubHeader from '@/components/layout/SubHeader';
+import { Plus, X } from 'lucide-react';
+import { extractYoutubeId, getYoutubeThumbnail, isValidYoutubeUrl } from '@/lib/youtube';
+
+function YoutubeIcon({ size = 18, color = '#FF0000' }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ flexShrink: 0 }}>
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    </svg>
+  );
+}
 
 const INSTRUMENTS = [
   '피아노', '바이올린', '비올라', '첼로', '콘트라베이스',
@@ -29,6 +39,9 @@ export default function WelcomePage() {
   const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
   const [region, setRegion] = useState('');
   const [bio, setBio] = useState('');
+  const [videoUrls, setVideoUrls] = useState<string[]>([]);
+  const [videoInput, setVideoInput] = useState('');
+  const [videoError, setVideoError] = useState('');
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(1);
@@ -74,6 +87,25 @@ export default function WelcomePage() {
     );
   };
 
+  const handleAddVideo = () => {
+    setVideoError('');
+    if (!videoInput.trim()) return;
+    if (!isValidYoutubeUrl(videoInput)) {
+      setVideoError('올바른 유튜브 URL을 입력해주세요');
+      return;
+    }
+    if (videoUrls.length >= 5) {
+      setVideoError('최대 5개까지 등록 가능합니다');
+      return;
+    }
+    if (videoUrls.includes(videoInput.trim())) {
+      setVideoError('이미 추가된 영상입니다');
+      return;
+    }
+    setVideoUrls(prev => [...prev, videoInput.trim()]);
+    setVideoInput('');
+  };
+
   const handleSave = async () => {
     if (!nickname.trim() || nickname.trim().length < 2) {
       alert('닉네임을 2자 이상 입력해주세요');
@@ -88,6 +120,7 @@ export default function WelcomePage() {
         instruments: selectedInstruments,
         region,
         bio,
+        videoUrls,
       });
 
       const updatedUser = res.data.data || res.data;
@@ -337,6 +370,85 @@ export default function WelcomePage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* 연주 영상 */}
+            <div style={{ marginBottom: 24 }}>
+              <label style={{
+                display: 'block', fontSize: 14,
+                fontWeight: 600, marginBottom: 8, color: '#374151',
+              }}>
+                연주 영상 <span style={{ fontSize: 12, color: '#9CA3AF', fontWeight: 400 }}>유튜브 링크 (선택, 최대 5개)</span>
+              </label>
+              <p style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.6, marginBottom: 10 }}>
+                유튜브에 올린 연주 영상 링크를 등록하세요.<br />
+                비공개 영상도 링크만 있으면 등록 가능해요!
+              </p>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                <div style={{
+                  flex: 1, display: 'flex', alignItems: 'center', gap: 8,
+                  border: '1.5px solid #DDD9EF', borderRadius: 12,
+                  padding: '0 12px', background: 'white',
+                }}>
+                  <YoutubeIcon size={18} />
+                  <input
+                    value={videoInput}
+                    onChange={e => { setVideoInput(e.target.value); setVideoError(''); }}
+                    onKeyDown={e => e.key === 'Enter' && handleAddVideo()}
+                    placeholder="유튜브 링크를 붙여넣으세요"
+                    style={{
+                      flex: 1, border: 'none', outline: 'none',
+                      fontSize: 14, padding: '12px 0', background: 'transparent',
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={handleAddVideo}
+                  style={{
+                    width: 44, height: 44, borderRadius: 12,
+                    background: '#7B82BE', border: 'none',
+                    cursor: 'pointer', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}>
+                  <Plus size={20} color="white" strokeWidth={2.5} />
+                </button>
+              </div>
+              {videoError && (
+                <p style={{ fontSize: 12, color: '#EF4444', marginBottom: 6 }}>⚠️ {videoError}</p>
+              )}
+              {videoUrls.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {videoUrls.map((url, i) => {
+                    const videoId = extractYoutubeId(url);
+                    return (
+                      <div key={i} style={{
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        background: 'white', borderRadius: 10,
+                        border: '1px solid #E5E7EB', padding: '6px 8px',
+                      }}>
+                        {videoId && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={getYoutubeThumbnail(videoId)}
+                            alt="썸네일"
+                            style={{ width: 64, height: 44, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }}
+                          />
+                        )}
+                        <p style={{
+                          flex: 1, fontSize: 12, color: '#444',
+                          overflow: 'hidden', textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap', margin: 0,
+                        }}>{url}</p>
+                        <button
+                          onClick={() => setVideoUrls(prev => prev.filter(v => v !== url))}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, flexShrink: 0 }}>
+                          <X size={16} color="#9CA3AF" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* 지역 선택 */}
