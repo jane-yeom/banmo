@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
 import SubHeader from '@/components/layout/SubHeader';
-import { Eye, EyeOff, Upload, X, FileText, Plus, ExternalLink } from 'lucide-react';
+import { Eye, EyeOff, Upload, X, FileText, Plus, ExternalLink, User, AlertTriangle, Lock, CheckCircle, Info, ClipboardList } from 'lucide-react';
 import { extractYoutubeId, getYoutubeThumbnail, isValidYoutubeUrl } from '@/lib/youtube';
 
 function YoutubeIcon({ size = 20, color = '#FF0000' }: { size?: number; color?: string }) {
@@ -220,7 +220,7 @@ export default function ProfileEditPage() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={form.profileImage} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               )
-              : <span style={{ fontSize: 36 }}>👤</span>}
+              : <User size={36} color="#7B82BE" />}
             {uploading && (
               <div style={{
                 position: 'absolute', inset: 0,
@@ -346,8 +346,8 @@ export default function ProfileEditPage() {
             {form.bio.length}/200
           </div>
           {!form.isBioPublic && (
-            <p style={{ fontSize: 11, color: '#D4A03A', marginTop: 4 }}>
-              🔒 비공개 설정 시 다른 사람에게 보이지 않지만, 공고 지원 시 채용자에게는 공개됩니다
+            <p style={{ fontSize: 11, color: '#D4A03A', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Lock size={11} strokeWidth={2} /> 비공개 설정 시 다른 사람에게 보이지 않지만, 공고 지원 시 채용자에게는 공개됩니다
             </p>
           )}
         </div>
@@ -377,10 +377,10 @@ export default function ProfileEditPage() {
               lineHeight: 1.8, minHeight: 200,
             }}
           />
-          <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
+          <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
             {form.isCareerPublic
-              ? '✅ 프로필에 공개됩니다'
-              : '🔒 기본 비공개. 공고 지원 시 채용자에게만 공개됩니다'}
+              ? <><CheckCircle size={11} strokeWidth={2} color="#5AAB7A" /> 프로필에 공개됩니다</>
+              : <><Lock size={11} strokeWidth={2} /> 기본 비공개. 공고 지원 시 채용자에게만 공개됩니다</>}
           </p>
         </div>
 
@@ -446,10 +446,10 @@ export default function ProfileEditPage() {
             onChange={handleAttachChange}
             style={{ display: 'none' }}
           />
-          <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6 }}>
+          <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
             {form.isAttachmentPublic
-              ? '✅ 프로필에 공개됩니다'
-              : '🔒 기본 비공개. 공고 지원 시 채용자에게만 공개됩니다'}
+              ? <><CheckCircle size={11} strokeWidth={2} color="#5AAB7A" /> 프로필에 공개됩니다</>
+              : <><Lock size={11} strokeWidth={2} /> 기본 비공개. 공고 지원 시 채용자에게만 공개됩니다</>}
           </p>
         </div>
 
@@ -499,7 +499,9 @@ export default function ProfileEditPage() {
 
           {/* 에러 메시지 */}
           {videoError && (
-            <p style={{ fontSize: 12, color: '#EF4444', marginBottom: 8 }}>⚠️ {videoError}</p>
+            <p style={{ fontSize: 12, color: '#EF4444', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <AlertTriangle size={13} strokeWidth={1.8} /> {videoError}
+            </p>
           )}
 
           {/* 안내 문구 */}
@@ -507,9 +509,11 @@ export default function ProfileEditPage() {
             background: '#F4F3F9', borderRadius: 10,
             padding: '10px 12px', marginBottom: 12,
             fontSize: 12, color: '#6B7280', lineHeight: 1.6,
+            display: 'flex', alignItems: 'flex-start', gap: 6,
           }}>
-            💡 유튜브에 <strong>비공개</strong>로 올린 영상도 링크만 있으면 등록 가능해요.<br />
-            일반 공개 또는 링크 공개로 설정된 영상을 추천드려요.
+            <Info size={13} strokeWidth={1.8} color="#9CA3AF" style={{ flexShrink: 0, marginTop: 2 }} />
+            <span>유튜브에 <strong>비공개</strong>로 올린 영상도 링크만 있으면 등록 가능해요.<br />
+            일반 공개 또는 링크 공개로 설정된 영상을 추천드려요.</span>
           </div>
 
           {/* 등록된 영상 목록 */}
@@ -578,8 +582,8 @@ export default function ProfileEditPage() {
           padding: '14px 16px',
           border: '1px solid #F5D99A',
         }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#B7770D', marginBottom: 6 }}>
-            📋 지원 시 공개 정책
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#B7770D', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ClipboardList size={14} strokeWidth={1.8} color="#B7770D" /> 지원 시 공개 정책
           </div>
           <p style={{ fontSize: 12, color: '#8B6914', lineHeight: 1.6, margin: 0 }}>
             비공개로 설정한 항목도 공고에 지원할 때는

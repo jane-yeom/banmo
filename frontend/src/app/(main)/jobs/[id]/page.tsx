@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Share2 } from 'lucide-react';
+import { Share2, Heart, MessageCircle, Send, Pencil, Trash2, CheckCircle, RotateCcw, MapPin, Music, Eye, Calendar, Coins, ClipboardList } from 'lucide-react';
 import SubHeader from '@/components/layout/SubHeader';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -94,8 +94,10 @@ function ApplyModal({
           padding: '10px 12px', fontSize: 12,
           color: '#B7770D', marginTop: 10,
           lineHeight: 1.5,
+          display: 'flex', alignItems: 'flex-start', gap: 6,
         }}>
-          📋 지원 시 프로필의 모든 정보(비공개 포함)가 채용 담당자에게 공개됩니다
+          <ClipboardList size={14} strokeWidth={1.8} color="#B7770D" style={{ flexShrink: 0, marginTop: 1 }} />
+          지원 시 프로필의 모든 정보(비공개 포함)가 채용 담당자에게 공개됩니다
         </div>
         <div className="mt-4 flex gap-2">
           <button
@@ -338,10 +340,16 @@ export default function JobDetailPage() {
             <button
               onClick={handleFavorite}
               disabled={favMutation.isPending}
-              className="flex-shrink-0 text-2xl transition-transform hover:scale-110 disabled:opacity-60"
+              className="flex-shrink-0 transition-transform hover:scale-110 disabled:opacity-60"
               title={isFavorite ? '찜 취소' : '찜하기'}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
             >
-              {isFavorite ? '❤️' : '🤍'}
+              <Heart
+                size={22}
+                strokeWidth={1.8}
+                color={isFavorite ? '#E8789A' : '#9CA3AF'}
+                fill={isFavorite ? '#E8789A' : 'none'}
+              />
             </button>
           )}
         </div>
@@ -358,10 +366,10 @@ export default function JobDetailPage() {
 
         {/* 기본 정보 */}
         <div className="mb-6 grid grid-cols-2 gap-3">
-          <InfoItem icon="📍" label="지역" value={post.region ?? '미정'} />
-          <InfoItem icon="🎵" label="악기" value={post.instruments?.join(', ') || '미정'} />
-          <InfoItem icon="👁" label="조회수" value={`${post.viewCount.toLocaleString()}회`} />
-          <InfoItem icon="📅" label="등록일" value={new Date(post.createdAt).toLocaleDateString('ko-KR')} />
+          <InfoItem icon={MapPin} label="지역" value={post.region ?? '미정'} />
+          <InfoItem icon={Music} label="악기" value={post.instruments?.join(', ') || '미정'} />
+          <InfoItem icon={Eye} label="조회수" value={`${post.viewCount.toLocaleString()}회`} />
+          <InfoItem icon={Calendar} label="등록일" value={new Date(post.createdAt).toLocaleDateString('ko-KR')} />
         </div>
 
         {/* 상세 내용 */}
@@ -443,9 +451,9 @@ export default function JobDetailPage() {
                 onClick={handleComplete}
                 disabled={isClosing}
                 className="w-full rounded-xl py-3 text-base font-semibold text-white transition-colors disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg, #5AAB7A, #3d8a5e)' }}
+                style={{ background: 'linear-gradient(135deg, #5AAB7A, #3d8a5e)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
-                ✓ 거래완료
+                <CheckCircle size={16} strokeWidth={2} /> 거래완료
               </button>
             )}
             {/* 마감/재등록 */}
@@ -454,33 +462,35 @@ export default function JobDetailPage() {
                 onClick={handleClose}
                 disabled={isClosing}
                 className="w-full rounded-xl border-2 border-gray-300 py-3 text-base font-semibold text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-60"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
-                🔒 마감하기
+                <CheckCircle size={16} strokeWidth={2} color="#6B7280" /> 마감하기
               </button>
             ) : post.status === 'CLOSED' ? (
               <button
                 onClick={handleReopen}
                 disabled={isClosing}
                 className="w-full rounded-xl py-3 text-base font-semibold text-white transition-colors disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg, #5AAB7A, #3d8a5e)' }}
+                style={{ background: 'linear-gradient(135deg, #5AAB7A, #3d8a5e)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
-                🔓 재등록하기
+                <RotateCcw size={16} strokeWidth={2} /> 재등록하기
               </button>
             ) : null}
             <div className="flex gap-3">
               <Link
                 href={`/jobs/${id}/edit`}
                 className="flex-1 rounded-xl border-2 py-3.5 text-center text-base font-semibold transition-colors"
-                style={{ borderColor: '#7B82BE', color: '#7B82BE' }}
+                style={{ borderColor: '#7B82BE', color: '#7B82BE', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
-                ✏️ 수정하기
+                <Pencil size={15} strokeWidth={2} /> 수정하기
               </Link>
               <button
                 onClick={handleDelete}
                 disabled={deleteMutation.isPending}
                 className="flex-1 rounded-xl border-2 border-red-300 py-3.5 text-base font-semibold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-60"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
-                🗑 삭제하기
+                <Trash2 size={15} strokeWidth={1.8} /> 삭제하기
               </button>
             </div>
           </div>
@@ -490,9 +500,9 @@ export default function JobDetailPage() {
               onClick={handleChat}
               disabled={createRoom.isPending || post.status === 'CLOSED'}
               className="flex-1 rounded-xl py-3.5 text-base font-semibold text-white transition-colors disabled:opacity-60"
-            style={{ background: post.status === 'CLOSED' ? '#9CA3AF' : 'linear-gradient(135deg, #7B82BE, #5A63A8)' }}
+              style={{ background: post.status === 'CLOSED' ? '#9CA3AF' : 'linear-gradient(135deg, #7B82BE, #5A63A8)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              {post.status === 'CLOSED' ? '마감된 공고' : '💬 채팅하기'}
+              {post.status === 'CLOSED' ? '마감된 공고' : <><MessageCircle size={18} strokeWidth={2} /> 채팅하기</>}
             </button>
             {canApply && post.status !== 'CLOSED' && (
               <button
@@ -501,9 +511,9 @@ export default function JobDetailPage() {
                   setShowApply(true);
                 }}
                 className="flex-1 rounded-xl border-2 py-3.5 text-base font-semibold transition-colors"
-                style={{ borderColor: '#7B82BE', color: '#7B82BE' }}
+                style={{ borderColor: '#7B82BE', color: '#7B82BE', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
-                ✋ 지원하기
+                <Send size={16} strokeWidth={2} /> 지원하기
               </button>
             )}
           </div>
@@ -513,11 +523,21 @@ export default function JobDetailPage() {
   );
 }
 
-function InfoItem({ icon, label, value }: { icon: string; label: string; value: string }) {
+function InfoItem({ icon: Icon, label, value, color = '#7B82BE' }: { icon: React.ElementType; label: string; value: string; color?: string }) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-3">
-      <p className="text-xs text-gray-400 mb-0.5">{icon} {label}</p>
-      <p className="text-sm font-medium text-gray-800">{value}</p>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="rounded-xl border border-gray-100 bg-white p-3">
+      <div style={{
+        width: 34, height: 34, background: '#ECEAF8',
+        borderRadius: 10, display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+      }}>
+        <Icon size={17} strokeWidth={1.8} color={color} />
+      </div>
+      <div>
+        <div style={{ fontSize: 11, color: '#9CA3AF' }}>{label}</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: '#1A1A1A' }}>{value}</div>
+      </div>
     </div>
   );
 }

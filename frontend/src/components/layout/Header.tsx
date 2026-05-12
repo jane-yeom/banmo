@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Bell, MessageCircle, Menu, X, ChevronRight, LogOut, Search } from 'lucide-react';
+import { Bell, MessageCircle, Menu, X, ChevronRight, LogOut, Search, User } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
@@ -210,7 +210,7 @@ export default function Header() {
                     <img src={user.profileImage} alt=""
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
                   ) : (
-                    <span style={{ fontSize: 16 }}>👤</span>
+                    <User size={18} color="#7B82BE" />
                   )}
                 </div>
                 <span style={{ fontSize: 14, color: '#374151', fontWeight: 500 }}>
@@ -315,7 +315,7 @@ export default function Header() {
                 <img src={user.profileImage} alt=""
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
               ) : (
-                <span style={{ fontSize: 22 }}>👤</span>
+                <User size={24} color="#7B82BE" />
               )}
             </div>
             <div>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import SubHeader from '@/components/layout/SubHeader';
 import Image from 'next/image';
 import { useMutation } from '@tanstack/react-query';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useBoardPost, useDeleteBoardPost, useAddComment, useDeleteComment } from '@/hooks/useBoard';
 import { useAuthStore } from '@/store/auth.store';
@@ -36,7 +37,7 @@ function ReportModal({ targetId, targetType, onClose }: { targetId: string; targ
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-xl">
-          <div className="mb-3 text-5xl">✅</div>
+          <div className="mb-3"><CheckCircle size={48} color="#5AAB7A" /></div>
           <h3 className="mb-2 text-lg font-bold">신고 완료</h3>
           <p className="mb-6 text-sm text-gray-500">검토 후 조치하겠습니다.</p>
           <button onClick={onClose} className="w-full rounded-xl bg-teal-600 py-3 text-sm font-semibold text-white hover:bg-teal-700">
@@ -203,8 +204,9 @@ export default function BoardDetailPage() {
               <button
                 onClick={() => openReport(board.id, 'BOARD')}
                 className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                style={{ display: 'flex', alignItems: 'center', gap: 3 }}
               >
-                🚨 신고
+                <AlertCircle size={13} strokeWidth={1.8} /> 신고
               </button>
             )}
           </div>

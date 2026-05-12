@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import PostCard from '@/components/common/PostCard';
 import { usePosts } from '@/hooks/usePosts';
+import { SlidersHorizontal, Music } from 'lucide-react';
 
 const CATEGORY_TABS = [
   { value: '',              label: '전체' },
@@ -107,7 +108,8 @@ export default function JobsPage() {
                 fontSize: 13, fontWeight: 500, cursor: 'pointer',
               }}
             >
-              🎛 필터{activeFilters > 0 ? ` (${activeFilters})` : ''}
+              <SlidersHorizontal size={14} strokeWidth={2} />
+              필터{activeFilters > 0 ? ` (${activeFilters})` : ''}
             </button>
             <Link
               href={`/write/jobs?category=${category || 'JOB_OFFER'}`}
@@ -202,7 +204,7 @@ export default function JobsPage() {
             alignItems: 'center', justifyContent: 'center',
             padding: '64px 0', color: '#9CA3AF',
           }}>
-            <span style={{ fontSize: 48, marginBottom: 12 }}>🎵</span>
+            <Music size={48} strokeWidth={1.5} color="#9CA3AF" style={{ marginBottom: 12 }} />
             <p style={{ fontSize: 14 }}>공고가 없습니다.</p>
           </div>
         ) : (

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import api from '@/lib/axios';
-import { Music2, Mic, BookOpen, Star, Building2, Guitar, MessageSquare, MessageCircle, LucideIcon } from 'lucide-react';
+import { Music2, Mic, BookOpen, Star, Building2, Guitar, MessageSquare, MessageCircle, LucideIcon, MapPin, ChevronRight, Music } from 'lucide-react';
 import { IconJob, IconPromo, IconTrade } from '@/components/common/SectionIcons';
 
 // 슬라이딩 배너 컴포넌트
@@ -16,7 +16,7 @@ function HeroBanner() {
   const banners = [
     {
       bg: 'linear-gradient(135deg, #7B82BE, #5A63A8)',
-      emoji: '🎹',
+      Icon: Music2,
       title: '반주자를 찾고 계신가요?',
       sub: '피아노, 바이올린, 첼로 등\n다양한 반주자를 만나보세요',
       btn: '구인 공고 보기',
@@ -24,7 +24,7 @@ function HeroBanner() {
     },
     {
       bg: 'linear-gradient(135deg, #6A8FD4, #4A6AB8)',
-      emoji: '🎵',
+      Icon: Music,
       title: '반주 활동을 원하시나요?',
       sub: '나에게 맞는 연주 기회를\n찾아보세요',
       btn: '구직 공고 보기',
@@ -32,7 +32,7 @@ function HeroBanner() {
     },
     {
       bg: 'linear-gradient(135deg, #9070C8, #7050A8)',
-      emoji: '🎭',
+      Icon: Star,
       title: '공연을 홍보해보세요',
       sub: '연주회, 공연 소식을\n많은 분들께 알려보세요',
       btn: '공연 홍보 보기',
@@ -86,7 +86,7 @@ function HeroBanner() {
         background: 'rgba(255,255,255,0.06)',
       }} />
 
-      <div style={{ fontSize: 44, marginBottom: 12 }}>{b.emoji}</div>
+      <b.Icon size={44} strokeWidth={1.5} color="rgba(255,255,255,0.9)" style={{ marginBottom: 12 }} />
       <h2 style={{
         color: 'white', fontSize: 20, fontWeight: 700,
         marginBottom: 8, lineHeight: 1.3,
@@ -214,7 +214,7 @@ function SectionCard({ post }: { post: any }) {
               display: 'flex', alignItems: 'center',
               gap: 4, fontSize: 13, color: '#6B7280',
             }}>
-              <span>📍</span>
+              <MapPin size={12} strokeWidth={1.8} color="#6B7280" />
               <span>{post.region || '지역 미정'}</span>
             </div>
           </div>
@@ -267,8 +267,9 @@ function SectionTitle({ type, title, href }: {
       <Link href={href} style={{
         fontSize: 13, color: '#5A63A8',
         textDecoration: 'none', fontWeight: 500,
+        display: 'flex', alignItems: 'center', gap: 2,
       }}>
-        더보기 →
+        더보기 <ChevronRight size={14} strokeWidth={1.8} color="#5A63A8" />
       </Link>
     </div>
   );

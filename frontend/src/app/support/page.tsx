@@ -1,10 +1,12 @@
 'use client';
 import Link from 'next/link';
 import SubHeader from '@/components/layout/SubHeader';
+import { HelpCircle, MessageCircle, Megaphone, LucideIcon } from 'lucide-react';
 
-const MENU_CARDS = [
+const MENU_CARDS: { Icon: LucideIcon; iconColor: string; title: string; desc: string; href: string; color: string; border: string; textColor: string }[] = [
   {
-    icon: '📋',
+    Icon: HelpCircle,
+    iconColor: '#6366F1',
     title: 'QnA',
     desc: '자주 묻는 질문을 확인하세요',
     href: '/support/qna',
@@ -13,7 +15,8 @@ const MENU_CARDS = [
     textColor: 'text-indigo-700',
   },
   {
-    icon: '✉️',
+    Icon: MessageCircle,
+    iconColor: '#3B82F6',
     title: '문의하기',
     desc: '1:1 문의를 남겨주세요',
     href: '/support/contact',
@@ -22,7 +25,8 @@ const MENU_CARDS = [
     textColor: 'text-blue-700',
   },
   {
-    icon: '📢',
+    Icon: Megaphone,
+    iconColor: '#D97706',
     title: '공지사항',
     desc: '서비스 공지를 확인하세요',
     href: '/support/notices',
@@ -61,7 +65,7 @@ export default function SupportPage() {
               href={card.href}
               className={`group flex flex-col items-center rounded-2xl border bg-gradient-to-br p-8 text-center transition-shadow hover:shadow-md ${card.color} ${card.border}`}
             >
-              <span className="text-5xl mb-4">{card.icon}</span>
+              <card.Icon size={48} strokeWidth={1.5} color={card.iconColor} style={{ marginBottom: 16 }} />
               <h2 className={`text-lg font-bold mb-1 ${card.textColor}`}>{card.title}</h2>
               <p className="text-sm text-gray-500">{card.desc}</p>
             </Link>

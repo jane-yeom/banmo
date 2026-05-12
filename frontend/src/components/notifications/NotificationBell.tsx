@@ -136,7 +136,7 @@ export default function NotificationBell() {
           <div className="max-h-96 overflow-y-auto divide-y divide-gray-50">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                <span className="text-3xl mb-2">🔔</span>
+                <Bell size={36} color="#9CA3AF" style={{ marginBottom: 8 }} />
                 <p className="text-sm">알림이 없습니다</p>
               </div>
             ) : (

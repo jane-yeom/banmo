@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
 import SubHeader from '@/components/layout/SubHeader';
+import { Info, Calendar } from 'lucide-react';
 
 const DRAFT_KEY = 'draft_jobs';
 
@@ -183,8 +184,10 @@ function WriteJobsContent() {
               background: '#F4F3F9', borderRadius: 8,
               fontSize: 12, color: '#6B7280', lineHeight: 1.5,
               borderLeft: '3px solid #7B82BE',
+              display: 'flex', alignItems: 'flex-start', gap: 6,
             }}>
-              💡 {guide}
+              <Info size={13} strokeWidth={1.8} color="#9CA3AF" style={{ flexShrink: 0, marginTop: 1 }} />
+              {guide}
             </div>
           )}
         </div>
@@ -267,8 +270,8 @@ function WriteJobsContent() {
               fontSize: 15, outline: 'none', boxSizing: 'border-box',
             }}
           />
-          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 6 }}>
-            💡 시급 기준 최저임금(10,030원) 이상으로 입력해주세요
+          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Info size={12} strokeWidth={1.8} /> 시급 기준 최저임금(10,030원) 이상으로 입력해주세요
           </p>
         </div>
 
@@ -277,8 +280,10 @@ function WriteJobsContent() {
           padding: '10px 14px', background: '#FFF7ED',
           border: '1px solid #FED7AA', borderRadius: 10,
           fontSize: 12, color: '#92400E', lineHeight: 1.5,
+          display: 'flex', alignItems: 'center', gap: 6,
         }}>
-          📅 공고는 등록 후 <strong>30일</strong>이 지나면 자동으로 마감됩니다.
+          <Calendar size={13} strokeWidth={1.8} color="#92400E" style={{ flexShrink: 0 }} />
+          공고는 등록 후 <strong>30일</strong>이 지나면 자동으로 마감됩니다.
         </div>
 
         {/* 내용 */}

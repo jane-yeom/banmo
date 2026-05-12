@@ -217,7 +217,7 @@ function SearchContent() {
                 textAlign: 'center', padding: '60px 0',
                 color: '#9CA3AF',
               }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>🔍</div>
+                <Search size={40} color="#9CA3AF" style={{ marginBottom: 12 }} />
                 <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
                   검색 결과가 없어요
                 </div>

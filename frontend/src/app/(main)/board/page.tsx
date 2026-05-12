@@ -4,10 +4,11 @@ import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useBoardPosts, type BoardPost } from '@/hooks/useBoard';
+import { MessageCircle, EyeOff, ClipboardList } from 'lucide-react';
 
 const TABS = [
-  { value: 'FREE',      label: '자유게시판', emoji: '💬' },
-  { value: 'ANONYMOUS', label: '익명게시판', emoji: '🎭' },
+  { value: 'FREE',      label: '자유게시판', Icon: MessageCircle },
+  { value: 'ANONYMOUS', label: '익명게시판', Icon: EyeOff },
 ];
 
 const TYPE_LABEL: Record<string, string> = {
@@ -70,7 +71,7 @@ function BoardContent() {
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <span>{t.emoji}</span>
+                <t.Icon size={14} strokeWidth={1.8} />
                 {t.label}
               </button>
             ))}
@@ -106,7 +107,7 @@ function BoardContent() {
             </div>
           ) : filtered?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-              <span className="text-5xl mb-3">📋</span>
+              <ClipboardList size={48} strokeWidth={1.5} color="#9CA3AF" style={{ marginBottom: 12 }} />
               <p>게시글이 없습니다.</p>
             </div>
           ) : (

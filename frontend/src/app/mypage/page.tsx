@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { X } from 'lucide-react';
+import { X, Heart, Bell, Key, ClipboardList, Inbox } from 'lucide-react';
 import SubHeader from '@/components/layout/SubHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/axios';
@@ -243,16 +243,16 @@ export default function MyPage() {
               프로필 편집
             </Link>
             <span className="text-gray-300">·</span>
-            <Link href="/favorites" className="text-gray-500 hover:underline">
-              ⭐ 찜한 공고
+            <Link href="/favorites" className="text-gray-500 hover:underline" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+              <Heart size={12} strokeWidth={1.8} /> 찜한 공고
             </Link>
             <span className="text-gray-300">·</span>
-            <Link href="/notifications/settings" className="text-gray-500 hover:underline">
-              🔔 알림 설정
+            <Link href="/notifications/settings" className="text-gray-500 hover:underline" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+              <Bell size={12} strokeWidth={1.8} /> 알림 설정
             </Link>
             <span className="text-gray-300">·</span>
-            <Link href="/notifications/keywords" className="text-gray-500 hover:underline">
-              🔍 키워드
+            <Link href="/notifications/keywords" className="text-gray-500 hover:underline" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+              <Key size={12} strokeWidth={1.8} /> 키워드
             </Link>
           </div>
         </div>
@@ -343,8 +343,8 @@ export default function MyPage() {
             const s = STATUS_LABEL[app.status];
             return (
               <div key={app.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                <div className="mb-2 text-xs text-indigo-600 font-medium truncate">
-                  📋 {app.post?.title ?? '공고'}
+                <div className="mb-2 text-xs text-indigo-600 font-medium truncate" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <ClipboardList size={12} strokeWidth={1.8} /> {app.post?.title ?? '공고'}
                 </div>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -506,7 +506,7 @@ function PostRow({ post }: { post: Post }) {
 function Empty({ text }: { text: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-      <span className="mb-2 text-4xl">📭</span>
+      <Inbox size={40} color="#9CA3AF" style={{ marginBottom: 8 }} />
       <p className="text-sm">{text}</p>
     </div>
   );

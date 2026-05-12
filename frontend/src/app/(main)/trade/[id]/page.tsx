@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,6 +11,7 @@ import { useCreateChatRoom } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
 import apiClient from '@/lib/axios';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
+import { MapPin, Calendar, Eye, Music, MessageCircle, Coins, Pencil, Trash2, Package } from 'lucide-react';
 
 const CATEGORY_LABEL: Record<string, string> = {
   TRADE_INSTRUMENT: '중고 악기',
@@ -199,8 +200,8 @@ export default function TradeDetailPage() {
             )}
           </div>
         ) : (
-          <div className="mb-5 flex aspect-square w-full items-center justify-center rounded-2xl bg-gray-100 text-6xl">
-            📦
+          <div className="mb-5 flex aspect-square w-full items-center justify-center rounded-2xl bg-gray-100">
+            <Package size={64} strokeWidth={1.3} color="#9CA3AF" />
           </div>
         )}
 
@@ -232,11 +233,11 @@ export default function TradeDetailPage() {
 
         {/* 기본 정보 */}
         <div className="mb-5 grid grid-cols-2 gap-3">
-          <InfoItem icon="📍" label="지역" value={post.region ?? '미정'} />
-          <InfoItem icon="📅" label="등록일" value={new Date(post.createdAt).toLocaleDateString('ko-KR')} />
-          <InfoItem icon="👁" label="조회수" value={`${post.viewCount.toLocaleString()}회`} />
+          <InfoItem icon={MapPin} label="지역" value={post.region ?? '미정'} />
+          <InfoItem icon={Calendar} label="등록일" value={new Date(post.createdAt).toLocaleDateString('ko-KR')} />
+          <InfoItem icon={Eye} label="조회수" value={`${post.viewCount.toLocaleString()}회`} />
           {post.instruments?.length > 0 && (
-            <InfoItem icon="🎵" label="악기" value={post.instruments.join(', ')} />
+            <InfoItem icon={Music} label="악기" value={post.instruments.join(', ')} />
           )}
         </div>
 
@@ -276,15 +277,17 @@ export default function TradeDetailPage() {
             <Link
               href={`/jobs/${id}/edit`}
               className="flex-1 rounded-xl border-2 border-amber-500 py-3.5 text-center text-base font-semibold text-amber-600 hover:bg-amber-50 transition-colors"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              ✏️ 수정하기
+              <Pencil size={15} strokeWidth={2} /> 수정하기
             </Link>
             <button
               onClick={() => confirm('삭제하시겠습니까?') && deleteMutation.mutate()}
               disabled={deleteMutation.isPending}
               className="flex-1 rounded-xl border-2 border-red-300 py-3.5 text-base font-semibold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-60"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              🗑 삭제하기
+              <Trash2 size={15} strokeWidth={1.8} /> 삭제하기
             </button>
           </div>
         ) : (
@@ -293,8 +296,9 @@ export default function TradeDetailPage() {
               onClick={handleChat}
               disabled={createRoom.isPending}
               className="flex-1 rounded-xl bg-amber-500 py-3.5 text-base font-semibold text-white hover:bg-amber-600 transition-colors disabled:opacity-60"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              💬 채팅하기
+              <MessageCircle size={18} strokeWidth={2} /> 채팅하기
             </button>
             <button
               onClick={() => {
@@ -302,8 +306,9 @@ export default function TradeDetailPage() {
                 setShowOffer(true);
               }}
               className="flex-1 rounded-xl border-2 border-amber-500 py-3.5 text-base font-semibold text-amber-600 hover:bg-amber-50 transition-colors"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              💰 가격 제안
+              <Coins size={16} strokeWidth={1.8} /> 가격 제안
             </button>
           </div>
         )}
@@ -312,11 +317,21 @@ export default function TradeDetailPage() {
   );
 }
 
-function InfoItem({ icon, label, value }: { icon: string; label: string; value: string }) {
+function InfoItem({ icon: Icon, label, value, color = '#D97706' }: { icon: React.ElementType; label: string; value: string; color?: string }) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-3">
-      <p className="text-xs text-gray-400 mb-0.5">{icon} {label}</p>
-      <p className="text-sm font-medium text-gray-800">{value}</p>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="rounded-xl border border-gray-100 bg-white p-3">
+      <div style={{
+        width: 34, height: 34, background: '#FEF6E4',
+        borderRadius: 10, display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+      }}>
+        <Icon size={17} strokeWidth={1.8} color={color} />
+      </div>
+      <div>
+        <div style={{ fontSize: 11, color: '#9CA3AF' }}>{label}</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: '#1A1A1A' }}>{value}</div>
+      </div>
     </div>
   );
 }

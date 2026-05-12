@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, User, MoreVertical, Image as ImageIcon, Send } from 'lucide-react';
+import { ChevronLeft, User, MoreVertical, Image as ImageIcon, Send, Ban, LockOpen } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useChatMessages } from '@/hooks/useChat';
@@ -300,7 +300,10 @@ export default function ChatRoomPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {isBlocked ? '🔓 차단 해제' : '🚫 차단하기'}
+                    {isBlocked
+                      ? <><LockOpen size={14} strokeWidth={1.8} style={{ display: 'inline', marginRight: 4 }} />차단 해제</>
+                      : <><Ban size={14} strokeWidth={1.8} style={{ display: 'inline', marginRight: 4 }} />차단하기</>
+                    }
                   </button>
                 </div>
               )}
