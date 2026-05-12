@@ -30,8 +30,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, logout } = useAuthStore();
   const [hydrated, setHydrated] = useState(false);
 
+  const isLoginPage = pathname === '/admin/login';
+
   // zustand persist가 localStorage에서 상태를 복원할 때까지 대기
   useEffect(() => {
+    if (isLoginPage) {
+      setHydrated(true);
+      return;
+    }
     if ((useAuthStore as any).persist?.hasHydrated?.()) {
       setHydrated(true);
     } else if ((useAuthStore as any).persist?.onFinishHydration) {
@@ -41,7 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       // fallback: 마운트 후 localStorage 직접 확인
       setHydrated(true);
     }
-  }, []);
+  }, [isLoginPage]);
 
   const { data: stats } = useQuery({
     queryKey: ['admin', 'stats'],
@@ -52,7 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   });
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (isLoginPage || !hydrated) return;
     if (!user) {
       router.replace('/admin/login');
       return;
@@ -60,7 +66,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (user.role !== 'ADMIN') {
       router.replace('/admin/login');
     }
-  }, [hydrated, user, router]);
+  }, [hydrated, user, router, isLoginPage]);
+
+  // 로그인 페이지는 레이아웃 없이 바로 렌더링
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (!hydrated || !user || user.role !== 'ADMIN') {
     return (
