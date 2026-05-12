@@ -95,6 +95,12 @@ export class Post {
   @Column({ type: 'timestamptz', nullable: true })
   closedAt: Date | null;
 
+  @Column({ default: false })
+  isCompleted: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  expiresAt: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 

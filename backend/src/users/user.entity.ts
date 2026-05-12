@@ -100,6 +100,15 @@ export class User {
   @Column({ default: false })
   isBanned: boolean;
 
+  @Column({ default: false })
+  isVerified: boolean;
+
+  @Column({ nullable: true })
+  verificationDoc: string;
+
+  @Column({ nullable: true, type: 'text' })
+  verificationNote: string;
+
   @Column({ nullable: true, type: 'text' })
   banReason: string;
 

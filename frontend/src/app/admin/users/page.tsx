@@ -92,6 +92,11 @@ export default function AdminUsersPage() {
     onSuccess: invalidate,
   });
 
+  const verifyMut = useMutation({
+    mutationFn: (id: string) => apiClient.patch(`/admin/users/${id}/verify`),
+    onSuccess: invalidate,
+  });
+
   const columns = [
     {
       key: 'no',
@@ -136,16 +141,18 @@ export default function AdminUsersPage() {
     {
       key: 'status',
       label: '상태',
-      render: (u: AdminUser) =>
-        u.isBanned ? (
-          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-600">
-            밴됨
-          </span>
-        ) : (
-          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-600">
-            정상
-          </span>
-        ),
+      render: (u: AdminUser) => (
+        <div className="flex flex-col gap-1">
+          {u.isBanned ? (
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-600">밴됨</span>
+          ) : (
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-600">정상</span>
+          )}
+          {u.isVerified && (
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">✓ 인증됨</span>
+          )}
+        </div>
+      ),
     },
     {
       key: 'actions',
@@ -191,6 +198,16 @@ export default function AdminUsersPage() {
           >
             추적
           </button>
+          {!u.isVerified && (
+            <button
+              onClick={() => {
+                if (confirm(`${u.nickname ?? '사용자'}를 인증하시겠습니까?`)) verifyMut.mutate(u.id);
+              }}
+              className="px-2 py-1 text-xs rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-700"
+            >
+              인증
+            </button>
+          )}
           <button
             onClick={() => {
               if (confirm('정말 삭제하시겠습니까?')) deleteMut.mutate(u.id);

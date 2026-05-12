@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
+
+const DRAFT_KEY = 'draft_jobs';
 
 const JOB_CATEGORIES = [
   { value: 'JOB_OFFER', label: '반주자 구인' },
@@ -55,15 +57,42 @@ function WriteJobsContent() {
   const rawCategory = searchParams.get('category') ?? 'JOB_OFFER';
   const initialCategory = VALID_JOB_CATEGORIES.includes(rawCategory) ? rawCategory : 'JOB_OFFER';
 
-  const [form, setForm] = useState({
-    category: initialCategory,
-    title: '',
-    content: '',
-    instruments: [] as string[],
-    region: '',
-    payText: '',
+  type FormState = { category: string; title: string; content: string; instruments: string[]; region: string; payText: string };
+  const [form, setForm] = useState<FormState>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(DRAFT_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return { ...parsed, category: initialCategory };
+        }
+      } catch {}
+    }
+    return {
+      category: initialCategory,
+      title: '',
+      content: '',
+      instruments: [] as string[],
+      region: '',
+      payText: '',
+    };
   });
   const [saving, setSaving] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 초안 자동저장 (2초 디바운스)
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+        setDraftSaved(true);
+        setTimeout(() => setDraftSaved(false), 2000);
+      } catch {}
+    }, 2000);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [form]);
 
   const toggleInstrument = (inst: string) => {
     setForm(prev => ({
@@ -86,6 +115,7 @@ function WriteJobsContent() {
         payMin: 0,
       });
       const id = res.data?.id || res.data?.data?.id;
+      localStorage.removeItem(DRAFT_KEY);
       router.replace(`/jobs/${id}`);
     } catch (e: any) {
       alert(e.response?.data?.message || '등록 실패');
@@ -114,7 +144,10 @@ function WriteJobsContent() {
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
           <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
         </button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>구인구직 공고 작성</h1>
+        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>구인구직 공고 작성</h1>
+        {draftSaved && (
+          <span style={{ fontSize: 11, color: '#9CA3AF', marginRight: 4 }}>초안 저장됨</span>
+        )}
         <button
           onClick={handleSubmit}
           disabled={saving}
@@ -244,6 +277,15 @@ function WriteJobsContent() {
           <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 6 }}>
             💡 시급 기준 최저임금(10,030원) 이상으로 입력해주세요
           </p>
+        </div>
+
+        {/* 자동 마감 안내 */}
+        <div style={{
+          padding: '10px 14px', background: '#FFF7ED',
+          border: '1px solid #FED7AA', borderRadius: 10,
+          fontSize: 12, color: '#92400E', lineHeight: 1.5,
+        }}>
+          📅 공고는 등록 후 <strong>30일</strong>이 지나면 자동으로 마감됩니다.
         </div>
 
         {/* 내용 */}

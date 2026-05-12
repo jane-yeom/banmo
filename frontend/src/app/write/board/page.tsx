@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { useCreateBoardPost } from '@/hooks/useBoard';
 import toast from 'react-hot-toast';
+
+const DRAFT_KEY = 'draft_board';
 
 function WriteBoardContent() {
   const router = useRouter();
@@ -14,8 +16,32 @@ function WriteBoardContent() {
   const { isLoggedIn } = useAuthStore();
   const createPost = useCreateBoardPost();
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}').title || ''; } catch {}
+    }
+    return '';
+  });
+  const [content, setContent] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}').content || ''; } catch {}
+    }
+    return '';
+  });
+  const [draftSaved, setDraftSaved] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ title, content }));
+        setDraftSaved(true);
+        setTimeout(() => setDraftSaved(false), 2000);
+      } catch {}
+    }, 2000);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [title, content]);
 
   const isAnonymous = type === 'ANONYMOUS';
   const pageTitle = isAnonymous ? '익명게시판 글쓰기' : '자유게시판 글쓰기';
@@ -28,7 +54,7 @@ function WriteBoardContent() {
     createPost.mutate(
       { type, title, content, isAnonymous },
       {
-        onSuccess: (res) => router.push(`/board/${res.data.id}`),
+        onSuccess: (res) => { localStorage.removeItem(DRAFT_KEY); router.push(`/board/${res.data.id}`); },
         onError: (error: any) => {
           const msg = error?.response?.data?.message || '게시글 등록에 실패했습니다.';
           toast.error(Array.isArray(msg) ? msg.join(', ') : msg);
@@ -54,7 +80,10 @@ function WriteBoardContent() {
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
           <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
         </button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>{pageTitle}</h1>
+        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>{pageTitle}</h1>
+        {draftSaved && (
+          <span style={{ fontSize: 11, color: '#9CA3AF', marginRight: 4 }}>초안 저장됨</span>
+        )}
         <button
           onClick={handleSubmit}
           disabled={createPost.isPending}

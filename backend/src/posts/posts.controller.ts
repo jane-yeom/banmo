@@ -42,6 +42,12 @@ export class PostsController {
     return this.postsService.create(user.id, dto);
   }
 
+  @Patch(':id/complete')
+  @UseGuards(AuthGuard('jwt'))
+  completePost(@Param('id') id: string, @Req() req: any) {
+    return this.postsService.completePost(id, req.user.id);
+  }
+
   @Patch(':id/close')
   @UseGuards(AuthGuard('jwt'))
   closePost(@Param('id') id: string, @Req() req: any) {

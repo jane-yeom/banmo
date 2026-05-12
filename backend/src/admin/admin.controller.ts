@@ -173,6 +173,11 @@ export class AdminController {
     return this.adminService.showPost(id);
   }
 
+  @Patch('users/:id/verify')
+  async verifyUser(@Param('id') id: string) {
+    return this.adminService.verifyUser(id);
+  }
+
   @Patch('posts/:id/close')
   adminClosePost(@Param('id') id: string) {
     return this.adminService.adminClosePost(id);

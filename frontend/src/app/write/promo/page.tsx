@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
+
+const DRAFT_KEY = 'draft_promo';
 
 const PROMO_CATEGORIES = [
   { value: 'PROMO_CONCERT', label: '공연/연주회 홍보' },
@@ -32,16 +34,42 @@ function WritePromoContent() {
   const rawCategory = searchParams.get('category') ?? 'PROMO_CONCERT';
   const initialCategory = VALID_PROMO_CATEGORIES.includes(rawCategory) ? rawCategory : 'PROMO_CONCERT';
 
-  const [form, setForm] = useState({
-    category: initialCategory,
-    title: '',
-    content: '',
-    region: '',
-    payText: '',
-    date: '',
-    venue: '',
+  type FormState = { category: string; title: string; content: string; region: string; payText: string; date: string; venue: string };
+  const [form, setForm] = useState<FormState>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(DRAFT_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return { ...parsed, category: initialCategory };
+        }
+      } catch {}
+    }
+    return {
+      category: initialCategory,
+      title: '',
+      content: '',
+      region: '',
+      payText: '',
+      date: '',
+      venue: '',
+    };
   });
   const [saving, setSaving] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+        setDraftSaved(true);
+        setTimeout(() => setDraftSaved(false), 2000);
+      } catch {}
+    }, 2000);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [form]);
 
   const handleSubmit = async () => {
     if (!form.title.trim()) return alert('제목을 입력해주세요');
@@ -57,6 +85,7 @@ function WritePromoContent() {
         payType: 'NEGOTIABLE',
         payMin: 0,
       });
+      localStorage.removeItem(DRAFT_KEY);
       router.replace('/promo');
     } catch (e: any) {
       alert(e.response?.data?.message || '등록 실패');
@@ -84,7 +113,10 @@ function WritePromoContent() {
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
           <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
         </button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>공연/연습실 등록</h1>
+        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>공연/연습실 등록</h1>
+        {draftSaved && (
+          <span style={{ fontSize: 11, color: '#9CA3AF', marginRight: 4 }}>초안 저장됨</span>
+        )}
         <button
           onClick={handleSubmit}
           disabled={saving}

@@ -323,6 +323,11 @@ export class AdminService {
     return this.postsRepo.save(post);
   }
 
+  async verifyUser(userId: string) {
+    await this.usersRepo.update(userId, { isVerified: true } as any);
+    return { success: true };
+  }
+
   async adminClosePost(id: string): Promise<Post> {
     const post = await this.postsRepo.findOne({ where: { id } });
     if (!post) throw new NotFoundException('공고를 찾을 수 없습니다.');

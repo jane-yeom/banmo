@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
 import { Post } from '@/types';
+import NoteGradeBadge from '@/components/common/NoteGradeBadge';
 
 type AppStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
@@ -38,11 +39,119 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 type Tab = 'posts' | 'applied' | 'received';
 
+interface ApplicantProfile {
+  id: string;
+  nickname: string | null;
+  profileImage: string | null;
+  noteGrade: string;
+  trustScore: number;
+  instruments: string[] | null;
+  bio: string | null;
+  isVerified?: boolean;
+}
+
+function ApplicantProfileModal({
+  applicantId,
+  onClose,
+}: {
+  applicantId: string;
+  onClose: () => void;
+}) {
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['applicantProfile', applicantId],
+    queryFn: () =>
+      apiClient.get<ApplicantProfile>(`/users/${applicantId}`).then((r) => r.data),
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-t-3xl bg-white p-6 shadow-xl"
+        style={{ maxHeight: '80vh', overflowY: 'auto' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-base font-bold text-gray-900">지원자 프로필</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+            <X size={20} color="#6B7280" />
+          </button>
+        </div>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
+          </div>
+        ) : profile ? (
+          <>
+            <div className="mb-4 flex items-center gap-4">
+              <div
+                className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-2xl font-bold overflow-hidden"
+                style={{ background: '#ECEAF8', color: '#7B82BE' }}
+              >
+                {profile.profileImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={profile.profileImage} alt="프로필" className="h-16 w-16 rounded-full object-cover" />
+                ) : (
+                  (profile.nickname ?? '?')[0]
+                )}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-lg font-bold text-gray-900">{profile.nickname ?? '익명'}</p>
+                  {profile.isVerified && (
+                    <span style={{ fontSize: 11, background: '#EAF6EF', color: '#5AAB7A', border: '1px solid #5AAB7A', borderRadius: 99, padding: '2px 8px', fontWeight: 700 }}>
+                      ✓ 인증
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1 flex items-center gap-2">
+                  <NoteGradeBadge grade={profile.noteGrade as any} />
+                  <span className="text-xs text-gray-400">신뢰점수 {profile.trustScore?.toFixed(1)}</span>
+                </div>
+              </div>
+            </div>
+            {profile.instruments && profile.instruments.length > 0 && (
+              <div className="mb-3">
+                <p className="mb-1 text-xs font-semibold text-gray-500">담당 악기</p>
+                <div className="flex flex-wrap gap-1">
+                  {profile.instruments.map((inst) => (
+                    <span key={inst} className="rounded-full px-3 py-1 text-xs font-medium" style={{ background: '#ECEAF8', color: '#7B82BE' }}>
+                      {inst}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {profile.bio && (
+              <div className="mb-4 rounded-xl bg-gray-50 p-3">
+                <p className="text-sm text-gray-700 leading-relaxed">{profile.bio}</p>
+              </div>
+            )}
+            <Link
+              href={`/profile/${applicantId}`}
+              onClick={onClose}
+              className="block w-full rounded-xl py-3 text-center text-sm font-semibold text-white"
+              style={{ background: 'linear-gradient(135deg, #7B82BE, #5A63A8)' }}
+            >
+              전체 프로필 보기
+            </Link>
+          </>
+        ) : (
+          <p className="py-8 text-center text-sm text-gray-400">프로필을 불러올 수 없습니다.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function MyPage() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>('posts');
+  const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) router.replace('/login');
@@ -103,6 +212,12 @@ export default function MyPage() {
 
   return (
     <>
+    {selectedApplicantId && (
+      <ApplicantProfileModal
+        applicantId={selectedApplicantId}
+        onClose={() => setSelectedApplicantId(null)}
+      />
+    )}
     <div style={{
       position: 'sticky', top: 0, zIndex: 10,
       background: 'white',
@@ -247,9 +362,12 @@ export default function MyPage() {
                 </div>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900">
-                      {app.applicant?.nickname ?? '익명'}
-                    </p>
+                    <button
+                      onClick={() => app.applicant?.id && setSelectedApplicantId(app.applicant.id)}
+                      className="font-medium text-gray-900 hover:text-indigo-700 transition-colors text-left"
+                    >
+                      {app.applicant?.nickname ?? '익명'} <span className="text-xs text-gray-400 font-normal">프로필 보기 →</span>
+                    </button>
                     <p className="mt-0.5 text-xs text-gray-400">
                       {new Date(app.createdAt).toLocaleDateString('ko-KR')}
                     </p>

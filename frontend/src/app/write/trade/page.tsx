@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { ChevronLeft, Camera } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
+
+const DRAFT_KEY = 'draft_trade';
 
 const TRADE_CATEGORIES = [
   { value: 'TRADE_INSTRUMENT', label: '중고악기 거래' },
@@ -42,21 +44,47 @@ function WriteTradeContent() {
   const router = useRouter();
   const { isLoggedIn } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchParams = useSearchParams();
   const rawCategory = searchParams.get('category') ?? 'TRADE_INSTRUMENT';
   const initialCategory = VALID_TRADE_CATEGORIES.includes(rawCategory) ? rawCategory : 'TRADE_INSTRUMENT';
 
-  const [form, setForm] = useState({
-    category: initialCategory,
-    title: '',
-    content: '',
-    region: '',
-    payText: '',
-    tradeMethod: 'both' as TradeMethod,
+  type FormState = { category: string; title: string; content: string; region: string; payText: string; tradeMethod: TradeMethod };
+  const [form, setForm] = useState<FormState>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(DRAFT_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return { ...parsed, category: initialCategory };
+        }
+      } catch {}
+    }
+    return {
+      category: initialCategory,
+      title: '',
+      content: '',
+      region: '',
+      payText: '',
+      tradeMethod: 'both' as TradeMethod,
+    };
   });
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+        setDraftSaved(true);
+        setTimeout(() => setDraftSaved(false), 2000);
+      } catch {}
+    }, 2000);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [form]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -95,6 +123,7 @@ function WriteTradeContent() {
         imageUrls: images,
       });
       const id = res.data?.id || res.data?.data?.id;
+      localStorage.removeItem(DRAFT_KEY);
       router.replace(`/trade/${id}`);
     } catch (e: any) {
       alert(e.response?.data?.message || '등록 실패');
@@ -122,7 +151,10 @@ function WriteTradeContent() {
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
           <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
         </button>
-        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>양도/중고거래 등록</h1>
+        <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>양도/중고거래 등록</h1>
+        {draftSaved && (
+          <span style={{ fontSize: 11, color: '#9CA3AF', marginRight: 4 }}>초안 저장됨</span>
+        )}
         <button
           onClick={handleSubmit}
           disabled={saving || uploading}

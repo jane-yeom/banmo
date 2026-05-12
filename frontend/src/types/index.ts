@@ -12,6 +12,7 @@ export interface User {
   trustScore: number;
   role: 'USER' | 'ADMIN';
   isBanned: boolean;
+  isVerified: boolean;
   createdAt: string;
 }
 

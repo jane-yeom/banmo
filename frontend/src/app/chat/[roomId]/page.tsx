@@ -4,8 +4,9 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, User } from 'lucide-react';
-import { useQueryClient } from '@tanstack/react-query';
+import { ChevronLeft, User, MoreVertical } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { useChatMessages } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
@@ -60,8 +61,42 @@ export default function ChatRoomPage() {
   const [readByOther, setReadByOther] = useState(false); // 상대방이 읽었는지
   const [input, setInput] = useState('');
   const [connected, setConnected] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // 상대방 정보 (room에서 파생)
+  const otherId = room
+    ? room.sender.id === user?.id ? room.receiver.id : room.sender.id
+    : null;
+
+  // 차단 목록 조회
+  const { data: blockList } = useQuery({
+    queryKey: ['blockList'],
+    queryFn: () => apiClient.get<{ id: string; blocked: { id: string } }[]>('/users/block/list').then(r => r.data),
+    enabled: !!user,
+  });
+  const isBlocked = blockList?.some(b => b.blocked?.id === otherId) ?? false;
+
+  const blockMutation = useMutation({
+    mutationFn: (userId: string) => apiClient.post(`/users/block/${userId}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['blockList'] });
+      toast.success('차단되었습니다');
+      setShowMenu(false);
+    },
+    onError: () => toast.error('오류가 발생했습니다'),
+  });
+
+  const unblockMutation = useMutation({
+    mutationFn: (userId: string) => apiClient.delete(`/users/block/${userId}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['blockList'] });
+      toast.success('차단이 해제되었습니다');
+      setShowMenu(false);
+    },
+    onError: () => toast.error('오류가 발생했습니다'),
+  });
 
   useEffect(() => {
     if (!user) { router.push('/login'); return; }
@@ -176,7 +211,7 @@ export default function ChatRoomPage() {
   }, [messages, user]);
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-gray-50">
+    <div className="flex h-[100dvh] flex-col bg-gray-50" onClick={() => showMenu && setShowMenu(false)}>
       {/* 채팅방 헤더 */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
@@ -208,6 +243,45 @@ export default function ChatRoomPage() {
             <Link href={`/profile/${other.id}`} className="flex-shrink-0 text-xs text-gray-400 hover:text-purple-600">
               프로필
             </Link>
+            {/* 더보기 메뉴 */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setShowMenu(v => !v)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}
+              >
+                <MoreVertical size={20} color="#6B7280" />
+              </button>
+              {showMenu && (
+                <div style={{
+                  position: 'absolute', top: '100%', right: 0, zIndex: 20,
+                  background: 'white', border: '1px solid #E5E7EB',
+                  borderRadius: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  minWidth: 130, overflow: 'hidden',
+                }}>
+                  <button
+                    onClick={() => {
+                      if (!otherId) return;
+                      if (isBlocked) {
+                        unblockMutation.mutate(otherId);
+                      } else {
+                        if (confirm(`${other.nickname ?? '상대방'}을 차단하시겠습니까?\n차단하면 이 사용자의 메시지를 받지 않습니다.`)) {
+                          blockMutation.mutate(otherId);
+                        }
+                      }
+                    }}
+                    style={{
+                      width: '100%', padding: '12px 16px',
+                      background: 'none', border: 'none',
+                      textAlign: 'left', fontSize: 14,
+                      color: isBlocked ? '#5AAB7A' : '#EF4444',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {isBlocked ? '🔓 차단 해제' : '🚫 차단하기'}
+                  </button>
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>

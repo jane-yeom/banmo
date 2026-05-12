@@ -30,6 +30,9 @@ export class PostsService {
       this.validatePay(dto.payType, dto.payMin);
     }
 
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
     const post = this.postsRepository.create({
       ...dto,
       payType: dto.payText ? PayType.NEGOTIABLE : dto.payType,
@@ -37,6 +40,7 @@ export class PostsService {
       authorId: userId,
       instruments: dto.instruments ?? [],
       imageUrls: dto.imageUrls ?? [],
+      expiresAt,
     });
     const saved = await this.postsRepository.save(post);
     console.log('[Posts] 저장 완료:', saved.id);
@@ -128,6 +132,18 @@ export class PostsService {
       .catch(() => {});
 
     return saved;
+  }
+
+  async completePost(postId: string, userId: string) {
+    const post = await this.postsRepository.findOne({ where: { id: postId }, relations: ['author'] });
+    if (!post) throw new NotFoundException('공고를 찾을 수 없습니다');
+    if (post.author.id !== userId) throw new ForbiddenException('본인 공고만 처리할 수 있습니다');
+    post.status = PostStatus.CLOSED;
+    (post as any).isCompleted = true;
+    post.closedAt = new Date();
+    await this.postsRepository.save(post);
+    await this.trustService.applyEvent(userId, TrustEvent.DEAL_ACCEPTED).catch(() => {});
+    return { success: true, message: '거래완료 처리되었습니다' };
   }
 
   async closePost(postId: string, userId: string) {

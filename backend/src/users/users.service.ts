@@ -3,6 +3,7 @@ import { IsArray, IsOptional, IsString } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, LoginType, NoteGrade } from './user.entity';
+import { Block } from './block.entity';
 
 function calcGrade(score: number): NoteGrade {
   if (score >= 100) return NoteGrade.WHOLE;
@@ -38,6 +39,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Block)
+    private readonly blockRepository: Repository<Block>,
   ) {}
 
   async findByKakaoId(kakaoId: string): Promise<User | null> {
@@ -139,6 +142,44 @@ export class UsersService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { kakaoId, email, isBanned, password, sanitizeArrays, ...profile } = user as any;
     return profile;
+  }
+
+  async blockUser(blockerId: string, blockedId: string) {
+    if (blockerId === blockedId) {
+      throw new BadRequestException('자기 자신을 차단할 수 없습니다');
+    }
+    const existing = await this.blockRepository.findOne({
+      where: { blocker: { id: blockerId }, blocked: { id: blockedId } },
+    });
+    if (existing) throw new BadRequestException('이미 차단된 유저입니다');
+    const block = this.blockRepository.create({
+      blocker: { id: blockerId } as User,
+      blocked: { id: blockedId } as User,
+    });
+    await this.blockRepository.save(block);
+    return { success: true, message: '차단되었습니다' };
+  }
+
+  async unblockUser(blockerId: string, blockedId: string) {
+    await this.blockRepository.delete({
+      blocker: { id: blockerId },
+      blocked: { id: blockedId },
+    });
+    return { success: true, message: '차단이 해제되었습니다' };
+  }
+
+  async getBlockList(userId: string) {
+    return this.blockRepository.find({
+      where: { blocker: { id: userId } },
+      relations: ['blocked'],
+    });
+  }
+
+  async isBlocked(blockerId: string, blockedId: string): Promise<boolean> {
+    const block = await this.blockRepository.findOne({
+      where: { blocker: { id: blockerId }, blocked: { id: blockedId } },
+    });
+    return !!block;
   }
 
   async deleteAccount(userId: string) {

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Share2 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { usePost } from '@/hooks/usePosts';
@@ -168,6 +168,22 @@ export default function JobDetailPage() {
     deleteMutation.mutate();
   };
 
+  const TRADE_CATS = new Set(['TRADE_INSTRUMENT', 'TRADE_LESSON', 'TRADE_SPACE', 'TRADE_TICKET']);
+
+  const handleComplete = async () => {
+    if (!confirm('거래완료 처리하시겠습니까?\n거래 완료 시 신뢰점수 +5점이 추가됩니다.')) return;
+    setIsClosing(true);
+    try {
+      await apiClient.patch(`/posts/${id}/complete`);
+      toast.success('거래완료 처리되었습니다');
+      qc.invalidateQueries({ queryKey: ['posts', id] });
+    } catch {
+      toast.error('오류가 발생했습니다');
+    } finally {
+      setIsClosing(false);
+    }
+  };
+
   const handleClose = async () => {
     if (!confirm('이 공고를 마감하시겠습니까?')) return;
     setIsClosing(true);
@@ -179,6 +195,24 @@ export default function JobDetailPage() {
       toast.error('오류가 발생했습니다');
     } finally {
       setIsClosing(false);
+    }
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = post?.title ?? '';
+    const text = `${(post as any)?.payText || '협의'} | ${post?.region || ''}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+        return;
+      } catch {}
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('링크가 복사되었습니다');
+    } catch {
+      toast.error('복사 실패');
     }
   };
 
@@ -248,9 +282,28 @@ export default function JobDetailPage() {
           <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
         </button>
         <h1 style={{ fontSize: 17, fontWeight: 700, margin: 0, flex: 1 }}>공고 상세</h1>
+        <button onClick={handleShare} style={{
+          background: 'none', border: 'none',
+          cursor: 'pointer', padding: 4,
+          display: 'flex', alignItems: 'center',
+        }}>
+          <Share2 size={22} color="#6B7280" strokeWidth={1.8} />
+        </button>
       </div>
 
       <div className="mx-auto max-w-3xl px-4 py-8">
+
+        {/* 거래완료 배지 */}
+        {(post as any).isCompleted && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: '#EAF6EF', border: '1px solid #5AAB7A',
+            borderRadius: 99, padding: '6px 14px', marginBottom: 12,
+          }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#5AAB7A' }}/>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#5AAB7A' }}>거래완료</span>
+          </div>
+        )}
 
         {/* 카테고리 + 상태 */}
         <div className="flex items-center gap-2 mb-3">
@@ -377,6 +430,17 @@ export default function JobDetailPage() {
               </div>
             )}
             */}
+            {/* 거래완료 버튼 (중고/양도 카테고리, ACTIVE 상태, 미완료 시) */}
+            {TRADE_CATS.has(post.category) && post.status === 'ACTIVE' && !(post as any).isCompleted && (
+              <button
+                onClick={handleComplete}
+                disabled={isClosing}
+                className="w-full rounded-xl py-3 text-base font-semibold text-white transition-colors disabled:opacity-60"
+                style={{ background: 'linear-gradient(135deg, #5AAB7A, #3d8a5e)' }}
+              >
+                ✓ 거래완료
+              </button>
+            )}
             {/* 마감/재등록 */}
             {post.status === 'ACTIVE' ? (
               <button

@@ -131,9 +131,20 @@ export default function ProfilePage() {
                   </div>
                 )}
                 <div className="mb-1">
-                  <h1 className="text-xl font-bold text-gray-900">
-                    {user.nickname ?? '익명'}
-                  </h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-xl font-bold text-gray-900">
+                      {user.nickname ?? '익명'}
+                    </h1>
+                    {(user as any).isVerified && (
+                      <span style={{
+                        fontSize: 11, background: '#EAF6EF',
+                        color: '#5AAB7A', border: '1px solid #5AAB7A',
+                        borderRadius: 99, padding: '2px 8px', fontWeight: 700,
+                      }}>
+                        ✓ 인증
+                      </span>
+                    )}
+                  </div>
                   <NoteGradeBadge grade={user.noteGrade} size="md" />
                 </div>
               </div>

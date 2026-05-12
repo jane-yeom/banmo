@@ -8,6 +8,7 @@ import {
   Body,
   UseGuards,
   Request,
+  Req,
 } from '@nestjs/common';
 import { IsString } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
@@ -65,5 +66,23 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   async deleteAccount(@Request() req: any) {
     return this.usersService.deleteAccount(req.user.id);
+  }
+
+  @Post('block/:userId')
+  @UseGuards(AuthGuard('jwt'))
+  async blockUser(@Param('userId') userId: string, @Request() req: any) {
+    return this.usersService.blockUser(req.user.id, userId);
+  }
+
+  @Delete('block/:userId')
+  @UseGuards(AuthGuard('jwt'))
+  async unblockUser(@Param('userId') userId: string, @Request() req: any) {
+    return this.usersService.unblockUser(req.user.id, userId);
+  }
+
+  @Get('block/list')
+  @UseGuards(AuthGuard('jwt'))
+  async getBlockList(@Request() req: any) {
+    return this.usersService.getBlockList(req.user.id);
   }
 }

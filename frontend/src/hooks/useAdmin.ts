@@ -20,6 +20,7 @@ export interface AdminUser {
   noteGrade: string;
   trustScore: number;
   isBanned: boolean;
+  isVerified: boolean;
   banReason: string | null;
   loginType: string;
   role: string;
