@@ -102,6 +102,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { event: 'messageSent', data: message };
   }
 
+  @SubscribeMessage('sendImage')
+  async handleSendImage(
+    @ConnectedSocket() client: AuthSocket,
+    @MessageBody() data: { roomId: string; imageUrl: string },
+  ) {
+    if (!client.userId) return client.disconnect();
+    const { roomId, imageUrl } = data;
+
+    const message = await this.chatService.saveMessage(client.userId, roomId, '[이미지]', imageUrl);
+    const receiverId = await this.chatService.getReceiverId(roomId, client.userId);
+
+    this.server.to(`room:${roomId}`).emit('newMessage', message);
+    this.server.to(`user:${receiverId}`).emit('roomUpdated', { roomId, lastMessage: '[이미지]' });
+
+    this.notificationsService
+      .sendChatNotification(client.userId, receiverId, roomId, '[이미지]')
+      .catch(() => {});
+
+    return { event: 'imageSent', data: message };
+  }
+
   @SubscribeMessage('markAsRead')
   async handleMarkAsRead(
     @ConnectedSocket() client: AuthSocket,

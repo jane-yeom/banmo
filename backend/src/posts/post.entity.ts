@@ -98,6 +98,12 @@ export class Post {
   @Column({ default: false })
   isCompleted: boolean;
 
+  @Column({ default: false })
+  isEdited: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  editedAt: Date;
+
   @Column({ type: 'timestamptz', nullable: true })
   expiresAt: Date;
 

@@ -30,11 +30,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, logout } = useAuthStore();
   const [hydrated, setHydrated] = useState(false);
 
-  const isLoginPage = pathname === '/admin/login';
+  const isPublicAdminPage =
+    pathname === '/admin/login' ||
+    pathname === '/admin/forgot-password' ||
+    pathname.startsWith('/admin/reset-password');
 
   // zustand persist가 localStorage에서 상태를 복원할 때까지 대기
   useEffect(() => {
-    if (isLoginPage) {
+    if (isPublicAdminPage) {
       setHydrated(true);
       return;
     }
@@ -47,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       // fallback: 마운트 후 localStorage 직접 확인
       setHydrated(true);
     }
-  }, [isLoginPage]);
+  }, [isPublicAdminPage]);
 
   const { data: stats } = useQuery({
     queryKey: ['admin', 'stats'],
@@ -58,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   });
 
   useEffect(() => {
-    if (isLoginPage || !hydrated) return;
+    if (isPublicAdminPage || !hydrated) return;
     if (!user) {
       router.replace('/admin/login');
       return;
@@ -66,10 +69,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (user.role !== 'ADMIN') {
       router.replace('/admin/login');
     }
-  }, [hydrated, user, router, isLoginPage]);
+  }, [hydrated, user, router, isPublicAdminPage]);
 
-  // 로그인 페이지는 레이아웃 없이 바로 렌더링
-  if (isLoginPage) {
+  // 공개 페이지(로그인/비밀번호찾기)는 레이아웃 없이 바로 렌더링
+  if (isPublicAdminPage) {
     return <>{children}</>;
   }
 

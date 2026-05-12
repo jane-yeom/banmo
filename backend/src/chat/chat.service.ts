@@ -69,7 +69,7 @@ export class ChatService {
     });
   }
 
-  async saveMessage(senderId: string, roomId: string, content: string): Promise<ChatMessage> {
+  async saveMessage(senderId: string, roomId: string, content: string, imageUrl?: string): Promise<ChatMessage> {
     const room = await this.roomsRepository.findOne({ where: { id: roomId } });
     if (!room) throw new NotFoundException('채팅방을 찾을 수 없습니다.');
     if (room.senderId !== senderId && room.receiverId !== senderId) {
@@ -77,13 +77,14 @@ export class ChatService {
     }
 
     const created = this.messagesRepository.create({ roomId, senderId, content });
+    if (imageUrl) (created as any).imageUrl = imageUrl;
     const saved = await this.messagesRepository.save(created);
 
     // eager relation(sender)이 save() 후 미로딩될 수 있으므로 재조회
     const message = await this.messagesRepository.findOne({ where: { id: saved.id } });
 
     await this.roomsRepository.update(roomId, {
-      lastMessage: content,
+      lastMessage: imageUrl ? '[이미지]' : content,
       lastMessageAt: new Date(),
       isRead: false,
     });

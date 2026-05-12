@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, User, MoreVertical, Home } from 'lucide-react';
+import { ChevronLeft, User, MoreVertical, Image as ImageIcon, Send } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useChatMessages } from '@/hooks/useChat';
@@ -12,6 +12,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
 import { getSocket } from '@/lib/socket';
 import apiClient from '@/lib/axios';
+import { uploadImage } from '@/lib/upload';
 import { ChatMessage } from '@/types';
 
 interface RoomInfo {
@@ -62,8 +63,10 @@ export default function ChatRoomPage() {
   const [input, setInput] = useState('');
   const [connected, setConnected] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
 
   // 상대방 정보 (room에서 파생)
   const otherId = room
@@ -188,6 +191,22 @@ export default function ChatRoomPage() {
     setInput('');
     inputRef.current?.focus();
   }, [input, connected, accessToken, roomId]);
+
+  const handleImageSend = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading(true);
+    try {
+      const url = await uploadImage(file);
+      const socket = getSocket(accessToken!);
+      socket.emit('sendImage', { roomId, imageUrl: url });
+    } catch {
+      toast.error('이미지 전송 실패');
+    } finally {
+      setImageUploading(false);
+      if (imageRef.current) imageRef.current.value = '';
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -333,16 +352,30 @@ export default function ChatRoomPage() {
                   )}
 
                   {/* 말풍선 */}
-                  <div
-                    className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed break-words ${
-                      isMine
-                        ? 'text-white rounded-br-sm'
-                        : 'bg-white text-gray-800 border border-gray-100 shadow-sm rounded-bl-sm'
-                    }`}
-                    style={isMine ? { background: 'linear-gradient(135deg, #7B82BE, #5A63A8)' } : undefined}
-                  >
-                    {msg.content}
-                  </div>
+                  {msg.imageUrl ? (
+                    <div
+                      style={{ maxWidth: 200, borderRadius: 12, overflow: 'hidden', cursor: 'pointer' }}
+                      onClick={() => window.open(msg.imageUrl, '_blank')}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={msg.imageUrl}
+                        alt="이미지"
+                        style={{ width: '100%', display: 'block', borderRadius: 12 }}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed break-words ${
+                        isMine
+                          ? 'text-white rounded-br-sm'
+                          : 'bg-white text-gray-800 border border-gray-100 shadow-sm rounded-bl-sm'
+                      }`}
+                      style={isMine ? { background: 'linear-gradient(135deg, #7B82BE, #5A63A8)' } : undefined}
+                    >
+                      {msg.content}
+                    </div>
+                  )}
 
                   {/* 시간 + 읽음 표시 */}
                   {showTime && (
@@ -366,6 +399,28 @@ export default function ChatRoomPage() {
       {/* 입력창 */}
       <div className="flex-shrink-0 border-t border-gray-100 bg-white px-4 py-3 safe-area-bottom">
         <div className="mx-auto flex items-end gap-2 max-w-3xl">
+          <button
+            onClick={() => imageRef.current?.click()}
+            disabled={imageUploading}
+            style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: '#F4F3F9', border: 'none',
+              cursor: 'pointer', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            {imageUploading
+              ? <span style={{ fontSize: 11, color: '#9CA3AF' }}>...</span>
+              : <ImageIcon size={18} color="#7B82BE" strokeWidth={1.8} />
+            }
+          </button>
+          <input
+            ref={imageRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageSend}
+            style={{ display: 'none' }}
+          />
           <textarea
             ref={inputRef}
             value={input}
@@ -379,13 +434,16 @@ export default function ChatRoomPage() {
           <button
             onClick={sendMessage}
             disabled={!input.trim() || !connected}
-            className="h-10 w-10 flex-shrink-0 rounded-full text-white flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: 'linear-gradient(135deg, #7B82BE, #5A63A8)' }}
+            style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: input.trim() ? '#7B82BE' : '#DDD9EF',
+              border: 'none', cursor: input.trim() ? 'pointer' : 'default',
+              flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 0.15s',
+            }}
             aria-label="전송"
           >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-              <path d="M3.105 2.289a.75.75 0 00-.826.95l1.903 6.308a.75.75 0 00.723.519H13.5a.75.75 0 010 1.5H4.905l-1.903 6.308a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" />
-            </svg>
+            <Send size={18} color="white" strokeWidth={2} />
           </button>
         </div>
         <p className="mt-1.5 text-center text-xs text-gray-400">Enter 전송 · Shift+Enter 줄바꿈</p>

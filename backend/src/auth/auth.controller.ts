@@ -65,6 +65,23 @@ export class AuthController {
     return this.authService.adminLogin(dto.email, dto.password);
   }
 
+  /** 비밀번호 재설정 요청 */
+  @Post('reset-password')
+  @HttpCode(200)
+  async resetPassword(@Body('email') email: string) {
+    return this.authService.resetPassword(email);
+  }
+
+  /** 비밀번호 재설정 확인 */
+  @Post('confirm-reset')
+  @HttpCode(200)
+  async confirmReset(
+    @Body('token') token: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    return this.authService.confirmReset(token, newPassword);
+  }
+
   /** 현재 유저 정보 */
   @Get('me')
   @UseGuards(AuthGuard('jwt'))

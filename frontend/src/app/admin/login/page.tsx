@@ -130,8 +130,15 @@ export default function AdminLoginPage() {
           {loading ? '로그인 중...' : '관리자 로그인'}
         </button>
 
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <a href="/admin/forgot-password"
+            style={{ fontSize: 13, color: '#7B82BE', textDecoration: 'none' }}>
+            비밀번호를 잊으셨나요?
+          </a>
+        </div>
+
         <p style={{
-          textAlign: 'center', marginTop: 20,
+          textAlign: 'center', marginTop: 16,
           fontSize: 12, color: '#4B5563',
           lineHeight: 1.5,
         }}>

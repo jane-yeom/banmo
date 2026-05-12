@@ -124,6 +124,8 @@ export class PostsService {
     }
 
     Object.assign(post, dto);
+    post.isEdited = true;
+    (post as any).editedAt = new Date();
     const saved = await this.postsRepository.save(post);
 
     // 찜한 유저들에게 알림 (비동기, 실패 무시)

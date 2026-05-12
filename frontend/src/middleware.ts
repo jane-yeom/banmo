@@ -17,8 +17,12 @@ const AUTH_ONLY = ['/login', '/signup'];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // /admin/login 은 항상 허용
-  if (pathname === '/admin/login') {
+  // 관리자 공개 페이지는 항상 허용
+  if (
+    pathname === '/admin/login' ||
+    pathname === '/admin/forgot-password' ||
+    pathname.startsWith('/admin/reset-password')
+  ) {
     return NextResponse.next();
   }
 
@@ -51,6 +55,8 @@ export const config = {
     '/board/write/:path*',
     '/write/:path*',
     '/admin/login',
+    '/admin/forgot-password',
+    '/admin/reset-password',
     '/login',
     '/signup',
   ],

@@ -32,6 +32,8 @@ export interface Post {
   status: 'ACTIVE' | 'CLOSED' | 'HIDDEN';
   author: User;
   imageUrls: string[];
+  isEdited: boolean;
+  editedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -53,5 +55,6 @@ export interface ChatMessage {
   sender: User;
   content: string;
   isRead: boolean;
+  imageUrl?: string;
   createdAt: string;
 }

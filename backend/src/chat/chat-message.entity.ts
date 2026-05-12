@@ -34,6 +34,9 @@ export class ChatMessage {
   @Column({ default: false })
   isRead: boolean;
 
+  @Column({ nullable: true })
+  imageUrl: string;
+
   @CreateDateColumn()
   createdAt: Date;
 }

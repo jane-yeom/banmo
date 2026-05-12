@@ -233,6 +233,25 @@ export class UsersService {
     return !!block;
   }
 
+  async saveResetToken(userId: string, token: string, expires: Date) {
+    await this.usersRepository.update(userId, {
+      resetToken: token,
+      resetTokenExpires: expires,
+    } as any);
+  }
+
+  async findByResetToken(token: string) {
+    return this.usersRepository.findOne({ where: { resetToken: token } as any });
+  }
+
+  async updatePassword(userId: string, hashedPassword: string) {
+    await this.usersRepository.update(userId, {
+      password: hashedPassword,
+      resetToken: null,
+      resetTokenExpires: null,
+    } as any);
+  }
+
   async deleteAccount(userId: string) {
     const user = await this.findById(userId);
     if (!user) throw new NotFoundException('유저를 찾을 수 없습니다');

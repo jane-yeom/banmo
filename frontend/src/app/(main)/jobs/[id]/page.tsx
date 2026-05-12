@@ -323,7 +323,17 @@ export default function JobDetailPage() {
 
         {/* 제목 + 찜 버튼 */}
         <div className="flex items-start gap-3 mb-4">
-          <h1 className="flex-1 text-2xl font-bold text-gray-900">{post.title}</h1>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-gray-900">{post.title}</h1>
+            {(post as any).isEdited && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
+                <span>수정됨</span>
+                {(post as any).editedAt && (
+                  <span>· {new Date((post as any).editedAt).toLocaleDateString('ko-KR')}</span>
+                )}
+              </div>
+            )}
+          </div>
           {user && !isOwner && (
             <button
               onClick={handleFavorite}

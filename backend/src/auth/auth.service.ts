@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/user.entity';
 import { RegisterDto, LoginDto as EmailLoginDto } from './auth.dto';
@@ -163,6 +164,72 @@ export class AuthService {
       });
     }
     return { accessToken: this.generateToken(user), user, isNewUser };
+  }
+
+  async resetPassword(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      return { success: true, message: '이메일을 확인해주세요' };
+    }
+    if ((user as any).role !== 'ADMIN') {
+      throw new ForbiddenException('관리자 계정만 비밀번호 재설정이 가능합니다');
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 30 * 60 * 1000);
+
+    await this.usersService.saveResetToken(user.id, token, expires);
+
+    const resetUrl = `${this.config.get('FRONTEND_URL')}/admin/reset-password?token=${token}`;
+    await this.sendResetEmail(email, resetUrl);
+
+    return { success: true, message: '비밀번호 재설정 링크를 이메일로 발송했습니다' };
+  }
+
+  async sendResetEmail(email: string, resetUrl: string) {
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: this.config.get('MAIL_USER'),
+        pass: this.config.get('MAIL_PASS'),
+      },
+    });
+
+    await transporter.sendMail({
+      from: `반모 관리자 <${this.config.get('MAIL_USER')}>`,
+      to: email,
+      subject: '[반모] 비밀번호 재설정',
+      html: `
+        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
+          <h2>비밀번호 재설정</h2>
+          <p>아래 링크를 클릭하여 비밀번호를 재설정해주세요.</p>
+          <p>링크는 30분 후 만료됩니다.</p>
+          <a href="${resetUrl}"
+            style="display:inline-block; padding:12px 24px;
+            background:#7B82BE; color:white; border-radius:8px;
+            text-decoration:none; font-weight:bold;">
+            비밀번호 재설정
+          </a>
+          <p style="color:#999; font-size:12px; margin-top:20px;">
+            본인이 요청하지 않았다면 이 이메일을 무시해주세요.
+          </p>
+        </div>
+      `,
+    });
+  }
+
+  async confirmReset(token: string, newPassword: string) {
+    const user = await this.usersService.findByResetToken(token);
+    if (!user) throw new BadRequestException('유효하지 않은 토큰입니다');
+    if (new Date() > (user as any).resetTokenExpires) {
+      throw new BadRequestException('만료된 토큰입니다');
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await this.usersService.updatePassword(user.id, hashed);
+
+    return { success: true, message: '비밀번호가 변경되었습니다' };
   }
 
   private generateToken(user: User): string {
