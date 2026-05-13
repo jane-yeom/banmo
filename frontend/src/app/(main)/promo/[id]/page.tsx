@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,6 +9,7 @@ import { usePost } from '@/hooks/usePosts';
 import { useCreateChatRoom } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
+import { MapPin, Music, Coins, Calendar, Eye, MessageCircle, Pencil, X } from 'lucide-react';
 
 const CATEGORY_LABEL: Record<string, string> = {
   PROMO_CONCERT: '연주회·공연 홍보',
@@ -20,6 +22,7 @@ export default function PromoDetailPage() {
   const { user } = useAuthStore();
   const { data: post, isLoading } = usePost(id);
   const createRoom = useCreateChatRoom();
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const handleChat = async () => {
     if (!user) { router.push('/login'); return; }
@@ -49,122 +52,212 @@ export default function PromoDetailPage() {
   }
 
   const isOwner = user?.id === post.author.id;
+  const images = post.imageUrls?.filter(Boolean) ?? [];
+  const mainImage = selectedImage ?? images[0] ?? null;
 
   return (
     <>
-    <SubHeader title="공연/연습실" />
-    <div className="mx-auto max-w-3xl px-4 py-8">
-
-      {/* 카테고리 배지 */}
-      <div className="mb-3 flex items-center gap-2 flex-wrap">
-        <span className="rounded-full bg-pink-100 px-3 py-1 text-sm font-medium text-pink-700">
-          {CATEGORY_LABEL[post.category] ?? post.category}
-        </span>
-        {post.isPremium && (
-          <span className="rounded-full bg-amber-400 px-3 py-1 text-sm font-bold text-white">
-            👑 프리미엄
-          </span>
-        )}
-        <span className={`ml-auto rounded-full px-3 py-1 text-xs font-medium ${
-          post.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-        }`}>
-          {post.status === 'ACTIVE' ? '모집중' : post.status === 'CLOSED' ? '마감' : '숨김'}
-        </span>
-      </div>
-
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">{post.title}</h1>
-
-      {/* 포스터 이미지 */}
-      {post.imageUrls?.filter(Boolean).length > 0 && (
-        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {post.imageUrls.filter(Boolean).map((url, i) => (
-            <div key={i} className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-100 shadow-sm">
-              <Image src={url} alt={`이미지 ${i + 1}`} fill className="object-cover" />
-            </div>
-          ))}
+      {/* 이미지 전체화면 모달 */}
+      {selectedImage && (
+        <div
+          onClick={() => setSelectedImage(null)}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.92)',
+            zIndex: 200, display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+            padding: 16,
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={selectedImage}
+            alt="이미지 전체보기"
+            style={{
+              maxWidth: '100%', maxHeight: '90vh',
+              borderRadius: 8, objectFit: 'contain',
+            }}
+          />
+          <button
+            onClick={() => setSelectedImage(null)}
+            style={{
+              position: 'absolute', top: 16, right: 16,
+              background: 'rgba(255,255,255,0.15)',
+              border: 'none', borderRadius: '50%',
+              width: 40, height: 40, cursor: 'pointer',
+              display: 'flex', alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <X size={22} color="white" strokeWidth={2} />
+          </button>
         </div>
       )}
 
-      {/* 기본 정보 */}
-      <div className="mb-6 grid grid-cols-2 gap-3">
-        <InfoItem icon="📍" label="지역" value={post.region ?? '미정'} />
-        <InfoItem icon="🎵" label="악기" value={post.instruments?.join(', ') || '미정'} />
-        {post.payMin > 0 && (
-          <InfoItem
-            icon="💰"
-            label="가격"
-            value={post.payType === 'NEGOTIABLE' ? '협의' : `${(post.payMin / 10000).toFixed(0)}만원~`}
-          />
-        )}
-        <InfoItem icon="📅" label="등록일" value={new Date(post.createdAt).toLocaleDateString('ko-KR')} />
-        <InfoItem icon="👁" label="조회수" value={`${post.viewCount.toLocaleString()}회`} />
-      </div>
+      <SubHeader title="공연/연습실" />
+      <div className="mx-auto max-w-3xl px-4 py-6">
 
-      {/* 상세 내용 */}
-      <div className="mb-8 rounded-xl border border-gray-100 bg-white p-5">
-        <p className="mb-3 text-sm font-semibold text-gray-500">상세 내용</p>
-        <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{post.content}</p>
-      </div>
+        {/* 이미지 갤러리 */}
+        {images.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            {/* 대표 이미지 */}
+            <div
+              onClick={() => setSelectedImage(mainImage)}
+              style={{
+                width: '100%', aspectRatio: '16/9',
+                borderRadius: 14, overflow: 'hidden',
+                marginBottom: 8, background: '#F4F3F9',
+                cursor: 'pointer', position: 'relative',
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={mainImage!}
+                alt="대표 이미지"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
 
-      {/* 작성자 */}
-      <div className="mb-8 flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-4">
-        {post.author.profileImage ? (
-          <Image
-            src={post.author.profileImage}
-            alt="프로필"
-            width={52}
-            height={52}
-            className="rounded-full object-cover flex-shrink-0"
-          />
-        ) : (
-          <div
-            className="flex-shrink-0 rounded-full bg-pink-200 flex items-center justify-center text-pink-700 text-xl font-bold"
-            style={{ width: 52, height: 52 }}
-          >
-            {(post.author.nickname ?? '?')[0]}
+            {/* 추가 이미지 썸네일 */}
+            {images.length > 1 && (
+              <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
+                {images.map((url, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={url}
+                    alt={`이미지${i + 1}`}
+                    onClick={() => setSelectedImage(url)}
+                    style={{
+                      width: 64, height: 64,
+                      borderRadius: 8, objectFit: 'cover',
+                      flexShrink: 0, cursor: 'pointer',
+                      border: (selectedImage ?? images[0]) === url
+                        ? '2px solid #7B82BE'
+                        : '1px solid #DDD9EF',
+                      transition: 'border 0.15s',
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-900">{post.author.nickname ?? '익명'}</p>
-          <div className="mt-1 flex items-center gap-2">
-            <NoteGradeBadge grade={post.author.noteGrade} />
-            <span className="text-xs text-gray-400">신뢰점수 {post.author.trustScore?.toFixed(1)}</span>
-          </div>
+
+        {/* 카테고리 배지 */}
+        <div className="mb-3 flex items-center gap-2 flex-wrap">
+          <span className="rounded-full bg-pink-100 px-3 py-1 text-sm font-medium text-pink-700">
+            {CATEGORY_LABEL[post.category] ?? post.category}
+          </span>
+          {post.isPremium && (
+            <span className="rounded-full bg-amber-400 px-3 py-1 text-sm font-bold text-white">
+              👑 프리미엄
+            </span>
+          )}
+          <span className={`ml-auto rounded-full px-3 py-1 text-xs font-medium ${
+            post.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+          }`}>
+            {post.status === 'ACTIVE' ? '모집중' : post.status === 'CLOSED' ? '마감' : '숨김'}
+          </span>
         </div>
-        <Link href={`/profile/${post.author.id}`} className="flex-shrink-0 text-sm text-pink-600 hover:underline">
-          프로필 보기
-        </Link>
-      </div>
 
-      {/* 액션 */}
-      {isOwner ? (
-        <div className="flex gap-3">
-          <Link
-            href={`/jobs/${id}/edit`}
-            className="flex-1 rounded-xl border-2 border-pink-600 py-3.5 text-center text-base font-semibold text-pink-600 hover:bg-pink-50 transition-colors"
-          >
-            ✏️ 수정하기
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">{post.title}</h1>
+
+        {/* 기본 정보 */}
+        <div className="mb-6 grid grid-cols-2 gap-3">
+          <InfoItem icon={MapPin} label="지역" value={post.region ?? '미정'} />
+          <InfoItem icon={Music} label="악기" value={post.instruments?.join(', ') || '미정'} />
+          {(post as any).payText && (
+            <InfoItem icon={Coins} label="가격" value={(post as any).payText} />
+          )}
+          {!((post as any).payText) && post.payMin > 0 && (
+            <InfoItem
+              icon={Coins}
+              label="가격"
+              value={post.payType === 'NEGOTIABLE' ? '협의' : `${(post.payMin / 10000).toFixed(0)}만원~`}
+            />
+          )}
+          <InfoItem icon={Calendar} label="등록일" value={new Date(post.createdAt).toLocaleDateString('ko-KR')} />
+          <InfoItem icon={Eye} label="조회수" value={`${post.viewCount.toLocaleString()}회`} />
+        </div>
+
+        {/* 상세 내용 */}
+        <div className="mb-8 rounded-xl border border-gray-100 bg-white p-5">
+          <p className="mb-3 text-sm font-semibold text-gray-500">상세 내용</p>
+          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{post.content}</p>
+        </div>
+
+        {/* 작성자 */}
+        <div className="mb-8 flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-4">
+          {post.author.profileImage ? (
+            <Image
+              src={post.author.profileImage}
+              alt="프로필"
+              width={52}
+              height={52}
+              className="rounded-full object-cover flex-shrink-0"
+            />
+          ) : (
+            <div
+              className="flex-shrink-0 rounded-full bg-pink-200 flex items-center justify-center text-pink-700 text-xl font-bold"
+              style={{ width: 52, height: 52 }}
+            >
+              {(post.author.nickname ?? '?')[0]}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-gray-900">{post.author.nickname ?? '익명'}</p>
+            <div className="mt-1 flex items-center gap-2">
+              <NoteGradeBadge grade={post.author.noteGrade} />
+              <span className="text-xs text-gray-400">신뢰점수 {post.author.trustScore?.toFixed(1)}</span>
+            </div>
+          </div>
+          <Link href={`/profile/${post.author.id}`} className="flex-shrink-0 text-sm text-pink-600 hover:underline">
+            프로필 보기
           </Link>
         </div>
-      ) : (
-        <button
-          onClick={handleChat}
-          disabled={createRoom.isPending}
-          className="w-full rounded-xl bg-pink-600 py-3.5 text-base font-semibold text-white hover:bg-pink-700 transition-colors disabled:opacity-60"
-        >
-          💬 채팅하기
-        </button>
-      )}
-    </div>
+
+        {/* 액션 */}
+        {isOwner ? (
+          <div className="flex gap-3">
+            <Link
+              href={`/jobs/${id}/edit`}
+              className="flex-1 rounded-xl border-2 border-pink-600 py-3.5 text-center text-base font-semibold text-pink-600 hover:bg-pink-50 transition-colors"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+            >
+              <Pencil size={15} strokeWidth={2} /> 수정하기
+            </Link>
+          </div>
+        ) : (
+          <button
+            onClick={handleChat}
+            disabled={createRoom.isPending}
+            className="w-full rounded-xl bg-pink-600 py-3.5 text-base font-semibold text-white hover:bg-pink-700 transition-colors disabled:opacity-60"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+          >
+            <MessageCircle size={18} strokeWidth={2} /> 채팅하기
+          </button>
+        )}
+      </div>
     </>
   );
 }
 
-function InfoItem({ icon, label, value }: { icon: string; label: string; value: string }) {
+function InfoItem({ icon: Icon, label, value, color = '#7B82BE' }: { icon: React.ElementType; label: string; value: string; color?: string }) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-3">
-      <p className="text-xs text-gray-400 mb-0.5">{icon} {label}</p>
-      <p className="text-sm font-medium text-gray-800">{value}</p>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="rounded-xl border border-gray-100 bg-white p-3">
+      <div style={{
+        width: 34, height: 34, background: '#FEE2E2',
+        borderRadius: 10, display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+      }}>
+        <Icon size={17} strokeWidth={1.8} color={color} />
+      </div>
+      <div>
+        <div style={{ fontSize: 11, color: '#9CA3AF' }}>{label}</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: '#1A1A1A' }}>{value}</div>
+      </div>
     </div>
   );
 }

@@ -5,10 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePosts } from '@/hooks/usePosts';
 import type { Post } from '@/types';
+import { Music, Building2, MapPin } from 'lucide-react';
 
 const TABS = [
-  { value: 'PROMO_CONCERT', label: '공연홍보', emoji: '🎵' },
-  { value: 'PROMO_SPACE',   label: '연습실 대여', emoji: '🏠' },
+  { value: 'PROMO_CONCERT', label: '공연홍보', Icon: Music },
+  { value: 'PROMO_SPACE',   label: '연습실 대여', Icon: Building2 },
 ];
 
 const REGIONS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산'];
@@ -25,8 +26,11 @@ function PromoCard({ post }: { post: Post }) {
           {firstImage ? (
             <Image src={firstImage} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
           ) : (
-            <div className="flex h-full items-center justify-center text-5xl">
-              {post.category === 'PROMO_CONCERT' ? '🎹' : '🏛'}
+            <div className="flex h-full items-center justify-center">
+              {post.category === 'PROMO_CONCERT'
+                ? <Music size={48} strokeWidth={1.3} color="#818CF8" />
+                : <Building2 size={48} strokeWidth={1.3} color="#818CF8" />
+              }
             </div>
           )}
           {isPremium && (
@@ -41,7 +45,9 @@ function PromoCard({ post }: { post: Post }) {
             {post.title}
           </h3>
           <div className="flex items-center justify-between text-xs text-gray-400 mt-1">
-            <span>📍 {post.region ?? '지역 미정'}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <MapPin size={11} strokeWidth={1.8} />{post.region ?? '지역 미정'}
+            </span>
             {post.payMin > 0 && (
               <span className="font-medium text-indigo-700">
                 {post.payType === 'NEGOTIABLE' ? '협의' : `${(post.payMin / 10000).toFixed(0)}만원~`}
@@ -83,7 +89,7 @@ export default function PromoPage() {
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <span>{t.emoji}</span>
+                <t.Icon size={14} strokeWidth={1.8} />
                 {t.label}
               </button>
             ))}
@@ -123,7 +129,7 @@ export default function PromoPage() {
           </div>
         ) : data?.items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-gray-400">
-            <span className="text-5xl mb-3">🎼</span>
+            <Music size={48} strokeWidth={1.3} color="#9CA3AF" style={{ marginBottom: 12 }} />
             <p>등록된 공연/연습실이 없습니다.</p>
           </div>
         ) : (
