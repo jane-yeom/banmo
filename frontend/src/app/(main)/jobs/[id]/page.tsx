@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Share2, Heart, MessageCircle, Send, Pencil, Trash2, CheckCircle, RotateCcw, MapPin, Music, Eye, Calendar, Coins, ClipboardList } from 'lucide-react';
+import { Share2, Heart, MessageCircle, Send, Pencil, Trash2, CheckCircle, RotateCcw, MapPin, Music, Eye, Calendar, Coins, ClipboardList, AlertCircle } from 'lucide-react';
+import ReportModal from '@/components/common/ReportModal';
 import SubHeader from '@/components/layout/SubHeader';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -128,6 +129,7 @@ export default function JobDetailPage() {
   const qc = useQueryClient();
   const [showApply, setShowApply] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   // TODO: 유료 기능 활성화시 주석 해제
   // const [showPremium, setShowPremium] = useState(false);
 
@@ -265,6 +267,14 @@ export default function JobDetailPage() {
     <>
       {showApply && (
         <ApplyModal postId={post.id} onClose={() => setShowApply(false)} />
+      )}
+      {showReport && (
+        <ReportModal
+          type="POST"
+          targetId={post.id}
+          targetName={post.title}
+          onClose={() => setShowReport(false)}
+        />
       )}
       {/* TODO: 유료 기능 활성화시 주석 해제
       {showPremium && (
@@ -495,25 +505,42 @@ export default function JobDetailPage() {
             </div>
           </div>
         ) : (
-          <div className="flex gap-3">
-            <button
-              onClick={handleChat}
-              disabled={createRoom.isPending || post.status === 'CLOSED'}
-              className="flex-1 rounded-xl py-3.5 text-base font-semibold text-white transition-colors disabled:opacity-60"
-              style={{ background: post.status === 'CLOSED' ? '#9CA3AF' : 'linear-gradient(135deg, #7B82BE, #5A63A8)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-            >
-              {post.status === 'CLOSED' ? '마감된 공고' : <><MessageCircle size={18} strokeWidth={2} /> 채팅하기</>}
-            </button>
-            {canApply && post.status !== 'CLOSED' && (
+          <div>
+            <div className="flex gap-3">
               <button
-                onClick={() => {
-                  if (!user) { router.push('/login'); return; }
-                  setShowApply(true);
-                }}
-                className="flex-1 rounded-xl border-2 py-3.5 text-base font-semibold transition-colors"
-                style={{ borderColor: '#7B82BE', color: '#7B82BE', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                onClick={handleChat}
+                disabled={createRoom.isPending || post.status === 'CLOSED'}
+                className="flex-1 rounded-xl py-3.5 text-base font-semibold text-white transition-colors disabled:opacity-60"
+                style={{ background: post.status === 'CLOSED' ? '#9CA3AF' : 'linear-gradient(135deg, #7B82BE, #5A63A8)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
-                <Send size={16} strokeWidth={2} /> 지원하기
+                {post.status === 'CLOSED' ? '마감된 공고' : <><MessageCircle size={18} strokeWidth={2} /> 채팅하기</>}
+              </button>
+              {canApply && post.status !== 'CLOSED' && (
+                <button
+                  onClick={() => {
+                    if (!user) { router.push('/login'); return; }
+                    setShowApply(true);
+                  }}
+                  className="flex-1 rounded-xl border-2 py-3.5 text-base font-semibold transition-colors"
+                  style={{ borderColor: '#7B82BE', color: '#7B82BE', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                >
+                  <Send size={16} strokeWidth={2} /> 지원하기
+                </button>
+              )}
+            </div>
+            {user && (
+              <button
+                onClick={() => setShowReport(true)}
+                style={{
+                  width: '100%', marginTop: 10,
+                  padding: '10px', background: 'none',
+                  border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', gap: 4,
+                  fontSize: 12, color: '#9CA3AF',
+                }}
+              >
+                <AlertCircle size={13} strokeWidth={1.8} /> 이 공고 신고하기
               </button>
             )}
           </div>

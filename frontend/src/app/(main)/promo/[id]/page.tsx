@@ -9,7 +9,8 @@ import { usePost } from '@/hooks/usePosts';
 import { useCreateChatRoom } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
-import { MapPin, Music, Coins, Calendar, Eye, MessageCircle, Pencil, X } from 'lucide-react';
+import { MapPin, Music, Coins, Calendar, Eye, MessageCircle, Pencil, X, AlertCircle } from 'lucide-react';
+import ReportModal from '@/components/common/ReportModal';
 
 const CATEGORY_LABEL: Record<string, string> = {
   PROMO_CONCERT: '연주회·공연 홍보',
@@ -23,6 +24,7 @@ export default function PromoDetailPage() {
   const { data: post, isLoading } = usePost(id);
   const createRoom = useCreateChatRoom();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showReport, setShowReport] = useState(false);
 
   const handleChat = async () => {
     if (!user) { router.push('/login'); return; }
@@ -238,6 +240,16 @@ export default function PromoDetailPage() {
           </Link>
         </div>
 
+        {/* 신고 모달 */}
+        {showReport && post && (
+          <ReportModal
+            type="POST"
+            targetId={post.id}
+            targetName={post.title}
+            onClose={() => setShowReport(false)}
+          />
+        )}
+
         {/* 액션 */}
         {isOwner ? (
           <div className="flex gap-3">
@@ -250,14 +262,31 @@ export default function PromoDetailPage() {
             </Link>
           </div>
         ) : (
-          <button
-            onClick={handleChat}
-            disabled={createRoom.isPending}
-            className="w-full rounded-xl bg-pink-600 py-3.5 text-base font-semibold text-white hover:bg-pink-700 transition-colors disabled:opacity-60"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-          >
-            <MessageCircle size={18} strokeWidth={2} /> 채팅하기
-          </button>
+          <div>
+            <button
+              onClick={handleChat}
+              disabled={createRoom.isPending}
+              className="w-full rounded-xl bg-pink-600 py-3.5 text-base font-semibold text-white hover:bg-pink-700 transition-colors disabled:opacity-60"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+            >
+              <MessageCircle size={18} strokeWidth={2} /> 채팅하기
+            </button>
+            {user && (
+              <button
+                onClick={() => setShowReport(true)}
+                style={{
+                  width: '100%', marginTop: 10,
+                  padding: '10px', background: 'none',
+                  border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', gap: 4,
+                  fontSize: 12, color: '#9CA3AF',
+                }}
+              >
+                <AlertCircle size={13} strokeWidth={1.8} /> 이 공고 신고하기
+              </button>
+            )}
+          </div>
         )}
       </div>
     </>
