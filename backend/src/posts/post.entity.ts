@@ -17,6 +17,7 @@ export enum PostCategory {
   LESSON_SEEK = 'LESSON_SEEK',
   PERFORMANCE = 'PERFORMANCE',
   AFTERSCHOOL = 'AFTERSCHOOL',
+  ETC = 'ETC',
   PROMO_CONCERT = 'PROMO_CONCERT',
   PROMO_SPACE = 'PROMO_SPACE',
   TRADE_LESSON = 'TRADE_LESSON',
@@ -103,6 +104,12 @@ export class Post {
 
   @Column({ type: 'timestamptz', nullable: true })
   editedAt: Date;
+
+  @Column({ nullable: true })
+  eventDate: string;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  eventDateAt: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
   expiresAt: Date;

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Post, PayType, PostStatus } from './post.entity';
+import { Post, PayType, PostStatus, PostCategory } from './post.entity';
 import { CreatePostDto, PostFilterDto, UpdatePostDto } from './post.dto';
 import { TrustService, TrustEvent } from '../users/trust.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -42,6 +42,17 @@ export class PostsService {
       imageUrls: dto.imageUrls ?? [],
       expiresAt,
     });
+
+    if (dto.category === PostCategory.PROMO_CONCERT && dto.date) {
+      post.eventDate = dto.date;
+      try {
+        const parsed = new Date(dto.date);
+        if (!isNaN(parsed.getTime())) {
+          post.eventDateAt = parsed;
+        }
+      } catch (e) {}
+    }
+
     const saved = await this.postsRepository.save(post);
     console.log('[Posts] 저장 완료:', saved.id);
 

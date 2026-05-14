@@ -61,6 +61,12 @@ export default function ChatListPage() {
   const getOtherUser = (room: ChatRoom) =>
     room.sender.id === user?.id ? room.receiver : room.sender;
 
+  const sortedRooms = rooms
+    ? [...rooms].sort((a, b) =>
+        new Date(b.lastMessageAt ?? 0).getTime() - new Date(a.lastMessageAt ?? 0).getTime()
+      )
+    : [];
+
   return (
     <>
     <SubHeader title="채팅" />
@@ -88,7 +94,7 @@ export default function ChatListPage() {
         </div>
       ) : (
         <div className="bg-white divide-y divide-gray-100 sm:rounded-2xl sm:border sm:border-gray-100 sm:shadow-sm overflow-hidden">
-          {rooms?.map((room) => {
+          {sortedRooms.map((room) => {
             const other = getOtherUser(room);
             const isUnread = !room.isRead && room.receiver.id === user?.id;
             return (

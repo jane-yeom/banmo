@@ -14,6 +14,7 @@ const CATEGORY_TABS = [
   { value: 'LESSON_SEEK',  label: '레슨 구직' },
   { value: 'PERFORMANCE',  label: '공연 도우미' },
   { value: 'AFTERSCHOOL',  label: '방과후 교사' },
+  { value: 'ETC',          label: '기타' },
 ];
 
 const INSTRUMENTS = [

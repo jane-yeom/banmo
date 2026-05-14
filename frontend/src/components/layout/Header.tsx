@@ -16,7 +16,6 @@ import { useNotifications } from '@/hooks/useNotifications';
 const navItems = [
   { label: '구인구직', href: '/jobs' },
   { label: '공연·연습실', href: '/promo' },
-  { label: '양도·중고', href: '/trade' },
   { label: '게시판', href: '/board' },
   { label: '고객센터', href: '/support' },
 ];

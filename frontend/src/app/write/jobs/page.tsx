@@ -17,6 +17,7 @@ const JOB_CATEGORIES = [
   { value: 'LESSON_SEEK', label: '레슨 구직' },
   { value: 'PERFORMANCE', label: '공연도우미 구인' },
   { value: 'AFTERSCHOOL', label: '방과후 교사 구인' },
+  { value: 'ETC', label: '기타' },
 ];
 
 const INSTRUMENTS = [
@@ -38,6 +39,7 @@ const CATEGORY_GUIDE: Record<string, string> = {
   LESSON_SEEK: '레슨 가능하다는 공고예요. 전공, 경력, 가능한 수준을 적어주세요.',
   PERFORMANCE: '공연 도우미를 구하는 공고예요. 공연 날짜, 장소, 역할을 적어주세요.',
   AFTERSCHOOL: '방과후 교사를 구하는 공고예요. 학교 위치, 수업 시간, 대상 학년을 적어주세요.',
+  ETC: '기타 음악 관련 공고예요. 내용을 상세히 작성해주세요.',
 };
 
 const CATEGORY_PLACEHOLDER: Record<string, string> = {
@@ -47,6 +49,7 @@ const CATEGORY_PLACEHOLDER: Record<string, string> = {
   LESSON_SEEK: '예) 음대 출신으로 피아노 레슨 가능합니다.\n초급~중급 지도 가능하며 콩쿠르 준비 경험 있습니다.',
   PERFORMANCE: '예) 결혼식 피아노 연주자를 구합니다.\n날짜: 2026년 6월 15일 오후 2시\n장소: 서울 강남구 OO웨딩홀',
   AFTERSCHOOL: '예) 초등학교 방과후 바이올린 강사를 구합니다.\n월~금 오후 2-4시, 학교 내 악기 구비되어 있습니다.',
+  ETC: '예) 음악 관련 기타 공고입니다.\n자세한 내용을 입력해주세요.',
 };
 
 const VALID_JOB_CATEGORIES = JOB_CATEGORIES.map(c => c.value);

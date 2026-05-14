@@ -24,6 +24,11 @@ export class BoardController {
     return this.boardService.findAll(type);
   }
 
+  @Get('hot')
+  getHot() {
+    return this.boardService.getHotBoards();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.boardService.findOne(id);

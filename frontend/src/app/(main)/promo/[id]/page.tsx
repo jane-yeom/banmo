@@ -54,6 +54,8 @@ export default function PromoDetailPage() {
   const isOwner = user?.id === post.author.id;
   const images = post.imageUrls?.filter(Boolean) ?? [];
   const mainImage = selectedImage ?? images[0] ?? null;
+  const eventDateAt = (post as any).eventDateAt ? new Date((post as any).eventDateAt) : null;
+  const isEventPast = eventDateAt ? eventDateAt < new Date() : false;
 
   return (
     <>
@@ -141,6 +143,25 @@ export default function PromoDetailPage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* 공연 일시 배지 (PROMO_CONCERT) */}
+        {post.category === 'PROMO_CONCERT' && eventDateAt && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: isEventPast ? '#F4F3F9' : '#ECEAF8',
+            border: `1px solid ${isEventPast ? '#DDD9EF' : '#7B82BE'}`,
+            borderRadius: 99, padding: '6px 14px', marginBottom: 12,
+          }}>
+            <Calendar size={13} strokeWidth={1.8}
+              color={isEventPast ? '#9CA3AF' : '#7B82BE'} />
+            <span style={{
+              fontSize: 12, fontWeight: 600,
+              color: isEventPast ? '#9CA3AF' : '#5A63A8',
+            }}>
+              {isEventPast ? '공연 종료' : '공연 예정'}
+            </span>
           </div>
         )}
 

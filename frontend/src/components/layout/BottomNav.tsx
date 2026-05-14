@@ -21,7 +21,6 @@ export default function BottomNav() {
 
   const getWriteHref = () => {
     if (pathname.startsWith('/promo')) return '/write/promo?category=PROMO_CONCERT';
-    if (pathname.startsWith('/trade')) return '/write/trade?category=TRADE_INSTRUMENT';
     if (pathname.startsWith('/board')) return '/write/board?type=FREE';
     if (pathname.startsWith('/jobs')) return '/write/jobs?category=JOB_OFFER';
     return '/write/jobs?category=JOB_OFFER';

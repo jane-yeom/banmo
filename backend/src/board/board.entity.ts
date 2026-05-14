@@ -42,6 +42,9 @@ export class Board {
   @Column({ type: 'int', default: 0 })
   viewCount: number;
 
+  @Column({ type: 'int', default: 0 })
+  commentCount: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

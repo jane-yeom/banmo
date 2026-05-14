@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, User, MoreVertical, Image as ImageIcon, Send, Ban, LockOpen } from 'lucide-react';
+import { ChevronLeft, User, MoreVertical, Image as ImageIcon, Send, Ban, LockOpen, ChevronDown, Music, ShieldCheck, ClipboardList } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useChatMessages } from '@/hooks/useChat';
@@ -64,6 +64,8 @@ export default function ChatRoomPage() {
   const [connected, setConnected] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [opponent, setOpponent] = useState<any>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
@@ -107,9 +109,18 @@ export default function ChatRoomPage() {
 
   // 채팅방 정보 로드
   useEffect(() => {
-    if (!roomId) return;
-    apiClient.get<RoomInfo>(`/chat/rooms/${roomId}`).then(({ data }) => setRoom(data));
-  }, [roomId]);
+    if (!roomId || !user) return;
+    apiClient.get<RoomInfo>(`/chat/rooms/${roomId}`).then(({ data }) => {
+      setRoom(data);
+      const opponentId = data.sender.id === user.id ? data.receiver.id : data.sender.id;
+      const hasApplied = data.post !== null;
+      const profileEndpoint = hasApplied ? `/users/${opponentId}/full` : `/users/${opponentId}`;
+      apiClient.get(profileEndpoint)
+        .catch(() => apiClient.get(`/users/${opponentId}`))
+        .then((res) => setOpponent(res.data?.data || res.data))
+        .catch(() => {});
+    });
+  }, [roomId, user]);
 
   // 초기 메시지 세팅
   useEffect(() => {
@@ -316,6 +327,155 @@ export default function ChatRoomPage() {
         <div className="text-center text-xs text-amber-600 py-1 bg-amber-50">
           ⚡ 연결 중...
         </div>
+      )}
+
+      {/* 프로필 미니 배너 */}
+      {other && (
+        <>
+          <div
+            onClick={() => setProfileOpen(!profileOpen)}
+            style={{
+              background: '#F4F3F9',
+              borderBottom: '0.5px solid #DDD9EF',
+              padding: '10px 16px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: '50%',
+                background: '#ECEAF8', overflow: 'hidden',
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'center', flexShrink: 0,
+              }}>
+                {(opponent?.profileImage || other.profileImage)
+                  ? <img src={opponent?.profileImage || other.profileImage!}
+                      alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <User size={18} color="#7B82BE" />
+                }
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700 }}>
+                  {opponent?.nickname || other.nickname}
+                </div>
+                <div style={{
+                  fontSize: 11, color: '#7B82BE',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                }}>
+                  <Music size={10} />
+                  {opponent?.instruments?.join(', ') || '악기 미설정'}
+                  {(opponent?.region) && ` · ${opponent.region}`}
+                </div>
+              </div>
+            </div>
+            <ChevronDown
+              size={16} color="#9CA3AF"
+              style={{
+                transform: profileOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s',
+              }}
+            />
+          </div>
+
+          {/* 펼쳐지는 프로필 상세 */}
+          {profileOpen && opponent && (
+            <div style={{
+              background: 'white',
+              borderBottom: '0.5px solid #DDD9EF',
+              padding: '16px',
+            }}>
+              {/* 음표 등급 */}
+              <div style={{
+                display: 'flex', alignItems: 'center',
+                gap: 8, marginBottom: 12,
+              }}>
+                <div style={{
+                  background: '#ECEAF8', borderRadius: 99,
+                  padding: '4px 12px', fontSize: 12,
+                  color: '#5A63A8', fontWeight: 600,
+                }}>
+                  ♩ {opponent.noteGrade === 'WHOLE' ? '온음표'
+                    : opponent.noteGrade === 'HALF' ? '2분음표'
+                    : opponent.noteGrade === 'QUARTER' ? '4분음표'
+                    : opponent.noteGrade === 'EIGHTH' ? '8분음표'
+                    : '16분음표'}
+                </div>
+                {opponent.isVerified && (
+                  <div style={{
+                    background: '#EAF6EF', color: '#5AAB7A',
+                    fontSize: 11, fontWeight: 600,
+                    padding: '4px 10px', borderRadius: 99,
+                    display: 'flex', alignItems: 'center', gap: 3,
+                  }}>
+                    <ShieldCheck size={11} /> 인증
+                  </div>
+                )}
+              </div>
+
+              {/* 자기소개 */}
+              {opponent.bio && opponent.isBioPublic && (
+                <p style={{
+                  fontSize: 13, color: '#444',
+                  lineHeight: 1.6, marginBottom: 12,
+                  background: '#F4F3F9', borderRadius: 8,
+                  padding: '8px 12px',
+                }}>
+                  {opponent.bio}
+                </p>
+              )}
+
+              {/* 악기 태그 */}
+              {opponent.instruments?.length > 0 && (
+                <div style={{
+                  display: 'flex', flexWrap: 'wrap',
+                  gap: 6, marginBottom: 12,
+                }}>
+                  {opponent.instruments.map((inst: string) => (
+                    <span key={inst} style={{
+                      background: '#ECEAF8', color: '#5A63A8',
+                      fontSize: 12, padding: '4px 10px',
+                      borderRadius: 99, fontWeight: 500,
+                    }}>
+                      {inst}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* 버튼 */}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => router.push(`/profile/${opponent.id}`)}
+                  style={{
+                    flex: 1, padding: '10px',
+                    background: '#ECEAF8', color: '#5A63A8',
+                    border: 'none', borderRadius: 10,
+                    fontSize: 13, fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', gap: 5,
+                  }}>
+                  <User size={14} /> 전체 프로필 보기
+                </button>
+                {room?.post && (
+                  <button
+                    onClick={() => router.push(`/jobs/${room.post!.id}`)}
+                    style={{
+                      flex: 1, padding: '10px',
+                      background: '#F4F3F9', color: '#6B7280',
+                      border: 'none', borderRadius: 10,
+                      fontSize: 13, fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', gap: 5,
+                    }}>
+                    <ClipboardList size={14} /> 공고 보기
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* 메시지 목록 */}

@@ -5,8 +5,8 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import api from '@/lib/axios';
-import { Music2, Mic, BookOpen, Star, Building2, Guitar, MessageSquare, MessageCircle, LucideIcon, MapPin, ChevronRight, Music } from 'lucide-react';
-import { IconJob, IconPromo, IconTrade } from '@/components/common/SectionIcons';
+import { Music2, Mic, BookOpen, Star, MessageSquare, MessageCircle, LucideIcon, MapPin, ChevronRight, Music, Eye } from 'lucide-react';
+import { IconJob, IconPromo, IconBoard } from '@/components/common/SectionIcons';
 
 // 슬라이딩 배너 컴포넌트
 function HeroBanner() {
@@ -170,6 +170,7 @@ function SectionCard({ post }: { post: any }) {
     JOB_OFFER: '반주자구인', JOB_SEEK: '반주자구직',
     LESSON_OFFER: '레슨구인', LESSON_SEEK: '레슨구직',
     PERFORMANCE: '공연도우미', AFTERSCHOOL: '방과후교사',
+    ETC: '기타',
     PROMO_CONCERT: '공연홍보', PROMO_SPACE: '연습실대여',
     TRADE_LESSON: '레슨양도', TRADE_SPACE: '연습실양도',
     TRADE_TICKET: '티켓양도', TRADE_INSTRUMENT: '중고악기',
@@ -233,14 +234,14 @@ function SectionCard({ post }: { post: any }) {
 
 // 섹션 타이틀
 function SectionTitle({ type, title, href }: {
-  type: 'job' | 'promo' | 'trade'
+  type: 'job' | 'promo' | 'board'
   title: string
   href: string
 }) {
   const iconMap = {
     job:   { Icon: IconJob,   bg: '#ECEAF8' },
     promo: { Icon: IconPromo, bg: '#FEF6E4' },
-    trade: { Icon: IconTrade, bg: '#FEF0EA' },
+    board: { Icon: IconBoard, bg: '#EAF6EF' },
   };
   const { Icon, bg } = iconMap[type];
 
@@ -282,8 +283,6 @@ function QuickMenu() {
     { Icon: Mic, label: '반주자\n구직', href: '/jobs?category=JOB_SEEK', iconBg: '#EAF0FB', iconColor: '#6A8FD4' },
     { Icon: BookOpen, label: '레슨\n구인', href: '/jobs?category=LESSON_OFFER', iconBg: '#EAF6EF', iconColor: '#5AAB7A' },
     { Icon: Star, label: '공연\n홍보', href: '/promo', iconBg: '#FEF6E4', iconColor: '#D4A03A' },
-    { Icon: Building2, label: '연습실\n대여', href: '/promo?category=PROMO_SPACE', iconBg: '#F3EAF8', iconColor: '#A06EC0' },
-    { Icon: Guitar, label: '중고\n악기', href: '/trade?category=TRADE_INSTRUMENT', iconBg: '#FEF0EA', iconColor: '#D4784A' },
     { Icon: MessageSquare, label: '자유\n게시판', href: '/board?type=FREE', iconBg: '#ECEAF8', iconColor: '#7B82BE' },
     { Icon: MessageCircle, label: '익명\n게시판', href: '/board?type=ANONYMOUS', iconBg: '#F0EAFA', iconColor: '#9070C8' },
   ];
@@ -335,20 +334,21 @@ function QuickMenu() {
 export default function HomePage() {
   const [jobPosts, setJobPosts] = useState<any[]>([]);
   const [promoPosts, setPromoPosts] = useState<any[]>([]);
-  const [tradePosts, setTradePosts] = useState<any[]>([]);
+  const [hotBoards, setHotBoards] = useState<any[]>([]);
+  const [recentBoards, setRecentBoards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const JOB_CATS = 'JOB_OFFER,JOB_SEEK,LESSON_OFFER,LESSON_SEEK,PERFORMANCE,AFTERSCHOOL';
+        const JOB_CATS = 'JOB_OFFER,JOB_SEEK,LESSON_OFFER,LESSON_SEEK,PERFORMANCE,AFTERSCHOOL,ETC';
         const PROMO_CATS = 'PROMO_CONCERT,PROMO_SPACE';
-        const TRADE_CATS = 'TRADE_INSTRUMENT,TRADE_LESSON,TRADE_SPACE,TRADE_TICKET';
 
-        const [jobs, promo, trade] = await Promise.all([
+        const [jobs, promo, hot, recent] = await Promise.all([
           api.get(`/posts?limit=3&categories=${JOB_CATS}`).catch(() => ({ data: { items: [] } })),
           api.get(`/posts?limit=3&categories=${PROMO_CATS}`).catch(() => ({ data: { items: [] } })),
-          api.get(`/posts?limit=3&categories=${TRADE_CATS}`).catch(() => ({ data: { items: [] } })),
+          api.get('/board/hot').catch(() => ({ data: [] })),
+          api.get('/board?type=FREE').catch(() => ({ data: [] })),
         ]);
 
         const extract = (res: any) =>
@@ -357,7 +357,9 @@ export default function HomePage() {
 
         setJobPosts(extract(jobs));
         setPromoPosts(extract(promo));
-        setTradePosts(extract(trade));
+        setHotBoards(Array.isArray(hot.data) ? hot.data : hot.data?.data || []);
+        const recentAll = Array.isArray(recent.data) ? recent.data : recent.data?.data || [];
+        setRecentBoards(recentAll.slice(0, 5));
       } catch (e) {
         console.error('홈 데이터 로딩 실패:', e);
       } finally {
@@ -422,19 +424,93 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* 중고거래 섹션 */}
+        {/* 자유게시판 섹션 */}
         <div style={{ marginBottom: 28 }}>
-          <SectionTitle type="trade" title="중고악기" href="/trade" />
-          {!loading && tradePosts.length === 0 ? (
+          <SectionTitle type="board" title="자유게시판" href="/board?type=FREE" />
+
+          {/* 핫글 */}
+          {hotBoards.length > 0 && (
+            <div style={{ marginBottom: 10 }}>
+              {hotBoards.map((post: any) => (
+                <Link key={post.id} href={`/board/${post.id}`}
+                  style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    background: '#FFFBEB',
+                    border: '1px solid #FDE68A',
+                    borderRadius: 12, padding: '12px 14px',
+                    marginBottom: 6, display: 'flex',
+                    alignItems: 'center', gap: 8,
+                  }}>
+                    <span style={{
+                      background: '#F59E0B', color: 'white',
+                      fontSize: 10, fontWeight: 700,
+                      padding: '2px 7px', borderRadius: 5,
+                      flexShrink: 0,
+                    }}>🔥 핫</span>
+                    <span style={{
+                      fontSize: 14, fontWeight: 600,
+                      color: '#1A1A1A', flex: 1,
+                      overflow: 'hidden', textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {post.title}
+                    </span>
+                    <div style={{
+                      display: 'flex', alignItems: 'center',
+                      gap: 3, fontSize: 11, color: '#9CA3AF',
+                      flexShrink: 0,
+                    }}>
+                      <Eye size={11} />
+                      {post.viewCount}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* 일반 게시글 */}
+          {recentBoards.length === 0 && !loading ? (
             <div style={{
               textAlign: 'center', padding: '24px',
               color: '#9CA3AF', fontSize: 14,
               background: 'white', borderRadius: 14,
             }}>
-              등록된 매물이 없습니다
+              등록된 게시글이 없습니다
             </div>
           ) : (
-            tradePosts.map((post: any) => <SectionCard key={post.id} post={post} />)
+            recentBoards.map((post: any) => (
+              <Link key={post.id} href={`/board/${post.id}`}
+                style={{ textDecoration: 'none' }}>
+                <div style={{
+                  background: 'white',
+                  border: '0.5px solid #DDD9EF',
+                  borderRadius: 12, padding: '12px 14px',
+                  marginBottom: 6, display: 'flex',
+                  alignItems: 'center', gap: 8,
+                }}>
+                  <span style={{
+                    fontSize: 14, color: '#1A1A1A',
+                    flex: 1, overflow: 'hidden',
+                    textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {post.title}
+                  </span>
+                  <div style={{
+                    display: 'flex', alignItems: 'center',
+                    gap: 8, fontSize: 11, color: '#9CA3AF',
+                    flexShrink: 0,
+                  }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <MessageSquare size={11} /> {post.commentCount || 0}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Eye size={11} /> {post.viewCount || 0}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))
           )}
         </div>
       </div>

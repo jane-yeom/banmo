@@ -52,6 +52,10 @@ export class CreatePostDto {
   @IsArray()
   @IsString({ each: true })
   imageUrls?: string[];
+
+  @IsOptional()
+  @IsString()
+  date?: string;
 }
 
 export class UpdatePostDto {

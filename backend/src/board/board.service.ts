@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { Board, BoardType } from './board.entity';
 import { BoardComment } from './board-comment.entity';
 import { CreateBoardDto, CreateCommentDto } from './board.dto';
@@ -27,6 +27,27 @@ export class BoardService {
       where,
       relations: ['author'],
       order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getHotBoards(limit = 3): Promise<Board[]> {
+    return this.boardsRepository.find({
+      where: [
+        { type: BoardType.FREE, viewCount: MoreThanOrEqual(50) },
+        { type: BoardType.FREE, commentCount: MoreThanOrEqual(5) },
+      ],
+      order: { viewCount: 'DESC', createdAt: 'DESC' },
+      take: limit,
+      relations: ['author'],
+    });
+  }
+
+  async getRecentBoards(limit = 5): Promise<Board[]> {
+    return this.boardsRepository.find({
+      where: { type: BoardType.FREE },
+      order: { createdAt: 'DESC' },
+      take: limit,
+      relations: ['author'],
     });
   }
 
@@ -73,6 +94,8 @@ export class BoardService {
     const comment = this.commentsRepository.create({ boardId, authorId: userId, ...dto });
     const saved = await this.commentsRepository.save(comment);
 
+    await this.boardsRepository.increment({ id: boardId }, 'commentCount', 1);
+
     // 댓글 알림 (비동기, 실패 무시)
     this.notificationsService
       .sendCommentNotification(userId, board.authorId, boardId)
@@ -93,6 +116,7 @@ export class BoardService {
       throw new ForbiddenException('삭제 권한이 없습니다.');
     }
     await this.commentsRepository.remove(comment);
+    await this.boardsRepository.decrement({ id: boardId }, 'commentCount', 1);
     return { success: true };
   }
 

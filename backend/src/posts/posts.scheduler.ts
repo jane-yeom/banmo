@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
-import { Post, PostStatus } from './post.entity';
+import { Post, PostStatus, PostCategory } from './post.entity';
 
 @Injectable()
 export class PostsScheduler {
@@ -14,6 +14,7 @@ export class PostsScheduler {
   @Cron(CronExpression.EVERY_HOUR)
   async autoCloseExpiredPosts() {
     const now = new Date();
+
     const expiredPosts = await this.postsRepository.find({
       where: {
         status: PostStatus.ACTIVE,
@@ -21,13 +22,26 @@ export class PostsScheduler {
       },
     });
 
-    if (expiredPosts.length === 0) return;
+    const expiredEvents = await this.postsRepository.find({
+      where: {
+        status: PostStatus.ACTIVE,
+        category: PostCategory.PROMO_CONCERT,
+        eventDateAt: LessThan(now),
+      },
+    });
 
-    for (const post of expiredPosts) {
+    const toClose = [
+      ...expiredPosts,
+      ...expiredEvents.filter(e => !expiredPosts.some(p => p.id === e.id)),
+    ];
+
+    if (toClose.length === 0) return;
+
+    for (const post of toClose) {
       post.status = PostStatus.CLOSED;
       post.closedAt = now;
     }
-    await this.postsRepository.save(expiredPosts);
-    console.log(`[Scheduler] ${expiredPosts.length}개 공고 자동 마감`);
+    await this.postsRepository.save(toClose);
+    console.log(`[Scheduler] ${toClose.length}개 공고 자동 마감`);
   }
 }
