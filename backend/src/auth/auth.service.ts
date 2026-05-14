@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
@@ -18,18 +18,33 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  // ── 이메일 회원가입 ──────────────────────────────────────────────────────
+  // ── 아이디 중복확인 ───────────────────────────────────────────────────
+  async checkUsernameAvailability(username: string): Promise<{ available: boolean }> {
+    const existing = await this.usersService.findByUsername(username);
+    return { available: !existing };
+  }
+
+  // ── 회원가입 (아이디/비밀번호 방식) ──────────────────────────────────
   async register(dto: RegisterDto): Promise<{ message: string }> {
+    const usernameRegex = /^[a-zA-Z0-9_]{4,20}$/;
+    if (!usernameRegex.test(dto.username)) {
+      throw new BadRequestException('아이디는 영문, 숫자, _(밑줄)만 4~20자 사용 가능합니다.');
+    }
+    const existingUsername = await this.usersService.findByUsername(dto.username);
+    if (existingUsername) {
+      throw new ConflictException('이미 사용 중인 아이디입니다.');
+    }
     const existingEmail = await this.usersService.findByEmail(dto.email);
     if (existingEmail) {
-      throw new BadRequestException('이미 사용 중인 이메일입니다.');
+      throw new ConflictException('이미 사용 중인 이메일입니다.');
     }
     const existingNickname = await this.usersService.findByNickname(dto.nickname);
     if (existingNickname) {
-      throw new BadRequestException('이미 사용 중인 닉네임입니다.');
+      throw new ConflictException('이미 사용 중인 닉네임입니다.');
     }
-    const hashed = await bcrypt.hash(dto.password, 10);
+    const hashed = await bcrypt.hash(dto.password, 12);
     const user = await this.usersService.createEmailUser({
+      username: dto.username,
       email: dto.email,
       password: hashed,
       nickname: dto.nickname,
@@ -39,7 +54,7 @@ export class AuthService {
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await this.usersService.updateVerifyToken(user.id, token, expires);
     await this.sendVerifyEmail(dto.email, token);
-    return { message: '이메일을 확인해주세요. 인증 링크가 발송되었습니다.' };
+    return { message: '가입 완료! 입력하신 이메일로 인증 링크를 보냈어요.' };
   }
 
   // ── 이메일 인증 ───────────────────────────────────────────────────────
@@ -101,10 +116,16 @@ export class AuthService {
     });
   }
 
-  // ── 일반 유저 비밀번호 찾기 ───────────────────────────────────────────
-  async forgotPasswordUser(email: string): Promise<{ message: string }> {
-    const user = await this.usersService.findByEmail(email);
-    if (!user) return { message: '이메일을 확인해주세요.' };
+  // ── 일반 유저 비밀번호 찾기 (아이디 + 이메일 확인) ──────────────────
+  async forgotPasswordUser(dto: { username: string; email: string }): Promise<{ message: string }> {
+    const user = await this.usersService.findByUsername(dto.username);
+    // 보안상 동일한 메시지 반환
+    if (!user || user.email !== dto.email) {
+      return { message: '이메일을 확인해주세요.' };
+    }
+    if ((user as any).role === 'ADMIN') {
+      throw new ForbiddenException('관리자는 관리자 페이지에서 비밀번호를 찾아주세요.');
+    }
     if (!user.password) {
       throw new BadRequestException('카카오로 가입한 계정은 비밀번호를 재설정할 수 없습니다.');
     }
@@ -112,22 +133,32 @@ export class AuthService {
     const expires = new Date(Date.now() + 30 * 60 * 1000);
     await this.usersService.saveResetToken(user.id, token, expires);
     const resetUrl = `${this.config.get('FRONTEND_URL')}/reset-password?token=${token}`;
-    await this.sendResetEmail(email, resetUrl);
-    return { message: '비밀번호 재설정 링크를 이메일로 발송했습니다.' };
+    await this.sendResetEmail(user.email, resetUrl);
+    return { message: '이메일을 확인해주세요.' };
   }
 
-  // ── 이메일 로그인 ──────────────────────────────────────────────────────
+  // ── 로그인 (아이디 + 비밀번호) ───────────────────────────────────────
   async emailLogin(dto: EmailLoginDto): Promise<{ accessToken: string; user: User }> {
-    const user = await this.usersService.findByEmail(dto.email);
+    // username 또는 email 둘 다 허용
+    let user = await this.usersService.findByUsername(dto.username);
+    if (!user) {
+      user = await this.usersService.findByEmail(dto.username);
+    }
     if (!user || !user.password) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw new UnauthorizedException('아이디 또는 비밀번호가 틀렸습니다.');
+    }
+    if ((user as any).role === 'ADMIN') {
+      throw new UnauthorizedException('관리자는 관리자 페이지에서 로그인해주세요.');
+    }
+    if (user.isBanned) {
+      throw new UnauthorizedException('이용이 제한된 계정입니다.');
     }
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw new UnauthorizedException('아이디 또는 비밀번호가 틀렸습니다.');
     }
     if (!(user as any).isEmailVerified) {
-      throw new BadRequestException('이메일 인증이 필요합니다. 받으신 인증 메일을 확인해주세요.');
+      throw new UnauthorizedException('이메일 인증이 필요합니다. 메일함을 확인해주세요.');
     }
     return { accessToken: this.generateToken(user), user };
   }

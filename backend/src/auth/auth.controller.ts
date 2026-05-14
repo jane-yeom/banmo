@@ -58,11 +58,17 @@ export class AuthController {
     return this.authService.emailLogin(dto);
   }
 
-  /** 일반 유저 비밀번호 찾기 */
+  /** 아이디 중복확인 */
+  @Get('check-username')
+  async checkUsername(@Query('username') username: string) {
+    return this.authService.checkUsernameAvailability(username);
+  }
+
+  /** 일반 유저 비밀번호 찾기 (아이디 + 이메일) */
   @Post('forgot-password')
   @HttpCode(200)
-  async forgotPassword(@Body('email') email: string) {
-    return this.authService.forgotPasswordUser(email);
+  async forgotPassword(@Body() dto: { username: string; email: string }) {
+    return this.authService.forgotPasswordUser(dto);
   }
 
   /** 카카오 AccessToken 방식 (레거시) */

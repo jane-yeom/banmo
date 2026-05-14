@@ -78,13 +78,19 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
+  async findByUsername(username: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { username } as any });
+  }
+
   async createEmailUser(data: {
+    username?: string;
     email: string;
     password: string;
     nickname: string;
     instruments?: string[];
   }): Promise<User> {
     const user = this.usersRepository.create({
+      username: data.username ?? null,
       email: data.email,
       password: data.password,
       nickname: data.nickname,

@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth.store';
 import { kakaoLogin } from '@/lib/kakao';
+import apiClient from '@/lib/axios';
 
 export default function LoginPage() {
   const router = useRouter();
   const { isLoggedIn, setAuth } = useAuthStore();
   const [tab, setTab] = useState<'kakao' | 'email'>('kakao');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, setForm] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [resendMsg, setResendMsg] = useState('');
@@ -23,65 +23,57 @@ export default function LoginPage() {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setResendMsg('');
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${apiUrl}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const res = await apiClient.post('/auth/login', {
+        username: form.username,
+        password: form.password,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || '로그인에 실패했습니다.');
-        return;
-      }
+      const data = res.data;
       document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}`;
       setAuth(data.user, data.accessToken);
       router.replace('/');
-    } catch {
-      setError('서버 오류가 발생했습니다.');
+    } catch (err: any) {
+      const msg = err.response?.data?.message;
+      setError(Array.isArray(msg) ? msg[0] : (msg || '로그인에 실패했습니다.'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleResend = async () => {
-    if (!email) { setError('이메일을 입력해주세요.'); return; }
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const res = await fetch(`${apiUrl}/auth/resend-verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    setResendMsg(data.message || '재발송했습니다.');
-    setError('');
+    // username 또는 이메일로 재발송 요청 - 이메일을 username 필드에 입력했을 경우
+    const value = form.username;
+    if (!value) { setError('아이디 또는 이메일을 입력해주세요.'); return; }
+    try {
+      const res = await apiClient.post('/auth/resend-verify', { email: value });
+      setResendMsg(res.data.message || '재발송했습니다.');
+      setError('');
+    } catch (err: any) {
+      setError(err.response?.data?.message || '재발송에 실패했습니다.');
+    }
   };
 
-  const showResend = error.includes('인증 메일');
+  const showResend = error.includes('이메일 인증') || error.includes('메일함');
 
   return (
     <div style={{
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      minHeight: '100vh',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', minHeight: '100vh',
       background: 'linear-gradient(160deg, #FFFFFF 0%, #ECEAF8 50%, #FFFFFF 100%)',
       padding: '20px',
     }}>
       <div style={{
-        background: 'white', borderRadius: 24,
-        padding: '40px 32px', width: '100%',
-        maxWidth: 380, textAlign: 'center',
+        background: 'white', borderRadius: 24, padding: '40px 32px',
+        width: '100%', maxWidth: 380, textAlign: 'center',
         boxShadow: '0 8px 40px rgba(123,130,190,0.15)',
       }}>
         {/* 로고 */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
           <img src="/banmo-logo.png" alt="반모" style={{ height: 80, width: 'auto' }} />
         </div>
-        <p style={{ color: '#7B82BE', fontSize: 14, marginBottom: 28, lineHeight: 1.5 }}>
-          반주의 모든것
-        </p>
+        <p style={{ color: '#7B82BE', fontSize: 14, marginBottom: 28, lineHeight: 1.5 }}>반주의 모든것</p>
 
         {/* 탭 */}
         <div style={{
@@ -93,8 +85,7 @@ export default function LoginPage() {
               key={t}
               onClick={() => { setTab(t); setError(''); setResendMsg(''); }}
               style={{
-                flex: 1, padding: '9px 0',
-                border: 'none', borderRadius: 9,
+                flex: 1, padding: '9px 0', border: 'none', borderRadius: 9,
                 fontSize: 14, fontWeight: 600, cursor: 'pointer',
                 background: tab === t ? 'white' : 'transparent',
                 color: tab === t ? '#5A63A8' : '#9CA3AF',
@@ -102,7 +93,7 @@ export default function LoginPage() {
                 transition: 'all 0.15s',
               }}
             >
-              {t === 'kakao' ? '카카오 로그인' : '이메일 로그인'}
+              {t === 'kakao' ? '카카오 로그인' : '아이디 로그인'}
             </button>
           ))}
         </div>
@@ -112,14 +103,11 @@ export default function LoginPage() {
             <button
               onClick={kakaoLogin}
               style={{
-                width: '100%', padding: '14px',
-                background: '#FEE500', border: 'none',
-                borderRadius: 12, fontSize: 16,
+                width: '100%', padding: '14px', background: '#FEE500',
+                border: 'none', borderRadius: 12, fontSize: 16,
                 fontWeight: 700, cursor: 'pointer',
-                display: 'flex', alignItems: 'center',
-                justifyContent: 'center', gap: 8,
-                color: '#191919',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                color: '#191919', boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
               }}
             >
               <img
@@ -134,40 +122,50 @@ export default function LoginPage() {
           </>
         ) : (
           <form onSubmit={handleEmailLogin} style={{ textAlign: 'left' }}>
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
-                이메일
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="이메일 주소"
-                required
-                style={{
-                  width: '100%', padding: '11px 14px',
-                  border: '1.5px solid #DDD9EF', borderRadius: 10,
-                  fontSize: 14, outline: 'none', boxSizing: 'border-box',
-                }}
-              />
+            {/* 아이디 */}
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 12, color: '#6B7280', marginBottom: 5, display: 'block' }}>아이디</label>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                border: '1.5px solid #DDD9EF', borderRadius: 12, padding: '0 14px',
+              }}>
+                <span style={{ fontSize: 15, color: '#9CA3AF', fontWeight: 500 }}>@</span>
+                <input
+                  value={form.username}
+                  onChange={(e) => setForm((p) => ({ ...p, username: e.target.value }))}
+                  placeholder="아이디"
+                  required
+                  autoComplete="username"
+                  style={{
+                    flex: 1, border: 'none', outline: 'none',
+                    fontSize: 15, padding: '13px 0', background: 'transparent',
+                  }}
+                />
+              </div>
             </div>
+
+            {/* 비밀번호 */}
             <div style={{ marginBottom: 6 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
-                비밀번호
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="비밀번호"
-                required
-                style={{
-                  width: '100%', padding: '11px 14px',
-                  border: '1.5px solid #DDD9EF', borderRadius: 10,
-                  fontSize: 14, outline: 'none', boxSizing: 'border-box',
-                }}
-              />
+              <label style={{ fontSize: 12, color: '#6B7280', marginBottom: 5, display: 'block' }}>비밀번호</label>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                border: '1.5px solid #DDD9EF', borderRadius: 12, padding: '0 14px',
+              }}>
+                <input
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                  placeholder="비밀번호"
+                  required
+                  autoComplete="current-password"
+                  style={{
+                    flex: 1, border: 'none', outline: 'none',
+                    fontSize: 15, padding: '13px 0', background: 'transparent',
+                  }}
+                />
+              </div>
             </div>
+
             <div style={{ textAlign: 'right', marginBottom: 18 }}>
               <Link href="/forgot-password" style={{ fontSize: 12, color: '#7B82BE' }}>
                 비밀번호를 잊으셨나요?
@@ -198,9 +196,8 @@ export default function LoginPage() {
               type="submit"
               disabled={loading}
               style={{
-                width: '100%', padding: '14px',
-                background: '#7B82BE', color: 'white',
-                border: 'none', borderRadius: 12,
+                width: '100%', padding: '14px', background: '#7B82BE',
+                color: 'white', border: 'none', borderRadius: 12,
                 fontSize: 15, fontWeight: 700, cursor: 'pointer',
                 opacity: loading ? 0.6 : 1,
               }}
@@ -210,9 +207,7 @@ export default function LoginPage() {
 
             <p style={{ marginTop: 20, textAlign: 'center', fontSize: 13, color: '#9CA3AF' }}>
               계정이 없으신가요?{' '}
-              <Link href="/signup" style={{ color: '#7B82BE', fontWeight: 600 }}>
-                회원가입
-              </Link>
+              <Link href="/signup" style={{ color: '#7B82BE', fontWeight: 600 }}>회원가입</Link>
             </p>
           </form>
         )}

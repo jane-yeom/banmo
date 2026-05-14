@@ -32,6 +32,9 @@ export class User {
   id: string;
 
   @Column({ unique: true, nullable: true })
+  username: string;
+
+  @Column({ unique: true, nullable: true })
   kakaoId: string;
 
   // 카카오 원본 정보 (절대 수정 불가 - 악플러 추적용)
