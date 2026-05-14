@@ -19,10 +19,14 @@ export class AuthService {
   ) {}
 
   // ── 이메일 회원가입 ──────────────────────────────────────────────────────
-  async register(dto: RegisterDto): Promise<{ accessToken: string; user: User }> {
-    const existing = await this.usersService.findByEmail(dto.email);
-    if (existing) {
+  async register(dto: RegisterDto): Promise<{ message: string }> {
+    const existingEmail = await this.usersService.findByEmail(dto.email);
+    if (existingEmail) {
       throw new BadRequestException('이미 사용 중인 이메일입니다.');
+    }
+    const existingNickname = await this.usersService.findByNickname(dto.nickname);
+    if (existingNickname) {
+      throw new BadRequestException('이미 사용 중인 닉네임입니다.');
     }
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.usersService.createEmailUser({
@@ -31,7 +35,85 @@ export class AuthService {
       nickname: dto.nickname,
       instruments: dto.instruments,
     });
-    return { accessToken: this.generateToken(user), user };
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await this.usersService.updateVerifyToken(user.id, token, expires);
+    await this.sendVerifyEmail(dto.email, token);
+    return { message: '이메일을 확인해주세요. 인증 링크가 발송되었습니다.' };
+  }
+
+  // ── 이메일 인증 ───────────────────────────────────────────────────────
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    const user = await this.usersService.findByEmailVerifyToken(token);
+    if (!user) throw new BadRequestException('유효하지 않은 인증 링크입니다.');
+    if (new Date() > (user as any).emailVerifyExpires) {
+      throw new BadRequestException('만료된 인증 링크입니다. 재발송을 요청해주세요.');
+    }
+    await this.usersService.verifyEmailUser(user.id);
+    return { message: '이메일 인증이 완료되었습니다.' };
+  }
+
+  // ── 인증 메일 재발송 ──────────────────────────────────────────────────
+  async resendVerifyEmail(email: string): Promise<{ message: string }> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) return { message: '이메일을 확인해주세요.' };
+    if ((user as any).isEmailVerified) {
+      throw new BadRequestException('이미 인증된 이메일입니다.');
+    }
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await this.usersService.updateVerifyToken(user.id, token, expires);
+    await this.sendVerifyEmail(email, token);
+    return { message: '인증 이메일이 재발송되었습니다.' };
+  }
+
+  // ── 인증 이메일 발송 ──────────────────────────────────────────────────
+  async sendVerifyEmail(email: string, token: string): Promise<void> {
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: this.config.get('MAIL_USER'),
+        pass: this.config.get('MAIL_PASS'),
+      },
+    });
+    const verifyUrl = `${this.config.get('FRONTEND_URL')}/auth/verify-email?token=${token}`;
+    await transporter.sendMail({
+      from: `반모 <${this.config.get('MAIL_USER')}>`,
+      to: email,
+      subject: '[반모] 이메일 인증',
+      html: `
+        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
+          <h2>이메일 인증</h2>
+          <p>아래 버튼을 클릭하여 이메일 인증을 완료해주세요.</p>
+          <p>링크는 24시간 후 만료됩니다.</p>
+          <a href="${verifyUrl}"
+            style="display:inline-block; padding:12px 24px;
+            background:#7B82BE; color:white; border-radius:8px;
+            text-decoration:none; font-weight:bold;">
+            이메일 인증하기
+          </a>
+          <p style="color:#999; font-size:12px; margin-top:20px;">
+            본인이 요청하지 않았다면 이 이메일을 무시해주세요.
+          </p>
+        </div>
+      `,
+    });
+  }
+
+  // ── 일반 유저 비밀번호 찾기 ───────────────────────────────────────────
+  async forgotPasswordUser(email: string): Promise<{ message: string }> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) return { message: '이메일을 확인해주세요.' };
+    if (!user.password) {
+      throw new BadRequestException('카카오로 가입한 계정은 비밀번호를 재설정할 수 없습니다.');
+    }
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 30 * 60 * 1000);
+    await this.usersService.saveResetToken(user.id, token, expires);
+    const resetUrl = `${this.config.get('FRONTEND_URL')}/reset-password?token=${token}`;
+    await this.sendResetEmail(email, resetUrl);
+    return { message: '비밀번호 재설정 링크를 이메일로 발송했습니다.' };
   }
 
   // ── 이메일 로그인 ──────────────────────────────────────────────────────
@@ -43,6 +125,9 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) {
       throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
+    }
+    if (!(user as any).isEmailVerified) {
+      throw new BadRequestException('이메일 인증이 필요합니다. 받으신 인증 메일을 확인해주세요.');
     }
     return { accessToken: this.generateToken(user), user };
   }

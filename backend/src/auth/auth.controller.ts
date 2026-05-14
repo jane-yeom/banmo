@@ -1,7 +1,7 @@
 // TODO: 이메일 로그인 - 현재 카카오 로그인만 지원
 // 추후 필요시 register/login 주석 해제
 
-import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs/common';
 import { IsEmail, IsString } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -31,19 +31,39 @@ class AdminLoginDto {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // TODO: 이메일 로그인 - 추후 필요시 주석 해제
-  // /** 이메일 회원가입 */
-  // @Post('register')
-  // async register(@Body() dto: RegisterDto) {
-  //   return this.authService.register(dto);
-  // }
+  /** 이메일 회원가입 */
+  @Post('register')
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
+  }
 
-  // /** 이메일 로그인 */
-  // @Post('login')
-  // @HttpCode(200)
-  // async emailLogin(@Body() dto: LoginDto) {
-  //   return this.authService.emailLogin(dto);
-  // }
+  /** 이메일 인증 */
+  @Post('verify-email')
+  @HttpCode(200)
+  async verifyEmail(@Body('token') token: string) {
+    return this.authService.verifyEmail(token);
+  }
+
+  /** 인증 메일 재발송 */
+  @Post('resend-verify')
+  @HttpCode(200)
+  async resendVerify(@Body('email') email: string) {
+    return this.authService.resendVerifyEmail(email);
+  }
+
+  /** 이메일 로그인 */
+  @Post('login')
+  @HttpCode(200)
+  async emailLogin(@Body() dto: LoginDto) {
+    return this.authService.emailLogin(dto);
+  }
+
+  /** 일반 유저 비밀번호 찾기 */
+  @Post('forgot-password')
+  @HttpCode(200)
+  async forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPasswordUser(email);
+  }
 
   /** 카카오 AccessToken 방식 (레거시) */
   @Post('kakao')

@@ -142,6 +142,15 @@ export class User {
   @Column({ nullable: true, type: 'timestamptz' })
   resetTokenExpires: Date;
 
+  @Column({ nullable: true })
+  emailVerifyToken: string;
+
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({ nullable: true, type: 'timestamptz' })
+  emailVerifyExpires: Date;
+
   @Column({ nullable: true, type: 'timestamptz' })
   deletedAt: Date;
 

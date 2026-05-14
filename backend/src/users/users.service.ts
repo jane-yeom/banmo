@@ -240,6 +240,29 @@ export class UsersService {
     } as any);
   }
 
+  async findByNickname(nickname: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { nickname } });
+  }
+
+  async findByEmailVerifyToken(token: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { emailVerifyToken: token } as any });
+  }
+
+  async verifyEmailUser(userId: string): Promise<void> {
+    await this.usersRepository.update(userId, {
+      isEmailVerified: true,
+      emailVerifyToken: null,
+      emailVerifyExpires: null,
+    } as any);
+  }
+
+  async updateVerifyToken(userId: string, token: string, expires: Date): Promise<void> {
+    await this.usersRepository.update(userId, {
+      emailVerifyToken: token,
+      emailVerifyExpires: expires,
+    } as any);
+  }
+
   async findByResetToken(token: string) {
     return this.usersRepository.findOne({ where: { resetToken: token } as any });
   }

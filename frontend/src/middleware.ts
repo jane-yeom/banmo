@@ -17,11 +17,14 @@ const AUTH_ONLY = ['/login', '/signup'];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 관리자 공개 페이지는 항상 허용
+  // 관리자 공개 페이지 및 이메일 인증 관련 페이지는 항상 허용
   if (
     pathname === '/admin/login' ||
     pathname === '/admin/forgot-password' ||
-    pathname.startsWith('/admin/reset-password')
+    pathname.startsWith('/admin/reset-password') ||
+    pathname.startsWith('/auth/verify-email') ||
+    pathname === '/forgot-password' ||
+    pathname.startsWith('/reset-password')
   ) {
     return NextResponse.next();
   }
@@ -59,5 +62,8 @@ export const config = {
     '/admin/reset-password',
     '/login',
     '/signup',
+    '/auth/verify-email',
+    '/forgot-password',
+    '/reset-password',
   ],
 };
