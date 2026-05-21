@@ -23,16 +23,15 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
-  const allowedOrigins = [
-    process.env.FRONTEND_URL,
-    'http://localhost:3000',
-    'https://frontend-production-9843d.up.railway.app',
-  ].filter(Boolean) as string[];
-
   app.enableCors({
-    origin: allowedOrigins,
+    origin: [
+      'http://localhost:3000',
+      'https://frontend-production-9843d.up.railway.app',
+      /\.vercel\.app$/,
+      process.env.FRONTEND_URL,
+    ].filter(Boolean),
     credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
