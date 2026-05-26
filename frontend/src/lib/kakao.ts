@@ -14,7 +14,10 @@
  */
 export function kakaoLogin(): void {
   const REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY;
-  const REDIRECT_URI = `${window.location.origin}/auth/callback`;
+  const REDIRECT_URI =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/auth/callback`
+      : process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI || 'https://banmo.kr/auth/callback';
 
   if (!REST_API_KEY) {
     console.error('NEXT_PUBLIC_KAKAO_REST_API_KEY 가 설정되지 않았습니다');

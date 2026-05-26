@@ -29,7 +29,6 @@ async function bootstrap() {
       'https://banmo.kr',
       'https://www.banmo.kr',
       'https://frontend-production-9843d.up.railway.app',
-      /\.vercel\.app$/,
       process.env.FRONTEND_URL,
     ].filter(Boolean),
     credentials: true,
