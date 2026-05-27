@@ -16,43 +16,26 @@ import { QnaModule } from './qna/qna.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { FavoritesModule } from './favorites/favorites.module';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: isProd ? '.env' : '.env.development',
     }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        const databaseUrl = config.get('DATABASE_URL');
-
-        if (databaseUrl) {
-          console.log('[DB] DATABASE_URL 방식으로 연결');
-          return {
-            type: 'postgres' as const,
-            url: databaseUrl,
-            entities: [__dirname + '/**/*.entity{.ts,.js}'],
-            synchronize: true,
-            ssl: { rejectUnauthorized: false },
-            logging: false,
-          };
-        }
-
-        console.log('[DB] 개별 환경변수 방식으로 연결');
-        return {
-          type: 'postgres' as const,
-          host: config.get<string>('DATABASE_HOST') || 'localhost',
-          port: +(config.get<string>('DATABASE_PORT') || 5432),
-          username: config.get<string>('DATABASE_USER') || 'banmo_user',
-          password: config.get<string>('DATABASE_PASSWORD') || 'banmo_pass',
-          database: config.get<string>('DATABASE_NAME') || 'banmo',
-          entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          synchronize: true,
-          logging: false,
-        };
-      },
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres' as const,
+        url: config.get<string>('DATABASE_URL'),
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: !isProd,
+        logging: !isProd,
+        ssl: isProd ? { rejectUnauthorized: false } : false,
+      }),
     }),
     UsersModule,
     AuthModule,
