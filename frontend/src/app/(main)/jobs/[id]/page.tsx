@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Share2, Heart, MessageCircle, Send, Pencil, Trash2, CheckCircle, RotateCcw, MapPin, Music, Eye, Calendar, Coins, ClipboardList, AlertCircle } from 'lucide-react';
+import { Share2, Heart, MessageCircle, Send, Pencil, Trash2, CheckCircle, RotateCcw, MapPin, Music, Eye, Calendar, ClipboardList, AlertCircle, Users } from 'lucide-react';
+import Avatar from '@/components/common/Avatar';
 import ReportModal from '@/components/common/ReportModal';
 import SubHeader from '@/components/layout/SubHeader';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -130,8 +131,19 @@ export default function JobDetailPage() {
   const [showApply, setShowApply] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [detailTab, setDetailTab] = useState<'info' | 'applicants'>('info');
   // TODO: 유료 기능 활성화시 주석 해제
   // const [showPremium, setShowPremium] = useState(false);
+
+  // 지원자 목록 (공고 작성자만)
+  const { data: applicants } = useQuery({
+    queryKey: ['postApplicants', id],
+    queryFn: () =>
+      apiClient.get<{ id: string; applicant: { id: string; nickname: string | null; profileImage: string | null }; message: string | null; status: string; createdAt: string }[]>(
+        `/applications/post/${id}`
+      ).then((r) => r.data),
+    enabled: !!user && !!post && user.id === post.author.id,
+  });
 
   // 찜 여부 조회
   const { data: favData } = useQuery({
@@ -401,22 +413,7 @@ export default function JobDetailPage() {
 
         {/* 작성자 프로필 */}
         <div className="mb-8 flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-4">
-          {post.author.profileImage ? (
-            <Image
-              src={post.author.profileImage}
-              alt="프로필"
-              width={52}
-              height={52}
-              className="rounded-full object-cover flex-shrink-0"
-            />
-          ) : (
-            <div
-              className="flex-shrink-0 rounded-full flex items-center justify-center text-xl font-bold"
-              style={{ background: '#ECEAF8', color: '#7B82BE', width: 52, height: 52 }}
-            >
-              {(post.author.nickname ?? '?')[0]}
-            </div>
-          )}
+          <Avatar src={post.author.profileImage} nickname={post.author.nickname} size={52} />
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-gray-900">{post.author.nickname ?? '익명'}</p>
             <div className="mt-1 flex items-center gap-2">
@@ -431,6 +428,73 @@ export default function JobDetailPage() {
             프로필 보기
           </Link>
         </div>
+
+        {/* 지원자 목록 탭 (작성자에게만 표시) */}
+        {isOwner && (
+          <div className="mb-6">
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+              <button
+                onClick={() => setDetailTab('info')}
+                style={{
+                  padding: '8px 20px', borderRadius: 99, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                  background: detailTab === 'info' ? '#7B82BE' : '#F3F4F6',
+                  color: detailTab === 'info' ? 'white' : '#6B7280',
+                }}
+              >
+                공고 정보
+              </button>
+              <button
+                onClick={() => setDetailTab('applicants')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '8px 20px', borderRadius: 99, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                  background: detailTab === 'applicants' ? '#7B82BE' : '#F3F4F6',
+                  color: detailTab === 'applicants' ? 'white' : '#6B7280',
+                }}
+              >
+                <Users size={14} strokeWidth={2} />
+                지원자 목록 {applicants?.length !== undefined ? `(${applicants.length})` : ''}
+              </button>
+            </div>
+
+            {detailTab === 'applicants' && (
+              <div>
+                {!applicants || applicants.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9CA3AF' }}>
+                    <Users size={40} strokeWidth={1.5} color="#9CA3AF" style={{ marginBottom: 8 }} />
+                    <p style={{ fontSize: 14 }}>아직 지원자가 없습니다</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {applicants.map((app) => (
+                      <div key={app.id} style={{ background: 'white', borderRadius: 12, border: '1px solid #E5E7EB', padding: '14px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <Avatar src={app.applicant.profileImage} nickname={app.applicant.nickname} size={40} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{app.applicant.nickname ?? '익명'}</p>
+                            {app.message && (
+                              <p style={{ fontSize: 12, color: '#6B7280', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {app.message}
+                              </p>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                            <Link
+                              href={`/profile/${app.applicant.id}`}
+                              style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, border: '1px solid #7B82BE', color: '#7B82BE', textDecoration: 'none' }}
+                            >
+                              프로필
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 액션 버튼 */}
         {isOwner ? (

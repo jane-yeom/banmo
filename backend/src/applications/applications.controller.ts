@@ -6,6 +6,7 @@ import {
   Body,
   Param,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
@@ -36,6 +37,11 @@ export class ApplicationsController {
   @Post()
   apply(@CurrentUser() user: User, @Body() dto: ApplyDto) {
     return this.applicationsService.apply(user.id, dto.postId, dto.message);
+  }
+
+  @Get('post/:postId')
+  getPostApplications(@CurrentUser() user: User, @Param('postId') postId: string) {
+    return this.applicationsService.getPostApplications(postId, user.id);
   }
 
   @Get('my')

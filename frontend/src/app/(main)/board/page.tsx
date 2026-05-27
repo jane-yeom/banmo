@@ -4,7 +4,8 @@ import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useBoardPosts, type BoardPost } from '@/hooks/useBoard';
-import { MessageCircle, EyeOff, ClipboardList } from 'lucide-react';
+import { MessageCircle, EyeOff } from 'lucide-react';
+import EmptyState from '@/components/common/EmptyState';
 
 const TABS = [
   { value: 'FREE',      label: '자유게시판', Icon: MessageCircle },
@@ -102,14 +103,20 @@ function BoardContent() {
           {isLoading ? (
             <div className="flex flex-col">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-16 border-b border-gray-100 px-4 py-3 animate-pulse bg-gray-50" />
+                <div key={i} style={{ padding: '14px 16px', borderBottom: '1px solid #F3F4F6' }}>
+                  <div style={{ height: 12, width: '60%', background: '#F4F3F9', borderRadius: 6, marginBottom: 8, animation: 'pulse 1.5s infinite' }} />
+                  <div style={{ height: 10, width: '35%', background: '#F4F3F9', borderRadius: 6, animation: 'pulse 1.5s infinite' }} />
+                </div>
               ))}
             </div>
           ) : filtered?.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-              <ClipboardList size={48} strokeWidth={1.5} color="#9CA3AF" style={{ marginBottom: 12 }} />
-              <p>게시글이 없습니다.</p>
-            </div>
+            <EmptyState
+              icon="✏️"
+              title="게시글이 없어요"
+              sub="첫 번째 글을 작성해보세요!"
+              href={`/board/write?type=${tab}`}
+              btnText="글쓰기"
+            />
           ) : (
             filtered?.map((post) => <BoardRow key={post.id} post={post} />)
           )}

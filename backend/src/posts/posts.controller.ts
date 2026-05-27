@@ -15,6 +15,7 @@ import { PostsService } from './posts.service';
 import { CreatePostDto, PostFilterDto, UpdatePostDto } from './post.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/user.entity';
+import { OptionalJwtGuard } from '../auth/optional-jwt.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -26,8 +27,9 @@ export class PostsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(id);
+  @UseGuards(OptionalJwtGuard)
+  findOne(@Param('id') id: string, @CurrentUser() user?: User) {
+    return this.postsService.findOne(id, user?.id);
   }
 
   @Post('test')

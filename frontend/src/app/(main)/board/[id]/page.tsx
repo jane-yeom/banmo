@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SubHeader from '@/components/layout/SubHeader';
-import Image from 'next/image';
 import { useMutation } from '@tanstack/react-query';
+import Avatar from '@/components/common/Avatar';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useBoardPost, useDeleteBoardPost, useAddComment, useDeleteComment } from '@/hooks/useBoard';
@@ -177,13 +177,7 @@ export default function BoardDetailPage() {
         {/* 작성자 정보 */}
         <div className="mb-5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            {displayAvatar ? (
-              <Image src={displayAvatar} alt="프로필" width={36} height={36} className="rounded-full object-cover" />
-            ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-100 text-teal-700 text-sm font-bold">
-                {displayName[0]}
-              </div>
-            )}
+            <Avatar src={displayAvatar} nickname={displayName} size={36} />
             <div>
               <p className="text-sm font-semibold text-gray-900">{displayName}</p>
               <p className="text-xs text-gray-400">
@@ -260,13 +254,7 @@ export default function BoardDetailPage() {
                   <div key={c.id} className="rounded-xl bg-white border border-gray-100 p-3.5">
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
-                        {cAvatar ? (
-                          <Image src={cAvatar} alt="프로필" width={28} height={28} className="rounded-full object-cover" />
-                        ) : (
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 text-xs font-bold">
-                            {cName[0]}
-                          </div>
-                        )}
+                        <Avatar src={cAvatar} nickname={cName} size={28} />
                         <span className="text-xs font-semibold text-gray-800">{cName}</span>
                         <span className="text-xs text-gray-400">
                           {new Date(c.createdAt).toLocaleString('ko-KR')}

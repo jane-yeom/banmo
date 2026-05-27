@@ -34,6 +34,9 @@ export class BoardComment {
   @Column({ default: false })
   isAnonymous: boolean;
 
+  @Column({ default: 0 })
+  likeCount: number;
+
   @CreateDateColumn()
   createdAt: Date;
 }

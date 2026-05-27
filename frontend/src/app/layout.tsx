@@ -14,7 +14,17 @@ const notoSansKR = Noto_Sans_KR({
 
 export const metadata: Metadata = {
   title: '반모 - 반주의 모든것',
-  description: '반주자 매칭 플랫폼 반모',
+  description: '반주자와 연주자를 연결하는 매칭 플랫폼. 피아노, 바이올린, 첼로 등 다양한 반주자를 찾아보세요.',
+  keywords: '반주자, 반주, 피아노, 바이올린, 첼로, 레슨, 구인구직',
+  openGraph: {
+    title: '반모 - 반주의 모든것',
+    description: '반주자와 연주자를 연결하는 매칭 플랫폼',
+    url: 'https://banmo.kr',
+    siteName: '반모',
+    images: [{ url: 'https://banmo.kr/banmo-logo.png' }],
+    locale: 'ko_KR',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -36,7 +46,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main style={{ paddingBottom: 80 }}>
             {children}
           </main>
-          <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
+          <Toaster
+            position="bottom-center"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: '#1A1A1A',
+                color: 'white',
+                borderRadius: '12px',
+                fontSize: '14px',
+                padding: '12px 16px',
+              },
+              success: {
+                iconTheme: { primary: '#5AAB7A', secondary: 'white' },
+              },
+              error: {
+                iconTheme: { primary: '#EF4444', secondary: 'white' },
+              },
+            }}
+          />
         </ReactQueryProvider>
       </body>
     </html>

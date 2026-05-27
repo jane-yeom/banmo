@@ -111,15 +111,19 @@ export class PostsService {
     return { items, total };
   }
 
-  async findOne(id: string): Promise<Post> {
+  async findOne(id: string, userId?: string): Promise<Post> {
     const post = await this.postsRepository.findOne({
       where: { id },
       relations: ['author'],
     });
     if (!post) throw new NotFoundException('공고를 찾을 수 없습니다.');
 
-    await this.postsRepository.increment({ id }, 'viewCount', 1);
-    post.viewCount += 1;
+    if (!userId || userId !== post.author.id) {
+      await this.postsRepository.update(id, {
+        viewCount: () => 'view_count + 1',
+      });
+      post.viewCount += 1;
+    }
     return post;
   }
 

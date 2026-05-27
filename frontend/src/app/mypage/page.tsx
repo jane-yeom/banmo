@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { X, Heart, Bell, Key, ClipboardList, Inbox } from 'lucide-react';
+import toast from 'react-hot-toast';
 import SubHeader from '@/components/layout/SubHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/axios';
@@ -202,10 +203,10 @@ export default function MyPage() {
       logout();
       localStorage.removeItem('accessToken');
       document.cookie = 'accessToken=;max-age=0;path=/';
-      alert('탈퇴가 완료되었습니다. 이용해주셔서 감사합니다.');
+      toast.success('탈퇴가 완료되었습니다. 이용해주셔서 감사합니다.');
       router.replace('/');
     } catch (e: any) {
-      alert(e.response?.data?.message || '오류가 발생했습니다');
+      toast.error(e.response?.data?.message || '오류가 발생했습니다');
     }
   };
 
@@ -443,6 +444,9 @@ function PostRow({ post }: { post: Post }) {
     try {
       await apiClient.patch(`/posts/${post.id}/close`);
       qc.invalidateQueries({ queryKey: ['myPosts'] });
+      toast.success('공고가 마감되었습니다');
+    } catch {
+      toast.error('오류가 발생했습니다');
     } finally {
       setBusy(false);
     }
@@ -454,6 +458,9 @@ function PostRow({ post }: { post: Post }) {
     try {
       await apiClient.patch(`/posts/${post.id}/reopen`);
       qc.invalidateQueries({ queryKey: ['myPosts'] });
+      toast.success('공고가 재등록되었습니다');
+    } catch {
+      toast.error('오류가 발생했습니다');
     } finally {
       setBusy(false);
     }

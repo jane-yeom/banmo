@@ -14,6 +14,7 @@ import { CreateBoardDto, CreateCommentDto } from './board.dto';
 import { BoardType } from './board.entity';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/user.entity';
+import { OptionalJwtGuard } from '../auth/optional-jwt.guard';
 
 @Controller('board')
 export class BoardController {
@@ -30,8 +31,9 @@ export class BoardController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.boardService.findOne(id);
+  @UseGuards(OptionalJwtGuard)
+  findOne(@Param('id') id: string, @CurrentUser() user?: User) {
+    return this.boardService.findOne(id, user?.id);
   }
 
   @Post()

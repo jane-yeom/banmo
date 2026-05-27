@@ -51,15 +51,19 @@ export class BoardService {
     });
   }
 
-  async findOne(id: string): Promise<{ board: Board; comments: BoardComment[] }> {
+  async findOne(id: string, userId?: string): Promise<{ board: Board; comments: BoardComment[] }> {
     const board = await this.boardsRepository.findOne({
       where: { id },
       relations: ['author'],
     });
     if (!board) throw new NotFoundException('게시글을 찾을 수 없습니다.');
 
-    await this.boardsRepository.increment({ id }, 'viewCount', 1);
-    board.viewCount += 1;
+    if (!userId || userId !== board.authorId) {
+      await this.boardsRepository.update(id, {
+        viewCount: () => 'view_count + 1',
+      });
+      board.viewCount += 1;
+    }
 
     const comments = await this.commentsRepository.find({
       where: { boardId: id },

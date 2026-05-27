@@ -61,6 +61,19 @@ export class ApplicationsService {
     return application;
   }
 
+  async getPostApplications(postId: string, requesterId: string): Promise<Application[]> {
+    const post = await this.postRepo.findOne({ where: { id: postId } });
+    if (!post) throw new NotFoundException('공고를 찾을 수 없습니다.');
+    if (post.authorId !== requesterId) throw new ForbiddenException('해당 공고의 작성자만 조회할 수 있습니다.');
+
+    return this.appRepo
+      .createQueryBuilder('app')
+      .innerJoinAndSelect('app.applicant', 'applicant')
+      .where('app.postId = :postId', { postId })
+      .orderBy('app.createdAt', 'DESC')
+      .getMany();
+  }
+
   async getMyApplications(applicantId: string): Promise<Application[]> {
     return this.appRepo.find({
       where: { applicantId },
