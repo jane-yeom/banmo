@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Share2, Heart, MessageCircle, Send, Pencil, Trash2, CheckCircle, RotateCcw, MapPin, Music, Eye, Calendar, ClipboardList, AlertCircle, Users } from 'lucide-react';
 import Avatar from '@/components/common/Avatar';
+import ImageGallery from '@/components/common/ImageGallery';
 import ReportModal from '@/components/common/ReportModal';
 import SubHeader from '@/components/layout/SubHeader';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -23,6 +23,7 @@ const CATEGORY_LABEL: Record<string, string> = {
   JOB_OFFER: '반주자 구인', JOB_SEEK: '반주자 구직',
   LESSON_OFFER: '레슨 구인', LESSON_SEEK: '레슨 구직',
   PERFORMANCE: '공연 도우미', AFTERSCHOOL: '방과후 교사',
+  ACADEMY_OFFER: '학원선생님 구인', ACADEMY_SEEK: '학원선생님 구직',
   PROMO_CONCERT: '연주회 홍보', PROMO_SPACE: '연습실 대여',
   TRADE_LESSON: '레슨 양도', TRADE_SPACE: '연습실 양도',
   TRADE_TICKET: '티켓 양도', TRADE_INSTRUMENT: '중고 악기',
@@ -402,12 +403,8 @@ export default function JobDetailPage() {
 
         {/* 이미지 */}
         {post.imageUrls?.filter(Boolean).length > 0 && (
-          <div className="mb-8 grid grid-cols-2 gap-2">
-            {post.imageUrls.filter(Boolean).map((url, i) => (
-              <div key={i} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                <Image src={url} alt={`첨부 이미지 ${i + 1}`} fill className="object-cover" />
-              </div>
-            ))}
+          <div className="mb-8">
+            <ImageGallery images={post.imageUrls.filter(Boolean)} />
           </div>
         )}
 

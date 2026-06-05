@@ -9,7 +9,8 @@ import { usePost } from '@/hooks/usePosts';
 import { useCreateChatRoom } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
-import { MapPin, Music, Coins, Calendar, Eye, MessageCircle, Pencil, X, AlertCircle } from 'lucide-react';
+import ImageGallery from '@/components/common/ImageGallery';
+import { MapPin, Music, Coins, Calendar, Eye, MessageCircle, Pencil, AlertCircle } from 'lucide-react';
 import ReportModal from '@/components/common/ReportModal';
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -23,7 +24,6 @@ export default function PromoDetailPage() {
   const { user } = useAuthStore();
   const { data: post, isLoading } = usePost(id);
   const createRoom = useCreateChatRoom();
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
 
   const handleChat = async () => {
@@ -55,96 +55,18 @@ export default function PromoDetailPage() {
 
   const isOwner = user?.id === post.author.id;
   const images = post.imageUrls?.filter(Boolean) ?? [];
-  const mainImage = selectedImage ?? images[0] ?? null;
   const eventDateAt = (post as any).eventDateAt ? new Date((post as any).eventDateAt) : null;
   const isEventPast = eventDateAt ? eventDateAt < new Date() : false;
 
   return (
     <>
-      {/* 이미지 전체화면 모달 */}
-      {selectedImage && (
-        <div
-          onClick={() => setSelectedImage(null)}
-          style={{
-            position: 'fixed', inset: 0,
-            background: 'rgba(0,0,0,0.92)',
-            zIndex: 200, display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
-            padding: 16,
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={selectedImage}
-            alt="이미지 전체보기"
-            style={{
-              maxWidth: '100%', maxHeight: '90vh',
-              borderRadius: 8, objectFit: 'contain',
-            }}
-          />
-          <button
-            onClick={() => setSelectedImage(null)}
-            style={{
-              position: 'absolute', top: 16, right: 16,
-              background: 'rgba(255,255,255,0.15)',
-              border: 'none', borderRadius: '50%',
-              width: 40, height: 40, cursor: 'pointer',
-              display: 'flex', alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <X size={22} color="white" strokeWidth={2} />
-          </button>
-        </div>
-      )}
-
       <SubHeader title="공연/연습실" />
       <div className="mx-auto max-w-3xl px-4 py-6">
 
         {/* 이미지 갤러리 */}
         {images.length > 0 && (
           <div style={{ marginBottom: 20 }}>
-            {/* 대표 이미지 */}
-            <div
-              onClick={() => setSelectedImage(mainImage)}
-              style={{
-                width: '100%', aspectRatio: '16/9',
-                borderRadius: 14, overflow: 'hidden',
-                marginBottom: 8, background: '#F7F4ED',
-                cursor: 'pointer', position: 'relative',
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={mainImage!}
-                alt="대표 이미지"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            </div>
-
-            {/* 추가 이미지 썸네일 */}
-            {images.length > 1 && (
-              <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
-                {images.map((url, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={i}
-                    src={url}
-                    alt={`이미지${i + 1}`}
-                    onClick={() => setSelectedImage(url)}
-                    style={{
-                      width: 64, height: 64,
-                      borderRadius: 8, objectFit: 'cover',
-                      flexShrink: 0, cursor: 'pointer',
-                      border: (selectedImage ?? images[0]) === url
-                        ? '2px solid #1C1C1C'
-                        : '1px solid #E8E4DC',
-                      transition: 'border 0.15s',
-                    }}
-                  />
-                ))}
-              </div>
-            )}
+            <ImageGallery images={images} />
           </div>
         )}
 
@@ -254,9 +176,9 @@ export default function PromoDetailPage() {
         {isOwner ? (
           <div className="flex gap-3">
             <Link
-              href={`/jobs/${id}/edit`}
-              className="flex-1 rounded-xl border-2 border-pink-600 py-3.5 text-center text-base font-semibold text-pink-600 hover:bg-pink-50 transition-colors"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+              href={`/write/promo/edit/${id}`}
+              className="flex-1 rounded-xl border-2 py-3.5 text-center text-base font-semibold transition-colors"
+              style={{ borderColor: '#1C1C1C', color: '#1C1C1C', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
               <Pencil size={15} strokeWidth={2} /> 수정하기
             </Link>

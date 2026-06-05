@@ -54,7 +54,15 @@ function WriteBoardContent() {
     createPost.mutate(
       { type, title, content, isAnonymous },
       {
-        onSuccess: (res) => { localStorage.removeItem(DRAFT_KEY); router.push(`/board/${res.data.id}`); },
+        onSuccess: (res) => {
+          localStorage.removeItem(DRAFT_KEY);
+          const id = res.data?.id || res.data?.data?.id || res.data?.board?.id;
+          if (id) {
+            router.replace(`/board/${id}`);
+          } else {
+            router.replace(`/board?type=${type}`);
+          }
+        },
         onError: (error: any) => {
           const msg = error?.response?.data?.message || '게시글 등록에 실패했습니다.';
           toast.error(Array.isArray(msg) ? msg.join(', ') : msg);

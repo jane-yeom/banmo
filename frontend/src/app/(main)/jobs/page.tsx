@@ -9,14 +9,16 @@ import { Post } from '@/types';
 import EmptyState from '@/components/common/EmptyState';
 
 const CATEGORY_TABS = [
-  { value: '',              label: '전체' },
-  { value: 'JOB_OFFER',    label: '반주자 구인' },
-  { value: 'JOB_SEEK',     label: '반주자 구직' },
-  { value: 'LESSON_OFFER', label: '레슨 구인' },
-  { value: 'LESSON_SEEK',  label: '레슨 구직' },
-  { value: 'PERFORMANCE',  label: '공연 도우미' },
-  { value: 'AFTERSCHOOL',  label: '방과후 교사' },
-  { value: 'ETC',          label: '기타' },
+  { value: '',               label: '전체' },
+  { value: 'JOB_OFFER',     label: '반주자 구인' },
+  { value: 'JOB_SEEK',      label: '반주자 구직' },
+  { value: 'LESSON_OFFER',  label: '레슨 구인' },
+  { value: 'LESSON_SEEK',   label: '레슨 구직' },
+  { value: 'ACADEMY_OFFER', label: '학원선생님 구인' },
+  { value: 'ACADEMY_SEEK',  label: '학원선생님 구직' },
+  { value: 'PERFORMANCE',   label: '공연 도우미' },
+  { value: 'AFTERSCHOOL',   label: '방과후 교사' },
+  { value: 'ETC',           label: '기타' },
 ];
 
 const INSTRUMENTS = [

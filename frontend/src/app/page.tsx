@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import api from '@/lib/axios';
-import { Music2, Mic, BookOpen, Star, MessageSquare, MessageCircle, LucideIcon, MapPin, ChevronRight, Music, Eye } from 'lucide-react';
+import { Music2, Mic, BookOpen, Star, MessageSquare, LucideIcon, MapPin, ChevronRight, Music, Eye, School, GraduationCap } from 'lucide-react';
 import { IconJob, IconPromo, IconBoard } from '@/components/common/SectionIcons';
 
 // 슬라이딩 배너 컴포넌트
@@ -170,6 +170,7 @@ function SectionCard({ post }: { post: any }) {
     JOB_OFFER: '반주자구인', JOB_SEEK: '반주자구직',
     LESSON_OFFER: '레슨구인', LESSON_SEEK: '레슨구직',
     PERFORMANCE: '공연도우미', AFTERSCHOOL: '방과후교사',
+    ACADEMY_OFFER: '학원선생님구인', ACADEMY_SEEK: '학원선생님구직',
     ETC: '기타',
     PROMO_CONCERT: '공연홍보', PROMO_SPACE: '연습실대여',
     TRADE_LESSON: '레슨양도', TRADE_SPACE: '연습실양도',
@@ -280,11 +281,13 @@ function SectionTitle({ type, title, href }: {
 function QuickMenu() {
   const menus = [
     { Icon: Music2, label: '반주자\n구인', href: '/jobs?category=JOB_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: Mic, label: '반주자\n구직', href: '/jobs?category=JOB_SEEK', iconBg: '#EAF0FB', iconColor: '#6A8FD4' },
-    { Icon: BookOpen, label: '레슨\n구인', href: '/jobs?category=LESSON_OFFER', iconBg: '#EAF6EF', iconColor: '#5AAB7A' },
-    { Icon: Star, label: '공연\n홍보', href: '/promo', iconBg: '#FEF6E4', iconColor: '#D4A03A' },
+    { Icon: Mic, label: '반주자\n구직', href: '/jobs?category=JOB_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: BookOpen, label: '레슨\n구인', href: '/jobs?category=LESSON_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: BookOpen, label: '레슨\n구직', href: '/jobs?category=LESSON_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: School, label: '학원선생님\n구인', href: '/jobs?category=ACADEMY_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: GraduationCap, label: '학원선생님\n구직', href: '/jobs?category=ACADEMY_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: Star, label: '공연\n홍보', href: '/promo?category=PROMO_CONCERT', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
     { Icon: MessageSquare, label: '자유\n게시판', href: '/board?type=FREE', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: MessageCircle, label: '익명\n게시판', href: '/board?type=ANONYMOUS', iconBg: '#F0EAFA', iconColor: '#9070C8' },
   ];
 
   return (
