@@ -7,6 +7,7 @@ import { Bell, MessageCircle, Menu, X, ChevronRight, LogOut, Search, User } from
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
+import { useNotificationStore } from '@/store/notification.store';
 import apiClient from '@/lib/axios';
 import { initKakao } from '@/lib/kakao';
 import { getSocket } from '@/lib/socket';
@@ -29,6 +30,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, isLoggedIn, setAuth, logout, accessToken } = useAuthStore();
   const { unreadCount, setUnreadCount } = useChatStore();
+  const notifUnread = useNotificationStore(s => s.unreadCount);
   const qc = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -171,6 +173,17 @@ export default function Header() {
                   color: '#6B7280',
                 }}>
                   <Bell size={22} strokeWidth={1.8} />
+                  {notifUnread > 0 && (
+                    <span style={{
+                      position: 'absolute', top: 0, right: 0,
+                      background: '#EF4444', color: 'white',
+                      borderRadius: '50%', width: 16, height: 16,
+                      fontSize: 10, fontWeight: 700,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {notifUnread > 9 ? '9+' : notifUnread}
+                    </span>
+                  )}
                 </Link>
                 <Link href="/chat" style={{
                   position: 'relative',
