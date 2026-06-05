@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import Link from 'next/link';
 import SubHeader from '@/components/layout/SubHeader';
 import { HelpCircle, MessageCircle, Megaphone, LucideIcon } from 'lucide-react';
@@ -41,7 +41,7 @@ export default function SupportPage() {
     <div className="min-h-screen bg-gray-50">
       <SubHeader title="고객센터" />
       {/* 상단 배너 */}
-      <div className="py-12 text-center text-white" style={{ background: 'linear-gradient(135deg, #7B82BE, #4A52A0)' }}>
+      <div className="py-12 text-center text-white" style={{ background: 'linear-gradient(135deg, #1C1C1C, #4A52A0)' }}>
         <div className="mx-auto max-w-2xl px-4">
           <h1 className="text-3xl font-bold mb-2">고객센터</h1>
           <p className="text-white/80 text-base mb-6">무엇을 도와드릴까요?</p>

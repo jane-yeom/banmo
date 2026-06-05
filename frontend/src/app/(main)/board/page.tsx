@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
@@ -104,8 +104,8 @@ function BoardContent() {
             <div className="flex flex-col">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} style={{ padding: '14px 16px', borderBottom: '1px solid #F3F4F6' }}>
-                  <div style={{ height: 12, width: '60%', background: '#F4F3F9', borderRadius: 6, marginBottom: 8, animation: 'pulse 1.5s infinite' }} />
-                  <div style={{ height: 10, width: '35%', background: '#F4F3F9', borderRadius: 6, animation: 'pulse 1.5s infinite' }} />
+                  <div style={{ height: 12, width: '60%', background: '#F7F4ED', borderRadius: 6, marginBottom: 8, animation: 'pulse 1.5s infinite' }} />
+                  <div style={{ height: 10, width: '35%', background: '#F7F4ED', borderRadius: 6, animation: 'pulse 1.5s infinite' }} />
                 </div>
               ))}
             </div>

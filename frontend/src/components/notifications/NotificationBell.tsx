@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -100,13 +100,13 @@ export default function NotificationBell() {
         <Bell
           size={22}
           strokeWidth={1.8}
-          color={unreadCount > 0 ? '#7B82BE' : '#9CA3AF'}
-          fill={unreadCount > 0 ? '#ECEAF8' : 'none'}
+          color={unreadCount > 0 ? '#1C1C1C' : '#9CA3AF'}
+          fill={unreadCount > 0 ? '#F0EDE6' : 'none'}
         />
         {unreadCount > 0 && (
           <div style={{
             position: 'absolute', top: -2, right: -2,
-            background: '#7B82BE', color: 'white',
+            background: '#1C1C1C', color: 'white',
             fontSize: 10, fontWeight: 700,
             width: 18, height: 18, borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',

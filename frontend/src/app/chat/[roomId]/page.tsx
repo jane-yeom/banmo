@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -43,7 +43,7 @@ function Avatar({ src, nickname }: { src: string | null; nickname: string | null
     );
   }
   return (
-    <div className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ background: '#ECEAF8', color: '#7B82BE' }}>
+    <div className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ background: '#F0EDE6', color: '#1C1C1C' }}>
       {(nickname ?? '?')[0]}
     </div>
   );
@@ -246,7 +246,7 @@ export default function ChatRoomPage() {
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
         background: 'white',
-        borderBottom: '0.5px solid #DDD9EF',
+        borderBottom: '0.5px solid #E8E4DC',
         padding: '12px 16px',
         display: 'flex', alignItems: 'center', gap: 12,
       }}>
@@ -255,7 +255,7 @@ export default function ChatRoomPage() {
           cursor: 'pointer', padding: 4,
           display: 'flex', alignItems: 'center',
         }}>
-          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+          <ChevronLeft size={24} color="#1C1C1C" strokeWidth={2} />
         </button>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0, marginRight: 4 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -263,16 +263,16 @@ export default function ChatRoomPage() {
         </Link>
         {other && (
           <>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#ECEAF8', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#F0EDE6', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
               {other.profileImage ? (
                 <Image src={other.profileImage} alt={other.nickname ?? '?'} width={36} height={36} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
               ) : (
-                <User size={20} color="#7B82BE" />
+                <User size={20} color="#1C1C1C" />
               )}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 15, fontWeight: 700 }}>{other.nickname ?? '익명'}</div>
-              <div style={{ fontSize: 11, color: '#7B82BE' }}>{other.noteGrade}</div>
+              <div style={{ fontSize: 11, color: '#1C1C1C' }}>{other.noteGrade}</div>
             </div>
             <Link href={`/profile/${other.id}`} className="flex-shrink-0 text-xs text-gray-400 hover:text-purple-600">
               프로필
@@ -335,8 +335,8 @@ export default function ChatRoomPage() {
           <div
             onClick={() => setProfileOpen(!profileOpen)}
             style={{
-              background: '#F4F3F9',
-              borderBottom: '0.5px solid #DDD9EF',
+              background: '#F7F4ED',
+              borderBottom: '0.5px solid #E8E4DC',
               padding: '10px 16px', cursor: 'pointer',
               display: 'flex', alignItems: 'center',
               justifyContent: 'space-between',
@@ -344,14 +344,14 @@ export default function ChatRoomPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
                 width: 36, height: 36, borderRadius: '50%',
-                background: '#ECEAF8', overflow: 'hidden',
+                background: '#F0EDE6', overflow: 'hidden',
                 display: 'flex', alignItems: 'center',
                 justifyContent: 'center', flexShrink: 0,
               }}>
                 {(opponent?.profileImage || other.profileImage)
                   ? <img src={opponent?.profileImage || other.profileImage!}
                       alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <User size={18} color="#7B82BE" />
+                  : <User size={18} color="#1C1C1C" />
                 }
               </div>
               <div>
@@ -359,7 +359,7 @@ export default function ChatRoomPage() {
                   {opponent?.nickname || other.nickname}
                 </div>
                 <div style={{
-                  fontSize: 11, color: '#7B82BE',
+                  fontSize: 11, color: '#1C1C1C',
                   display: 'flex', alignItems: 'center', gap: 4,
                 }}>
                   <Music size={10} />
@@ -381,7 +381,7 @@ export default function ChatRoomPage() {
           {profileOpen && opponent && (
             <div style={{
               background: 'white',
-              borderBottom: '0.5px solid #DDD9EF',
+              borderBottom: '0.5px solid #E8E4DC',
               padding: '16px',
             }}>
               {/* 음표 등급 */}
@@ -390,9 +390,9 @@ export default function ChatRoomPage() {
                 gap: 8, marginBottom: 12,
               }}>
                 <div style={{
-                  background: '#ECEAF8', borderRadius: 99,
+                  background: '#F0EDE6', borderRadius: 99,
                   padding: '4px 12px', fontSize: 12,
-                  color: '#5A63A8', fontWeight: 600,
+                  color: '#000000', fontWeight: 600,
                 }}>
                   ♩ {opponent.noteGrade === 'WHOLE' ? '온음표'
                     : opponent.noteGrade === 'HALF' ? '2분음표'
@@ -417,7 +417,7 @@ export default function ChatRoomPage() {
                 <p style={{
                   fontSize: 13, color: '#444',
                   lineHeight: 1.6, marginBottom: 12,
-                  background: '#F4F3F9', borderRadius: 8,
+                  background: '#F7F4ED', borderRadius: 8,
                   padding: '8px 12px',
                 }}>
                   {opponent.bio}
@@ -432,7 +432,7 @@ export default function ChatRoomPage() {
                 }}>
                   {opponent.instruments.map((inst: string) => (
                     <span key={inst} style={{
-                      background: '#ECEAF8', color: '#5A63A8',
+                      background: '#F0EDE6', color: '#000000',
                       fontSize: 12, padding: '4px 10px',
                       borderRadius: 99, fontWeight: 500,
                     }}>
@@ -448,7 +448,7 @@ export default function ChatRoomPage() {
                   onClick={() => router.push(`/profile/${opponent.id}`)}
                   style={{
                     flex: 1, padding: '10px',
-                    background: '#ECEAF8', color: '#5A63A8',
+                    background: '#F0EDE6', color: '#000000',
                     border: 'none', borderRadius: 10,
                     fontSize: 13, fontWeight: 600,
                     cursor: 'pointer',
@@ -462,7 +462,7 @@ export default function ChatRoomPage() {
                     onClick={() => router.push(`/jobs/${room.post!.id}`)}
                     style={{
                       flex: 1, padding: '10px',
-                      background: '#F4F3F9', color: '#6B7280',
+                      background: '#F7F4ED', color: '#6B7280',
                       border: 'none', borderRadius: 10,
                       fontSize: 13, fontWeight: 600,
                       cursor: 'pointer',
@@ -534,7 +534,7 @@ export default function ChatRoomPage() {
                           ? 'text-white rounded-br-sm'
                           : 'bg-white text-gray-800 border border-gray-100 shadow-sm rounded-bl-sm'
                       }`}
-                      style={isMine ? { background: 'linear-gradient(135deg, #7B82BE, #5A63A8)' } : undefined}
+                      style={isMine ? { background: 'linear-gradient(135deg, #1C1C1C, #000000)' } : undefined}
                     >
                       {msg.content}
                     </div>
@@ -567,14 +567,14 @@ export default function ChatRoomPage() {
             disabled={imageUploading}
             style={{
               width: 40, height: 40, borderRadius: 10,
-              background: '#F4F3F9', border: 'none',
+              background: '#F7F4ED', border: 'none',
               cursor: 'pointer', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
             {imageUploading
               ? <span style={{ fontSize: 11, color: '#9CA3AF' }}>...</span>
-              : <ImageIcon size={18} color="#7B82BE" strokeWidth={1.8} />
+              : <ImageIcon size={18} color="#1C1C1C" strokeWidth={1.8} />
             }
           </button>
           <input
@@ -599,7 +599,7 @@ export default function ChatRoomPage() {
             disabled={!input.trim() || !connected}
             style={{
               width: 40, height: 40, borderRadius: 10,
-              background: input.trim() ? '#7B82BE' : '#DDD9EF',
+              background: input.trim() ? '#1C1C1C' : '#E8E4DC',
               border: 'none', cursor: input.trim() ? 'pointer' : 'default',
               flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'background 0.15s',

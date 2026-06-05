@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -80,7 +80,7 @@ function WriteBoardContent() {
               disabled={createPost.isPending}
               style={{
                 padding: '8px 18px',
-                background: createPost.isPending ? '#ccc' : '#7B82BE',
+                background: createPost.isPending ? '#ccc' : '#1C1C1C',
                 color: 'white', border: 'none',
                 borderRadius: 99, fontSize: 14,
                 fontWeight: 700, cursor: createPost.isPending ? 'not-allowed' : 'pointer',
@@ -107,7 +107,7 @@ function WriteBoardContent() {
         {/* 제목 */}
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 8 }}>
-            제목 <span style={{ color: '#7B82BE' }}>*</span>
+            제목 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
           <input
             value={title}
@@ -116,7 +116,7 @@ function WriteBoardContent() {
             maxLength={100}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -125,7 +125,7 @@ function WriteBoardContent() {
         {/* 내용 */}
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 8 }}>
-            내용 <span style={{ color: '#7B82BE' }}>*</span>
+            내용 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
           <textarea
             value={content}
@@ -134,7 +134,7 @@ function WriteBoardContent() {
             rows={12}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, outline: 'none',
               resize: 'none', boxSizing: 'border-box',
               lineHeight: 1.6,

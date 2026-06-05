@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
@@ -148,7 +148,7 @@ function WriteJobsContent() {
               disabled={saving}
               style={{
                 padding: '8px 18px',
-                background: saving ? '#ccc' : '#7B82BE',
+                background: saving ? '#ccc' : '#1C1C1C',
                 color: 'white', border: 'none',
                 borderRadius: 99, fontSize: 14,
                 fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
@@ -164,16 +164,16 @@ function WriteJobsContent() {
         {/* 카테고리 */}
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 10 }}>
-            카테고리 <span style={{ color: '#7B82BE' }}>*</span>
+            카테고리 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {JOB_CATEGORIES.map(c => (
               <button key={c.value} onClick={() => setForm(p => ({ ...p, category: c.value }))}
                 style={{
                   padding: '8px 14px', borderRadius: 99,
-                  border: `1.5px solid ${form.category === c.value ? '#7B82BE' : '#DDD9EF'}`,
-                  background: form.category === c.value ? '#ECEAF8' : 'white',
-                  color: form.category === c.value ? '#5A63A8' : '#666',
+                  border: `1.5px solid ${form.category === c.value ? '#1C1C1C' : '#E8E4DC'}`,
+                  background: form.category === c.value ? '#F0EDE6' : 'white',
+                  color: form.category === c.value ? '#000000' : '#666',
                   fontSize: 13, fontWeight: form.category === c.value ? 700 : 400,
                   cursor: 'pointer', transition: 'all 0.15s',
                 }}>
@@ -184,9 +184,9 @@ function WriteJobsContent() {
           {guide && (
             <div style={{
               marginTop: 10, padding: '10px 12px',
-              background: '#F4F3F9', borderRadius: 8,
+              background: '#F7F4ED', borderRadius: 8,
               fontSize: 12, color: '#6B7280', lineHeight: 1.5,
-              borderLeft: '3px solid #7B82BE',
+              borderLeft: '3px solid #1C1C1C',
               display: 'flex', alignItems: 'flex-start', gap: 6,
             }}>
               <Info size={13} strokeWidth={1.8} color="#9CA3AF" style={{ flexShrink: 0, marginTop: 1 }} />
@@ -198,7 +198,7 @@ function WriteJobsContent() {
         {/* 제목 */}
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 8 }}>
-            제목 <span style={{ color: '#7B82BE' }}>*</span>
+            제목 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
           <input
             value={form.title}
@@ -207,7 +207,7 @@ function WriteJobsContent() {
             maxLength={50}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -226,9 +226,9 @@ function WriteJobsContent() {
               <button key={inst} onClick={() => toggleInstrument(inst)}
                 style={{
                   padding: '7px 12px', borderRadius: 99,
-                  border: `1.5px solid ${form.instruments.includes(inst) ? '#7B82BE' : '#DDD9EF'}`,
-                  background: form.instruments.includes(inst) ? '#ECEAF8' : 'white',
-                  color: form.instruments.includes(inst) ? '#5A63A8' : '#666',
+                  border: `1.5px solid ${form.instruments.includes(inst) ? '#1C1C1C' : '#E8E4DC'}`,
+                  background: form.instruments.includes(inst) ? '#F0EDE6' : 'white',
+                  color: form.instruments.includes(inst) ? '#000000' : '#666',
                   fontSize: 13, fontWeight: form.instruments.includes(inst) ? 700 : 400,
                   cursor: 'pointer',
                 }}>
@@ -248,7 +248,7 @@ function WriteJobsContent() {
             onChange={e => setForm(p => ({ ...p, region: e.target.value }))}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, background: 'white',
               outline: 'none', boxSizing: 'border-box',
             }}>
@@ -260,7 +260,7 @@ function WriteJobsContent() {
         {/* 페이 */}
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 8 }}>
-            페이 <span style={{ color: '#7B82BE' }}>*</span>
+            페이 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
           <input
             value={form.payText}
@@ -269,7 +269,7 @@ function WriteJobsContent() {
             maxLength={50}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -292,7 +292,7 @@ function WriteJobsContent() {
         {/* 내용 */}
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 8 }}>
-            상세 내용 <span style={{ color: '#7B82BE' }}>*</span>
+            상세 내용 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
           <textarea
             value={form.content}
@@ -301,7 +301,7 @@ function WriteJobsContent() {
             rows={8}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, outline: 'none',
               resize: 'none', boxSizing: 'border-box',
               lineHeight: 1.6,

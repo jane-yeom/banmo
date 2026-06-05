@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -43,7 +43,7 @@ function NotifRow({
     <div style={{
       display: 'flex', alignItems: 'center',
       gap: 12, padding: '14px 0',
-      borderBottom: '0.5px solid #F4F3F9',
+      borderBottom: '0.5px solid #F7F4ED',
     }}>
       <div style={{
         width: 40, height: 40,
@@ -65,7 +65,7 @@ function NotifRow({
         onClick={onChange}
         style={{
           width: 44, height: 24,
-          background: value ? '#7B82BE' : '#DDD9EF',
+          background: value ? '#1C1C1C' : '#E8E4DC',
           borderRadius: 12, position: 'relative',
           cursor: 'pointer', transition: 'background 0.2s',
           flexShrink: 0,
@@ -141,12 +141,12 @@ export default function NotificationSettingsPage() {
               value={settings.chatMessage} onChange={() => toggle('chatMessage')}
             />
             <NotifRow
-              icon={<IconNewApplicant />} bg="#ECEAF8"
+              icon={<IconNewApplicant />} bg="#F0EDE6"
               title="새 지원자" sub="내 공고에 지원자가 생겼을 때"
               value={settings.application} onChange={() => toggle('application')}
             />
             <NotifRow
-              icon={<IconResult />} bg="#ECEAF8"
+              icon={<IconResult />} bg="#F0EDE6"
               title="지원 결과" sub="지원한 공고의 합/불합격 결과"
               value={settings.applicationStatus} onChange={() => toggle('applicationStatus')}
             />
@@ -161,7 +161,7 @@ export default function NotificationSettingsPage() {
               value={settings.comment} onChange={() => toggle('comment')}
             />
             <NotifRow
-              icon={<IconFavorite />} bg="#ECEAF8"
+              icon={<IconFavorite />} bg="#F0EDE6"
               title="찜한 공고 업데이트" sub="찜한 공고가 수정됐을 때"
               value={settings.favoritePost} onChange={() => toggle('favoritePost')}
             />

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -60,7 +60,7 @@ function ApplyModal({
           <button
             onClick={onClose}
             className="w-full rounded-xl py-3 text-sm font-semibold text-white"
-            style={{ background: 'linear-gradient(135deg, #7B82BE, #5A63A8)' }}
+            style={{ background: 'linear-gradient(135deg, #1C1C1C, #000000)' }}
           >
             확인
           </button>
@@ -328,7 +328,7 @@ export default function JobDetailPage() {
 
         {/* 카테고리 + 상태 */}
         <div className="flex items-center gap-2 mb-3">
-          <span className="rounded-full px-3 py-1 text-sm font-medium" style={{ background: '#ECEAF8', color: '#7B82BE' }}>
+          <span className="rounded-full px-3 py-1 text-sm font-medium" style={{ background: '#F0EDE6', color: '#1C1C1C' }}>
             {CATEGORY_LABEL[post.category] ?? post.category}
           </span>
           {/* TODO: 유료 기능 활성화시 주석 해제 (프리미엄 배지)
@@ -377,8 +377,8 @@ export default function JobDetailPage() {
         </div>
 
         {/* 페이 */}
-        <div className="mb-6 rounded-2xl p-5" style={{ background: '#ECEAF8', border: '1px solid #DDD9EF' }}>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: '#7B82BE' }}>급여 조건</p>
+        <div className="mb-6 rounded-2xl p-5" style={{ background: '#F0EDE6', border: '1px solid #E8E4DC' }}>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: '#1C1C1C' }}>급여 조건</p>
           {(post as any).payText ? (
             <p className="text-sm font-semibold text-gray-800">{(post as any).payText}</p>
           ) : (
@@ -423,7 +423,7 @@ export default function JobDetailPage() {
           </div>
           <Link
             href={`/profile/${post.author.id}`}
-            className="flex-shrink-0 text-sm hover:underline" style={{ color: '#7B82BE' }}
+            className="flex-shrink-0 text-sm hover:underline" style={{ color: '#1C1C1C' }}
           >
             프로필 보기
           </Link>
@@ -437,7 +437,7 @@ export default function JobDetailPage() {
                 onClick={() => setDetailTab('info')}
                 style={{
                   padding: '8px 20px', borderRadius: 99, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
-                  background: detailTab === 'info' ? '#7B82BE' : '#F3F4F6',
+                  background: detailTab === 'info' ? '#1C1C1C' : '#F3F4F6',
                   color: detailTab === 'info' ? 'white' : '#6B7280',
                 }}
               >
@@ -448,7 +448,7 @@ export default function JobDetailPage() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '8px 20px', borderRadius: 99, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
-                  background: detailTab === 'applicants' ? '#7B82BE' : '#F3F4F6',
+                  background: detailTab === 'applicants' ? '#1C1C1C' : '#F3F4F6',
                   color: detailTab === 'applicants' ? 'white' : '#6B7280',
                 }}
               >
@@ -481,7 +481,7 @@ export default function JobDetailPage() {
                           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                             <Link
                               href={`/profile/${app.applicant.id}`}
-                              style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, border: '1px solid #7B82BE', color: '#7B82BE', textDecoration: 'none' }}
+                              style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, border: '1px solid #1C1C1C', color: '#1C1C1C', textDecoration: 'none' }}
                             >
                               프로필
                             </Link>
@@ -554,7 +554,7 @@ export default function JobDetailPage() {
               <Link
                 href={`/jobs/${id}/edit`}
                 className="flex-1 rounded-xl border-2 py-3.5 text-center text-base font-semibold transition-colors"
-                style={{ borderColor: '#7B82BE', color: '#7B82BE', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                style={{ borderColor: '#1C1C1C', color: '#1C1C1C', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
                 <Pencil size={15} strokeWidth={2} /> 수정하기
               </Link>
@@ -575,7 +575,7 @@ export default function JobDetailPage() {
                 onClick={handleChat}
                 disabled={createRoom.isPending || post.status === 'CLOSED'}
                 className="flex-1 rounded-xl py-3.5 text-base font-semibold text-white transition-colors disabled:opacity-60"
-                style={{ background: post.status === 'CLOSED' ? '#9CA3AF' : 'linear-gradient(135deg, #7B82BE, #5A63A8)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                style={{ background: post.status === 'CLOSED' ? '#9CA3AF' : 'linear-gradient(135deg, #1C1C1C, #000000)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
                 {post.status === 'CLOSED' ? '마감된 공고' : <><MessageCircle size={18} strokeWidth={2} /> 채팅하기</>}
               </button>
@@ -586,7 +586,7 @@ export default function JobDetailPage() {
                     setShowApply(true);
                   }}
                   className="flex-1 rounded-xl border-2 py-3.5 text-base font-semibold transition-colors"
-                  style={{ borderColor: '#7B82BE', color: '#7B82BE', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                  style={{ borderColor: '#1C1C1C', color: '#1C1C1C', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                 >
                   <Send size={16} strokeWidth={2} /> 지원하기
                 </button>
@@ -614,11 +614,11 @@ export default function JobDetailPage() {
   );
 }
 
-function InfoItem({ icon: Icon, label, value, color = '#7B82BE' }: { icon: React.ElementType; label: string; value: string; color?: string }) {
+function InfoItem({ icon: Icon, label, value, color = '#1C1C1C' }: { icon: React.ElementType; label: string; value: string; color?: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="rounded-xl border border-gray-100 bg-white p-3">
       <div style={{
-        width: 34, height: 34, background: '#ECEAF8',
+        width: 34, height: 34, background: '#F0EDE6',
         borderRadius: 10, display: 'flex',
         alignItems: 'center', justifyContent: 'center',
         flexShrink: 0,

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
@@ -107,7 +107,7 @@ function WritePromoContent() {
             disabled={saving}
             style={{
               padding: '8px 18px',
-              background: saving ? '#ccc' : '#7B82BE',
+              background: saving ? '#ccc' : '#1C1C1C',
               color: 'white', border: 'none',
               borderRadius: 99, fontSize: 14,
               fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
@@ -123,7 +123,7 @@ function WritePromoContent() {
         {/* 카테고리 */}
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 10 }}>
-            카테고리 <span style={{ color: '#7B82BE' }}>*</span>
+            카테고리 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
           <div style={{ display: 'flex', gap: 8 }}>
             {PROMO_CATEGORIES.map(c => (
@@ -133,9 +133,9 @@ function WritePromoContent() {
                 style={{
                   flex: 1, padding: '10px',
                   borderRadius: 12,
-                  border: `1.5px solid ${form.category === c.value ? '#7B82BE' : '#DDD9EF'}`,
-                  background: form.category === c.value ? '#ECEAF8' : 'white',
-                  color: form.category === c.value ? '#5A63A8' : '#666',
+                  border: `1.5px solid ${form.category === c.value ? '#1C1C1C' : '#E8E4DC'}`,
+                  background: form.category === c.value ? '#F0EDE6' : 'white',
+                  color: form.category === c.value ? '#000000' : '#666',
                   fontSize: 13,
                   fontWeight: form.category === c.value ? 700 : 400,
                   cursor: 'pointer',
@@ -166,13 +166,13 @@ function WritePromoContent() {
                   style={{
                     width: 90, height: 90,
                     borderRadius: 10, objectFit: 'cover',
-                    border: '1px solid #DDD9EF',
+                    border: '1px solid #E8E4DC',
                   }}
                 />
                 {i === 0 && (
                   <div style={{
                     position: 'absolute', bottom: 4, left: 4,
-                    background: '#7B82BE', color: 'white',
+                    background: '#1C1C1C', color: 'white',
                     fontSize: 9, fontWeight: 700,
                     padding: '2px 6px', borderRadius: 4,
                   }}>
@@ -198,7 +198,7 @@ function WritePromoContent() {
             {images.length < 5 && (
               <label style={{
                 width: 90, height: 90,
-                border: '1.5px dashed #DDD9EF',
+                border: '1.5px dashed #E8E4DC',
                 borderRadius: 10, cursor: 'pointer',
                 display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
@@ -240,7 +240,7 @@ function WritePromoContent() {
         {/* 제목 */}
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 8 }}>
-            제목 <span style={{ color: '#7B82BE' }}>*</span>
+            제목 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
           <input
             value={form.title}
@@ -251,7 +251,7 @@ function WritePromoContent() {
             maxLength={50}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -266,7 +266,7 @@ function WritePromoContent() {
             fontSize: 13, fontWeight: 700, color: '#444',
             display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8,
           }}>
-            <Calendar size={14} strokeWidth={1.8} color="#7B82BE" />
+            <Calendar size={14} strokeWidth={1.8} color="#1C1C1C" />
             {isSpace ? '대여 가능 시간' : '공연 일시'}
           </label>
           <input
@@ -277,7 +277,7 @@ function WritePromoContent() {
               : '예) 2026년 6월 1일 (일) 오후 7시 30분'}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -289,7 +289,7 @@ function WritePromoContent() {
             fontSize: 13, fontWeight: 700, color: '#444',
             display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8,
           }}>
-            <MapPin size={14} strokeWidth={1.8} color="#7B82BE" />
+            <MapPin size={14} strokeWidth={1.8} color="#1C1C1C" />
             {isSpace ? '주소' : '공연 장소'}
           </label>
           <input
@@ -300,7 +300,7 @@ function WritePromoContent() {
               : '예) 예술의전당 리사이틀홀'}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -312,7 +312,7 @@ function WritePromoContent() {
             fontSize: 13, fontWeight: 700, color: '#444',
             display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8,
           }}>
-            <MapPin size={14} strokeWidth={1.8} color="#7B82BE" />
+            <MapPin size={14} strokeWidth={1.8} color="#1C1C1C" />
             지역
           </label>
           <select
@@ -320,7 +320,7 @@ function WritePromoContent() {
             onChange={e => setForm(p => ({ ...p, region: e.target.value }))}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, background: 'white',
               outline: 'none', boxSizing: 'border-box',
             }}
@@ -336,7 +336,7 @@ function WritePromoContent() {
             fontSize: 13, fontWeight: 700, color: '#444',
             display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8,
           }}>
-            <Coins size={14} strokeWidth={1.8} color="#7B82BE" />
+            <Coins size={14} strokeWidth={1.8} color="#1C1C1C" />
             {isSpace ? '대여료' : '입장료'}
           </label>
           <input
@@ -348,7 +348,7 @@ function WritePromoContent() {
             maxLength={50}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -357,7 +357,7 @@ function WritePromoContent() {
         {/* 상세 내용 */}
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 8 }}>
-            상세 내용 <span style={{ color: '#7B82BE' }}>*</span>
+            상세 내용 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
           <textarea
             value={form.content}
@@ -368,7 +368,7 @@ function WritePromoContent() {
             rows={8}
             style={{
               width: '100%', padding: '14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 14, outline: 'none',
               resize: 'none', boxSizing: 'border-box',
               lineHeight: 1.8, minHeight: 180,

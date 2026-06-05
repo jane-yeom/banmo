@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -41,11 +41,11 @@ export default function BottomNav() {
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
       background: 'white',
-      borderTop: '1px solid #DDD9EF',
+      borderTop: '1px solid #E8E4DC',
       display: 'flex',
       zIndex: 50,
       paddingBottom: 'env(safe-area-inset-bottom)',
-      boxShadow: '0 -4px 16px rgba(90,99,168,0.08)',
+      boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
     }}>
       {tabs.map((tab) => {
         const isActive =
@@ -68,19 +68,19 @@ export default function BottomNav() {
             >
               <div style={{
                 width: 46, height: 46,
-                background: 'linear-gradient(135deg, #7B82BE, #5A63A8)',
+                background: '#1C1C1C',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginBottom: 2,
-                boxShadow: '0 4px 14px rgba(90,99,168,0.45)',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
                 transform: 'translateY(-10px)',
               }}>
                 <Icon size={20} strokeWidth={2} color="white" />
               </div>
               <span style={{
-                fontSize: 10, color: '#7B82BE',
+                fontSize: 10, color: '#1C1C1C',
                 fontWeight: 600,
                 transform: 'translateY(-10px)',
               }}>
@@ -108,7 +108,7 @@ export default function BottomNav() {
               <Icon
                 size={24}
                 strokeWidth={isActive ? 2.2 : 1.6}
-                color={isActive ? '#7B82BE' : '#9CA3AF'}
+                color={isActive ? '#1C1C1C' : '#9CA3AF'}
               />
               {tab.showBadge && unreadCount > 0 && (
                 <span style={{
@@ -124,7 +124,7 @@ export default function BottomNav() {
             </div>
             <span style={{
               fontSize: 10,
-              color: isActive ? '#7B82BE' : '#9CA3AF',
+              color: isActive ? '#1C1C1C' : '#9CA3AF',
               fontWeight: isActive ? 700 : 400,
             }}>
               {tab.label}
@@ -133,7 +133,7 @@ export default function BottomNav() {
               <div style={{
                 position: 'absolute', bottom: 0,
                 width: 4, height: 4, borderRadius: '50%',
-                background: '#7B82BE',
+                background: '#1C1C1C',
               }} />
             )}
           </Link>

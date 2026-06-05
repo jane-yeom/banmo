@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -32,11 +32,11 @@ function SkeletonCard() {
     <div style={{
       background: 'white', borderRadius: 12,
       padding: '14px', marginBottom: 10,
-      border: '0.5px solid #DDD9EF',
+      border: '0.5px solid #E8E4DC',
     }}>
-      <div style={{ height: 14, width: '30%', background: '#F4F3F9', borderRadius: 6, marginBottom: 8, animation: 'pulse 1.5s infinite' }} />
-      <div style={{ height: 16, width: '80%', background: '#F4F3F9', borderRadius: 6, marginBottom: 8, animation: 'pulse 1.5s infinite' }} />
-      <div style={{ height: 12, width: '50%', background: '#F4F3F9', borderRadius: 6, animation: 'pulse 1.5s infinite' }} />
+      <div style={{ height: 14, width: '30%', background: '#F7F4ED', borderRadius: 6, marginBottom: 8, animation: 'pulse 1.5s infinite' }} />
+      <div style={{ height: 16, width: '80%', background: '#F7F4ED', borderRadius: 6, marginBottom: 8, animation: 'pulse 1.5s infinite' }} />
+      <div style={{ height: 12, width: '50%', background: '#F7F4ED', borderRadius: 6, animation: 'pulse 1.5s infinite' }} />
     </div>
   );
 }
@@ -135,7 +135,7 @@ export default function JobsPage() {
               style={{
                 whiteSpace: 'nowrap', borderRadius: 99, padding: '7px 16px',
                 fontSize: 13, fontWeight: 500, border: 'none', cursor: 'pointer', flexShrink: 0,
-                background: category === tab.value ? '#7B82BE' : '#F3F4F6',
+                background: category === tab.value ? '#1C1C1C' : '#F3F4F6',
                 color: category === tab.value ? 'white' : '#4B5563',
                 transition: 'all 0.15s',
               }}
@@ -159,8 +159,8 @@ export default function JobsPage() {
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '7px 14px', borderRadius: 8,
                 border: '1px solid #E5E7EB',
-                background: activeFilters > 0 ? '#ECEAF8' : 'white',
-                color: activeFilters > 0 ? '#7B82BE' : '#374151',
+                background: activeFilters > 0 ? '#F0EDE6' : 'white',
+                color: activeFilters > 0 ? '#1C1C1C' : '#374151',
                 fontSize: 13, fontWeight: 500, cursor: 'pointer',
               }}
             >
@@ -169,7 +169,7 @@ export default function JobsPage() {
             </button>
             <Link
               href={`/write/jobs?category=${category || 'JOB_OFFER'}`}
-              style={{ padding: '7px 14px', borderRadius: 8, background: '#7B82BE', color: 'white', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}
+              style={{ padding: '7px 14px', borderRadius: 8, background: '#1C1C1C', color: 'white', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}
             >
               + 공고 작성
             </Link>
@@ -188,8 +188,8 @@ export default function JobsPage() {
                     onClick={() => setInstrument(instrument === inst ? '' : inst)}
                     style={{
                       borderRadius: 99, padding: '5px 12px', fontSize: 12, cursor: 'pointer', border: '1px solid',
-                      borderColor: instrument === inst ? '#7B82BE' : '#E5E7EB',
-                      background: instrument === inst ? '#7B82BE' : 'white',
+                      borderColor: instrument === inst ? '#1C1C1C' : '#E5E7EB',
+                      background: instrument === inst ? '#1C1C1C' : 'white',
                       color: instrument === inst ? 'white' : '#6B7280',
                     }}
                   >
@@ -213,7 +213,7 @@ export default function JobsPage() {
               <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', marginBottom: 8, letterSpacing: '0.05em' }}>
                 최대 페이: {payMax < 500000 ? `${(payMax / 10000).toFixed(0)}만원` : '무제한'}
               </p>
-              <input type="range" min={0} max={500000} step={10000} value={payMax} onChange={(e) => setPayMax(Number(e.target.value))} style={{ width: '100%', accentColor: '#7B82BE' }} />
+              <input type="range" min={0} max={500000} step={10000} value={payMax} onChange={(e) => setPayMax(Number(e.target.value))} style={{ width: '100%', accentColor: '#1C1C1C' }} />
             </div>
           </div>
         )}

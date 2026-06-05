@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -142,8 +142,8 @@ export default function Header() {
               <Link key={item.href} href={item.href} style={{
                 padding: '8px 14px',
                 borderRadius: 8,
-                color: pathname.startsWith(item.href) ? '#7B82BE' : '#374151',
-                background: pathname.startsWith(item.href) ? '#ECEAF8' : 'transparent',
+                color: pathname.startsWith(item.href) ? '#1C1C1C' : '#374151',
+                background: pathname.startsWith(item.href) ? '#F0EDE6' : 'transparent',
                 textDecoration: 'none',
                 fontSize: 14,
                 fontWeight: pathname.startsWith(item.href) ? 600 : 400,
@@ -202,14 +202,14 @@ export default function Header() {
               }} className="desktop-only">
                 <div style={{
                   width: 32, height: 32, borderRadius: '50%',
-                  background: '#ECEAF8', overflow: 'hidden',
+                  background: '#F0EDE6', overflow: 'hidden',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {user?.profileImage ? (
                     <img src={user.profileImage} alt=""
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
                   ) : (
-                    <User size={18} color="#7B82BE" />
+                    <User size={18} color="#1C1C1C" />
                   )}
                 </div>
                 <span style={{ fontSize: 14, color: '#374151', fontWeight: 500 }}>
@@ -222,7 +222,7 @@ export default function Header() {
                 style={{
                   display: 'none',
                   padding: '8px 16px',
-                  background: '#7B82BE', color: 'white',
+                  background: '#1C1C1C', color: 'white',
                   borderRadius: 8, textDecoration: 'none',
                   fontSize: 14, fontWeight: 600,
                 }}>
@@ -286,10 +286,10 @@ export default function Header() {
         </div>
 
         {/* 드로어 검색창 */}
-        <div style={{ padding: '12px 16px', borderBottom: '0.5px solid #F4F3F9' }}>
+        <div style={{ padding: '12px 16px', borderBottom: '0.5px solid #F7F4ED' }}>
           <Link href="/search" style={{
             display: 'flex', alignItems: 'center', gap: 8,
-            background: '#F4F3F9', borderRadius: 10,
+            background: '#F7F4ED', borderRadius: 10,
             padding: '10px 14px', textDecoration: 'none',
           }}>
             <Search size={16} color="#9CA3AF" strokeWidth={1.8} />
@@ -306,7 +306,7 @@ export default function Header() {
           }}>
             <div style={{
               width: 48, height: 48, borderRadius: '50%',
-              background: '#ECEAF8', overflow: 'hidden',
+              background: '#F0EDE6', overflow: 'hidden',
               flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
@@ -314,14 +314,14 @@ export default function Header() {
                 <img src={user.profileImage} alt=""
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
               ) : (
-                <User size={24} color="#7B82BE" />
+                <User size={24} color="#1C1C1C" />
               )}
             </div>
             <div>
               <div style={{ fontWeight: 600, fontSize: 15 }}>
                 {user.nickname}
               </div>
-              <div style={{ fontSize: 12, color: '#7B82BE', marginTop: 2 }}>
+              <div style={{ fontSize: 12, color: '#1C1C1C', marginTop: 2 }}>
                 {user.noteGrade === 'WHOLE' ? '♩ 온음표' :
                  user.noteGrade === 'HALF' ? '♩ 2분음표' :
                  user.noteGrade === 'QUARTER' ? '♩ 4분음표' :
@@ -343,13 +343,13 @@ export default function Header() {
           {navItems.map(item => (
             <Link key={item.href} href={item.href} style={{
               display: 'block', padding: '12px 20px',
-              color: pathname.startsWith(item.href) ? '#7B82BE' : '#374151',
-              background: pathname.startsWith(item.href) ? '#ECEAF8' : 'transparent',
+              color: pathname.startsWith(item.href) ? '#1C1C1C' : '#374151',
+              background: pathname.startsWith(item.href) ? '#F0EDE6' : 'transparent',
               textDecoration: 'none',
               fontSize: 15,
               fontWeight: pathname.startsWith(item.href) ? 600 : 400,
               borderLeft: pathname.startsWith(item.href)
-                ? '3px solid #7B82BE' : '3px solid transparent',
+                ? '3px solid #1C1C1C' : '3px solid transparent',
             }}>
               {item.label}
             </Link>
@@ -404,7 +404,7 @@ export default function Header() {
           ) : (
             <Link href="/login" style={{
               display: 'block', textAlign: 'center',
-              padding: '12px', background: '#7B82BE',
+              padding: '12px', background: '#1C1C1C',
               color: 'white', borderRadius: 8,
               fontSize: 15, fontWeight: 600,
               textDecoration: 'none',

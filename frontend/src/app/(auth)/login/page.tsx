@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -61,23 +61,23 @@ export default function LoginPage() {
     <div style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center',
       justifyContent: 'center', minHeight: '100vh',
-      background: 'linear-gradient(160deg, #FFFFFF 0%, #ECEAF8 50%, #FFFFFF 100%)',
+      background: 'linear-gradient(160deg, #FFFFFF 0%, #F0EDE6 50%, #FFFFFF 100%)',
       padding: '20px',
     }}>
       <div style={{
         background: 'white', borderRadius: 24, padding: '40px 32px',
         width: '100%', maxWidth: 380, textAlign: 'center',
-        boxShadow: '0 8px 40px rgba(123,130,190,0.15)',
+        boxShadow: '0 8px 40px rgba(28,28,28,0.15)',
       }}>
         {/* 로고 */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
           <img src="/banmo-logo.png" alt="반모" style={{ height: 80, width: 'auto' }} />
         </div>
-        <p style={{ color: '#7B82BE', fontSize: 14, marginBottom: 28, lineHeight: 1.5 }}>반주의 모든것</p>
+        <p style={{ color: '#1C1C1C', fontSize: 14, marginBottom: 28, lineHeight: 1.5 }}>반주의 모든것</p>
 
         {/* 탭 */}
         <div style={{
-          display: 'flex', background: '#F4F3F9',
+          display: 'flex', background: '#F7F4ED',
           borderRadius: 12, padding: 4, marginBottom: 28,
         }}>
           {(['kakao', 'email'] as const).map((t) => (
@@ -88,7 +88,7 @@ export default function LoginPage() {
                 flex: 1, padding: '9px 0', border: 'none', borderRadius: 9,
                 fontSize: 14, fontWeight: 600, cursor: 'pointer',
                 background: tab === t ? 'white' : 'transparent',
-                color: tab === t ? '#5A63A8' : '#9CA3AF',
+                color: tab === t ? '#000000' : '#9CA3AF',
                 boxShadow: tab === t ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
                 transition: 'all 0.15s',
               }}
@@ -127,7 +127,7 @@ export default function LoginPage() {
               <label style={{ fontSize: 12, color: '#6B7280', marginBottom: 5, display: 'block' }}>아이디</label>
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                border: '1.5px solid #DDD9EF', borderRadius: 12, padding: '0 14px',
+                border: '1.5px solid #E8E4DC', borderRadius: 12, padding: '0 14px',
               }}>
                 <span style={{ fontSize: 15, color: '#9CA3AF', fontWeight: 500 }}>@</span>
                 <input
@@ -149,7 +149,7 @@ export default function LoginPage() {
               <label style={{ fontSize: 12, color: '#6B7280', marginBottom: 5, display: 'block' }}>비밀번호</label>
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                border: '1.5px solid #DDD9EF', borderRadius: 12, padding: '0 14px',
+                border: '1.5px solid #E8E4DC', borderRadius: 12, padding: '0 14px',
               }}>
                 <input
                   type="password"
@@ -167,7 +167,7 @@ export default function LoginPage() {
             </div>
 
             <div style={{ textAlign: 'right', marginBottom: 18 }}>
-              <Link href="/forgot-password" style={{ fontSize: 12, color: '#7B82BE' }}>
+              <Link href="/forgot-password" style={{ fontSize: 12, color: '#1C1C1C' }}>
                 비밀번호를 잊으셨나요?
               </Link>
             </div>
@@ -179,7 +179,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={handleResend}
-                    style={{ display: 'block', marginTop: 6, fontSize: 12, color: '#7B82BE', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                    style={{ display: 'block', marginTop: 6, fontSize: 12, color: '#1C1C1C', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
                   >
                     인증 메일 재발송
                   </button>
@@ -196,7 +196,7 @@ export default function LoginPage() {
               type="submit"
               disabled={loading}
               style={{
-                width: '100%', padding: '14px', background: '#7B82BE',
+                width: '100%', padding: '14px', background: '#1C1C1C',
                 color: 'white', border: 'none', borderRadius: 12,
                 fontSize: 15, fontWeight: 700, cursor: 'pointer',
                 opacity: loading ? 0.6 : 1,
@@ -207,7 +207,7 @@ export default function LoginPage() {
 
             <p style={{ marginTop: 20, textAlign: 'center', fontSize: 13, color: '#9CA3AF' }}>
               계정이 없으신가요?{' '}
-              <Link href="/signup" style={{ color: '#7B82BE', fontWeight: 600 }}>회원가입</Link>
+              <Link href="/signup" style={{ color: '#1C1C1C', fontWeight: 600 }}>회원가입</Link>
             </p>
           </form>
         )}

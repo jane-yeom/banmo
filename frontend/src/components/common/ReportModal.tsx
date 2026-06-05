@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { X, AlertCircle, CheckCircle } from 'lucide-react';
@@ -89,7 +89,7 @@ export default function ReportModal({
               onClick={onClose}
               style={{
                 marginTop: 20, padding: '12px 32px',
-                background: '#7B82BE', color: 'white',
+                background: '#1C1C1C', color: 'white',
                 border: 'none', borderRadius: 12,
                 fontSize: 14, fontWeight: 700, cursor: 'pointer',
               }}
@@ -123,7 +123,7 @@ export default function ReportModal({
                     onClick={() => setReason(r.value)}
                     style={{
                       padding: '8px 14px', borderRadius: 99,
-                      border: `1.5px solid ${reason === r.value ? '#EF4444' : '#DDD9EF'}`,
+                      border: `1.5px solid ${reason === r.value ? '#EF4444' : '#E8E4DC'}`,
                       background: reason === r.value ? '#FEF2F2' : 'white',
                       color: reason === r.value ? '#EF4444' : '#666',
                       fontSize: 13, cursor: 'pointer',
@@ -151,7 +151,7 @@ export default function ReportModal({
                 maxLength={500}
                 style={{
                   width: '100%', padding: '12px 14px',
-                  border: '1.5px solid #DDD9EF', borderRadius: 12,
+                  border: '1.5px solid #E8E4DC', borderRadius: 12,
                   fontSize: 14, outline: 'none', resize: 'none',
                   lineHeight: 1.6, boxSizing: 'border-box',
                 }}
@@ -163,7 +163,7 @@ export default function ReportModal({
               disabled={submitting || !reason}
               style={{
                 width: '100%', padding: '14px',
-                background: reason ? '#EF4444' : '#DDD9EF',
+                background: reason ? '#EF4444' : '#E8E4DC',
                 color: 'white', border: 'none',
                 borderRadius: 12, fontSize: 15,
                 fontWeight: 700,

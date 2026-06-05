@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -110,7 +110,7 @@ export default function PromoDetailPage() {
               style={{
                 width: '100%', aspectRatio: '16/9',
                 borderRadius: 14, overflow: 'hidden',
-                marginBottom: 8, background: '#F4F3F9',
+                marginBottom: 8, background: '#F7F4ED',
                 cursor: 'pointer', position: 'relative',
               }}
             >
@@ -137,8 +137,8 @@ export default function PromoDetailPage() {
                       borderRadius: 8, objectFit: 'cover',
                       flexShrink: 0, cursor: 'pointer',
                       border: (selectedImage ?? images[0]) === url
-                        ? '2px solid #7B82BE'
-                        : '1px solid #DDD9EF',
+                        ? '2px solid #1C1C1C'
+                        : '1px solid #E8E4DC',
                       transition: 'border 0.15s',
                     }}
                   />
@@ -152,15 +152,15 @@ export default function PromoDetailPage() {
         {post.category === 'PROMO_CONCERT' && eventDateAt && (
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: isEventPast ? '#F4F3F9' : '#ECEAF8',
-            border: `1px solid ${isEventPast ? '#DDD9EF' : '#7B82BE'}`,
+            background: isEventPast ? '#F7F4ED' : '#F0EDE6',
+            border: `1px solid ${isEventPast ? '#E8E4DC' : '#1C1C1C'}`,
             borderRadius: 99, padding: '6px 14px', marginBottom: 12,
           }}>
             <Calendar size={13} strokeWidth={1.8}
-              color={isEventPast ? '#9CA3AF' : '#7B82BE'} />
+              color={isEventPast ? '#9CA3AF' : '#1C1C1C'} />
             <span style={{
               fontSize: 12, fontWeight: 600,
-              color: isEventPast ? '#9CA3AF' : '#5A63A8',
+              color: isEventPast ? '#9CA3AF' : '#000000',
             }}>
               {isEventPast ? '공연 종료' : '공연 예정'}
             </span>
@@ -293,7 +293,7 @@ export default function PromoDetailPage() {
   );
 }
 
-function InfoItem({ icon: Icon, label, value, color = '#7B82BE' }: { icon: React.ElementType; label: string; value: string; color?: string }) {
+function InfoItem({ icon: Icon, label, value, color = '#1C1C1C' }: { icon: React.ElementType; label: string; value: string; color?: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="rounded-xl border border-gray-100 bg-white p-3">
       <div style={{

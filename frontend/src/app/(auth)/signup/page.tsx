@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -68,7 +68,7 @@ export default function SignupPage() {
     fontSize: 15, padding: '13px 0', background: 'transparent',
   };
 
-  const boxStyle = (borderColor = '#DDD9EF') => ({
+  const boxStyle = (borderColor = '#E8E4DC') => ({
     display: 'flex', alignItems: 'center', gap: 8,
     border: `1.5px solid ${borderColor}`, borderRadius: 12, padding: '0 14px',
   });
@@ -78,25 +78,25 @@ export default function SignupPage() {
       <div style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         justifyContent: 'center', minHeight: '100vh',
-        background: 'linear-gradient(160deg, #FFFFFF 0%, #ECEAF8 50%, #FFFFFF 100%)',
+        background: 'linear-gradient(160deg, #FFFFFF 0%, #F0EDE6 50%, #FFFFFF 100%)',
         padding: '20px',
       }}>
         <div style={{
           background: 'white', borderRadius: 24, padding: '48px 32px',
           width: '100%', maxWidth: 380, textAlign: 'center',
-          boxShadow: '0 8px 40px rgba(123,130,190,0.15)',
+          boxShadow: '0 8px 40px rgba(28,28,28,0.15)',
         }}>
-          <CheckCircle size={56} color="#7B82BE" style={{ margin: '0 auto 16px' }} />
+          <CheckCircle size={56} color="#1C1C1C" style={{ margin: '0 auto 16px' }} />
           <h1 style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A', marginBottom: 10 }}>
             인증 메일을 확인해주세요
           </h1>
           <p style={{ fontSize: 14, color: '#9CA3AF', lineHeight: 1.7, marginBottom: 32 }}>
-            <strong style={{ color: '#5A63A8' }}>{form.email}</strong>로<br />
+            <strong style={{ color: '#000000' }}>{form.email}</strong>로<br />
             인증 메일을 발송했습니다.<br />
             메일의 링크를 클릭하면 가입이 완료됩니다.
           </p>
           <button onClick={() => router.push('/login')} style={{
-            width: '100%', padding: '14px', background: '#7B82BE',
+            width: '100%', padding: '14px', background: '#1C1C1C',
             color: 'white', border: 'none', borderRadius: 12,
             fontSize: 15, fontWeight: 700, cursor: 'pointer',
           }}>
@@ -111,13 +111,13 @@ export default function SignupPage() {
     <div style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center',
       justifyContent: 'center', minHeight: '100vh',
-      background: 'linear-gradient(160deg, #FFFFFF 0%, #ECEAF8 50%, #FFFFFF 100%)',
+      background: 'linear-gradient(160deg, #FFFFFF 0%, #F0EDE6 50%, #FFFFFF 100%)',
       padding: '20px',
     }}>
       <div style={{
         background: 'white', borderRadius: 24, padding: '36px 28px',
         width: '100%', maxWidth: 400,
-        boxShadow: '0 8px 40px rgba(123,130,190,0.15)',
+        boxShadow: '0 8px 40px rgba(28,28,28,0.15)',
       }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <img src="/banmo-logo.png" alt="반모" style={{ height: 56, width: 'auto', marginBottom: 6 }} />
@@ -129,7 +129,7 @@ export default function SignupPage() {
           <div style={{ marginBottom: 10 }}>
             <label style={{ fontSize: 12, color: '#6B7280', marginBottom: 5, display: 'block' }}>아이디</label>
             <div style={{ display: 'flex', gap: 8 }}>
-              <div style={boxStyle(usernameChecked === true ? '#5AAB7A' : usernameChecked === false ? '#EF4444' : '#DDD9EF')}>
+              <div style={boxStyle(usernameChecked === true ? '#5AAB7A' : usernameChecked === false ? '#EF4444' : '#E8E4DC')}>
                 <span style={{ fontSize: 14, color: '#9CA3AF' }}>@</span>
                 <input
                   value={form.username}
@@ -150,8 +150,8 @@ export default function SignupPage() {
                 disabled={checkingUsername || !form.username}
                 style={{
                   padding: '0 14px', borderRadius: 12, flexShrink: 0,
-                  background: usernameChecked === true ? '#EAF6EF' : '#ECEAF8',
-                  color: usernameChecked === true ? '#5AAB7A' : '#5A63A8',
+                  background: usernameChecked === true ? '#EAF6EF' : '#F0EDE6',
+                  color: usernameChecked === true ? '#5AAB7A' : '#000000',
                   border: 'none', fontSize: 13, fontWeight: 600,
                   cursor: 'pointer', whiteSpace: 'nowrap',
                   opacity: checkingUsername || !form.username ? 0.6 : 1,
@@ -179,7 +179,7 @@ export default function SignupPage() {
           {/* 비밀번호 확인 */}
           <div style={{ marginBottom: 10 }}>
             <label style={{ fontSize: 12, color: '#6B7280', marginBottom: 5, display: 'block' }}>비밀번호 확인</label>
-            <div style={boxStyle(form.passwordConfirm && form.password !== form.passwordConfirm ? '#EF4444' : '#DDD9EF')}>
+            <div style={boxStyle(form.passwordConfirm && form.password !== form.passwordConfirm ? '#EF4444' : '#E8E4DC')}>
               <input
                 type="password"
                 value={form.passwordConfirm}
@@ -230,11 +230,11 @@ export default function SignupPage() {
               type="checkbox"
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
-              style={{ width: 16, height: 16, accentColor: '#7B82BE' }}
+              style={{ width: 16, height: 16, accentColor: '#1C1C1C' }}
             />
             <span style={{ fontSize: 13, color: '#374151' }}>
-              <Link href="/terms" style={{ color: '#7B82BE' }}>이용약관</Link> 및{' '}
-              <Link href="/privacy" style={{ color: '#7B82BE' }}>개인정보처리방침</Link>에 동의합니다
+              <Link href="/terms" style={{ color: '#1C1C1C' }}>이용약관</Link> 및{' '}
+              <Link href="/privacy" style={{ color: '#1C1C1C' }}>개인정보처리방침</Link>에 동의합니다
             </span>
           </label>
 
@@ -248,7 +248,7 @@ export default function SignupPage() {
             type="submit"
             disabled={loading}
             style={{
-              width: '100%', padding: '14px', background: '#7B82BE',
+              width: '100%', padding: '14px', background: '#1C1C1C',
               color: 'white', border: 'none', borderRadius: 12,
               fontSize: 15, fontWeight: 700, cursor: 'pointer',
               opacity: loading ? 0.6 : 1,
@@ -259,7 +259,7 @@ export default function SignupPage() {
 
           <p style={{ marginTop: 18, textAlign: 'center', fontSize: 13, color: '#9CA3AF' }}>
             이미 계정이 있으신가요?{' '}
-            <Link href="/login" style={{ color: '#7B82BE', fontWeight: 600 }}>로그인</Link>
+            <Link href="/login" style={{ color: '#1C1C1C', fontWeight: 600 }}>로그인</Link>
           </p>
         </form>
       </div>

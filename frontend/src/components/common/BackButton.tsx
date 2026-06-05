@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
@@ -21,7 +21,7 @@ export default function BackButton({ href, label }: BackButtonProps) {
         padding: '8px 4px',
       }}
     >
-      <ChevronLeft size={24} strokeWidth={2} color="#7B82BE" />
+      <ChevronLeft size={24} strokeWidth={2} color="#1C1C1C" />
       {label && <span style={{ fontSize: 15, fontWeight: 500 }}>{label}</span>}
     </button>
   );

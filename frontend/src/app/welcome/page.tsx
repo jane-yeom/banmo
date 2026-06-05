@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -163,7 +163,7 @@ export default function WelcomePage() {
           {[1, 2].map(s => (
             <div key={s} style={{
               flex: 1, height: 4, borderRadius: 2,
-              background: s <= step ? '#7B82BE' : '#E5E7EB',
+              background: s <= step ? '#1C1C1C' : '#E5E7EB',
               transition: 'background 0.3s',
             }}/>
           ))}
@@ -178,11 +178,11 @@ export default function WelcomePage() {
                 style={{
                   width: 100, height: 100,
                   borderRadius: '50%', margin: '0 auto 12px',
-                  background: profileImage ? 'transparent' : '#ECEAF8',
+                  background: profileImage ? 'transparent' : '#F0EDE6',
                   cursor: 'pointer', overflow: 'hidden',
                   display: 'flex', alignItems: 'center',
                   justifyContent: 'center', position: 'relative',
-                  border: '3px solid #7B82BE',
+                  border: '3px solid #1C1C1C',
                 }}>
                 {profileImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -206,7 +206,7 @@ export default function WelcomePage() {
               <input ref={fileRef} type="file"
                 accept="image/*" onChange={handleImageChange}
                 style={{ display: 'none' }}/>
-              <p style={{ fontSize: 13, color: '#7B82BE', cursor: 'pointer' }}
+              <p style={{ fontSize: 13, color: '#1C1C1C', cursor: 'pointer' }}
                 onClick={() => fileRef.current?.click()}>
                 프로필 사진 변경
               </p>
@@ -272,14 +272,14 @@ export default function WelcomePage() {
                     setAgreed(e.target.checked);
                     setAgreedPrivacy(e.target.checked);
                   }}
-                  style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#7B82BE' }}
+                  style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#1C1C1C' }}
                 />
                 <label htmlFor="agree-all" style={{ fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
                   전체 동의
                 </label>
               </div>
               <div style={{
-                borderTop: '0.5px solid #DDD9EF',
+                borderTop: '0.5px solid #E8E4DC',
                 paddingTop: 8, display: 'flex',
                 flexDirection: 'column', gap: 8,
               }}>
@@ -288,10 +288,10 @@ export default function WelcomePage() {
                     <input type="checkbox" id="agree-terms"
                       checked={agreed}
                       onChange={e => setAgreed(e.target.checked)}
-                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#7B82BE' }}
+                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#1C1C1C' }}
                     />
                     <label htmlFor="agree-terms" style={{ fontSize: 13, cursor: 'pointer' }}>
-                      <span style={{ color: '#7B82BE', fontWeight: 600 }}>[필수] </span>
+                      <span style={{ color: '#1C1C1C', fontWeight: 600 }}>[필수] </span>
                       이용약관 동의
                     </label>
                   </div>
@@ -304,10 +304,10 @@ export default function WelcomePage() {
                     <input type="checkbox" id="agree-privacy"
                       checked={agreedPrivacy}
                       onChange={e => setAgreedPrivacy(e.target.checked)}
-                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#7B82BE' }}
+                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#1C1C1C' }}
                     />
                     <label htmlFor="agree-privacy" style={{ fontSize: 13, cursor: 'pointer' }}>
-                      <span style={{ color: '#7B82BE', fontWeight: 600 }}>[필수] </span>
+                      <span style={{ color: '#1C1C1C', fontWeight: 600 }}>[필수] </span>
                       개인정보처리방침 동의
                     </label>
                   </div>
@@ -332,7 +332,7 @@ export default function WelcomePage() {
               }}
               style={{
                 width: '100%', padding: '14px',
-                background: '#7B82BE', color: 'white',
+                background: '#1C1C1C', color: 'white',
                 border: 'none', borderRadius: 12,
                 fontSize: 16, fontWeight: 600,
                 cursor: 'pointer',
@@ -360,9 +360,9 @@ export default function WelcomePage() {
                     style={{
                       padding: '8px 14px',
                       borderRadius: 99,
-                      border: `1px solid ${selectedInstruments.includes(inst) ? '#7B82BE' : '#E5E7EB'}`,
-                      background: selectedInstruments.includes(inst) ? '#ECEAF8' : 'white',
-                      color: selectedInstruments.includes(inst) ? '#7B82BE' : '#374151',
+                      border: `1px solid ${selectedInstruments.includes(inst) ? '#1C1C1C' : '#E5E7EB'}`,
+                      background: selectedInstruments.includes(inst) ? '#F0EDE6' : 'white',
+                      color: selectedInstruments.includes(inst) ? '#1C1C1C' : '#374151',
                       fontSize: 13, cursor: 'pointer',
                       fontWeight: selectedInstruments.includes(inst) ? 600 : 400,
                     }}>
@@ -387,7 +387,7 @@ export default function WelcomePage() {
               <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
                 <div style={{
                   flex: 1, display: 'flex', alignItems: 'center', gap: 8,
-                  border: '1.5px solid #DDD9EF', borderRadius: 12,
+                  border: '1.5px solid #E8E4DC', borderRadius: 12,
                   padding: '0 12px', background: 'white',
                 }}>
                   <YoutubeIcon size={18} />
@@ -406,7 +406,7 @@ export default function WelcomePage() {
                   onClick={handleAddVideo}
                   style={{
                     width: 44, height: 44, borderRadius: 12,
-                    background: '#7B82BE', border: 'none',
+                    background: '#1C1C1C', border: 'none',
                     cursor: 'pointer', display: 'flex',
                     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   }}>
@@ -491,7 +491,7 @@ export default function WelcomePage() {
                 disabled={saving}
                 style={{
                   flex: 2, padding: '14px',
-                  background: saving ? '#9CA3AF' : '#7B82BE',
+                  background: saving ? '#9CA3AF' : '#1C1C1C',
                   color: 'white', border: 'none',
                   borderRadius: 12, fontSize: 16,
                   fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer',

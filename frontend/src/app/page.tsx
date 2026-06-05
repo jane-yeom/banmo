@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
@@ -15,7 +15,7 @@ function HeroBanner() {
 
   const banners = [
     {
-      bg: 'linear-gradient(135deg, #7B82BE, #5A63A8)',
+      bg: '#1C1C1C',
       Icon: Music2,
       title: '반주자를 찾고 계신가요?',
       sub: '피아노, 바이올린, 첼로 등\n다양한 반주자를 만나보세요',
@@ -23,7 +23,7 @@ function HeroBanner() {
       href: '/jobs?category=JOB_OFFER',
     },
     {
-      bg: 'linear-gradient(135deg, #6A8FD4, #4A6AB8)',
+      bg: '#2C2C2C',
       Icon: Music,
       title: '반주 활동을 원하시나요?',
       sub: '나에게 맞는 연주 기회를\n찾아보세요',
@@ -31,7 +31,7 @@ function HeroBanner() {
       href: '/jobs?category=JOB_SEEK',
     },
     {
-      bg: 'linear-gradient(135deg, #9070C8, #7050A8)',
+      bg: '#3C3C3C',
       Icon: Star,
       title: '공연을 홍보해보세요',
       sub: '연주회, 공연 소식을\n많은 분들께 알려보세요',
@@ -102,8 +102,8 @@ function HeroBanner() {
       </p>
       <Link href={b.href} style={{
         display: 'inline-block',
-        background: 'white',
-        color: '#5A63A8',
+        background: '#FFFFFF',
+        color: '#1C1C1C',
         padding: '10px 24px',
         borderRadius: 99,
         fontWeight: 700,
@@ -197,7 +197,7 @@ function SectionCard({ post }: { post: any }) {
           <div style={{ flex: 1 }}>
             <span style={{
               display: 'inline-block',
-              background: '#ECEAF8', color: '#7B82BE',
+              background: '#F0EDE6', color: '#1C1C1C',
               fontSize: 11, fontWeight: 600,
               padding: '3px 8px', borderRadius: 6,
               marginBottom: 8,
@@ -221,7 +221,7 @@ function SectionCard({ post }: { post: any }) {
           </div>
           <div style={{
             fontSize: 14, fontWeight: 700,
-            color: '#7B82BE', marginLeft: 12,
+            color: '#1C1C1C', marginLeft: 12,
             flexShrink: 0,
           }}>
             {payText}
@@ -239,7 +239,7 @@ function SectionTitle({ type, title, href }: {
   href: string
 }) {
   const iconMap = {
-    job:   { Icon: IconJob,   bg: '#ECEAF8' },
+    job:   { Icon: IconJob,   bg: '#F0EDE6' },
     promo: { Icon: IconPromo, bg: '#FEF6E4' },
     board: { Icon: IconBoard, bg: '#EAF6EF' },
   };
@@ -266,11 +266,11 @@ function SectionTitle({ type, title, href }: {
         {title}
       </h2>
       <Link href={href} style={{
-        fontSize: 13, color: '#5A63A8',
+        fontSize: 13, color: '#000000',
         textDecoration: 'none', fontWeight: 500,
         display: 'flex', alignItems: 'center', gap: 2,
       }}>
-        더보기 <ChevronRight size={14} strokeWidth={1.8} color="#5A63A8" />
+        더보기 <ChevronRight size={14} strokeWidth={1.8} color="#000000" />
       </Link>
     </div>
   );
@@ -279,11 +279,11 @@ function SectionTitle({ type, title, href }: {
 // 빠른 메뉴
 function QuickMenu() {
   const menus = [
-    { Icon: Music2, label: '반주자\n구인', href: '/jobs?category=JOB_OFFER', iconBg: '#ECEAF8', iconColor: '#7B82BE' },
+    { Icon: Music2, label: '반주자\n구인', href: '/jobs?category=JOB_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
     { Icon: Mic, label: '반주자\n구직', href: '/jobs?category=JOB_SEEK', iconBg: '#EAF0FB', iconColor: '#6A8FD4' },
     { Icon: BookOpen, label: '레슨\n구인', href: '/jobs?category=LESSON_OFFER', iconBg: '#EAF6EF', iconColor: '#5AAB7A' },
     { Icon: Star, label: '공연\n홍보', href: '/promo', iconBg: '#FEF6E4', iconColor: '#D4A03A' },
-    { Icon: MessageSquare, label: '자유\n게시판', href: '/board?type=FREE', iconBg: '#ECEAF8', iconColor: '#7B82BE' },
+    { Icon: MessageSquare, label: '자유\n게시판', href: '/board?type=FREE', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
     { Icon: MessageCircle, label: '익명\n게시판', href: '/board?type=ANONYMOUS', iconBg: '#F0EAFA', iconColor: '#9070C8' },
   ];
 
@@ -303,7 +303,7 @@ function QuickMenu() {
                 borderRadius: 12,
                 padding: '12px 8px',
                 textAlign: 'center',
-                border: '0.5px solid #DDD9EF',
+                border: '0.5px solid #E8E4DC',
                 cursor: 'pointer',
               }}>
                 <div style={{
@@ -370,7 +370,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F9FAFB' }}>
+    <div style={{ minHeight: '100vh', background: '#F7F4ED' }}>
       <Header />
 
       <div style={{
@@ -484,7 +484,7 @@ export default function HomePage() {
                 style={{ textDecoration: 'none' }}>
                 <div style={{
                   background: 'white',
-                  border: '0.5px solid #DDD9EF',
+                  border: '0.5px solid #E8E4DC',
                   borderRadius: 12, padding: '12px 14px',
                   marginBottom: 6, display: 'flex',
                   alignItems: 'center', gap: 8,

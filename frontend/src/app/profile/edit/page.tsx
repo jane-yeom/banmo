@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
@@ -37,11 +37,11 @@ function VisibilityToggle({
       onClick={() => onChange(!value)}
       style={{
         display: 'flex', alignItems: 'center', gap: 4,
-        background: value ? '#ECEAF8' : '#F4F3F9',
-        border: `1px solid ${value ? '#7B82BE' : '#DDD9EF'}`,
+        background: value ? '#F0EDE6' : '#F7F4ED',
+        border: `1px solid ${value ? '#1C1C1C' : '#E8E4DC'}`,
         borderRadius: 99, padding: '4px 10px',
         cursor: 'pointer', fontSize: 12,
-        color: value ? '#5A63A8' : '#9CA3AF',
+        color: value ? '#000000' : '#9CA3AF',
         fontWeight: 600, flexShrink: 0,
       }}
     >
@@ -189,7 +189,7 @@ export default function ProfileEditPage() {
             disabled={saving}
             style={{
               padding: '8px 18px',
-              background: saving ? '#ccc' : '#7B82BE',
+              background: saving ? '#ccc' : '#1C1C1C',
               color: 'white', border: 'none',
               borderRadius: 99, fontSize: 14,
               fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
@@ -209,10 +209,10 @@ export default function ProfileEditPage() {
             style={{
               width: 90, height: 90, borderRadius: '50%',
               margin: '0 auto 10px',
-              background: form.profileImage ? 'transparent' : '#ECEAF8',
+              background: form.profileImage ? 'transparent' : '#F0EDE6',
               cursor: 'pointer', overflow: 'hidden',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '3px solid #7B82BE', position: 'relative',
+              border: '3px solid #1C1C1C', position: 'relative',
             }}
           >
             {form.profileImage
@@ -220,7 +220,7 @@ export default function ProfileEditPage() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={form.profileImage} alt="프로필" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               )
-              : <User size={36} color="#7B82BE" />}
+              : <User size={36} color="#1C1C1C" />}
             {uploading && (
               <div style={{
                 position: 'absolute', inset: 0,
@@ -233,7 +233,7 @@ export default function ProfileEditPage() {
           <input ref={fileRef} type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
           <button type="button" onClick={() => fileRef.current?.click()} style={{
             background: 'none', border: 'none',
-            color: '#7B82BE', fontSize: 13,
+            color: '#1C1C1C', fontSize: 13,
             fontWeight: 600, cursor: 'pointer',
           }}>
             사진 변경
@@ -243,7 +243,7 @@ export default function ProfileEditPage() {
         {/* 닉네임 */}
         <div>
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 8 }}>
-            닉네임 <span style={{ color: '#7B82BE' }}>*</span>
+            닉네임 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
           <input
             value={form.nickname}
@@ -252,7 +252,7 @@ export default function ProfileEditPage() {
             maxLength={20}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -278,9 +278,9 @@ export default function ProfileEditPage() {
                 onClick={() => toggleInstrument(inst)}
                 style={{
                   padding: '7px 12px', borderRadius: 99,
-                  border: `1.5px solid ${form.instruments.includes(inst) ? '#7B82BE' : '#DDD9EF'}`,
-                  background: form.instruments.includes(inst) ? '#ECEAF8' : 'white',
-                  color: form.instruments.includes(inst) ? '#5A63A8' : '#666',
+                  border: `1.5px solid ${form.instruments.includes(inst) ? '#1C1C1C' : '#E8E4DC'}`,
+                  background: form.instruments.includes(inst) ? '#F0EDE6' : 'white',
+                  color: form.instruments.includes(inst) ? '#000000' : '#666',
                   fontSize: 13,
                   fontWeight: form.instruments.includes(inst) ? 700 : 400,
                   cursor: 'pointer',
@@ -306,7 +306,7 @@ export default function ProfileEditPage() {
             onChange={e => setForm(p => ({ ...p, region: e.target.value }))}
             style={{
               width: '100%', padding: '12px 14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 15, background: 'white',
               outline: 'none', boxSizing: 'border-box',
             }}
@@ -336,7 +336,7 @@ export default function ProfileEditPage() {
             rows={6}
             style={{
               width: '100%', padding: '14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 14, outline: 'none',
               resize: 'none', boxSizing: 'border-box',
               lineHeight: 1.7, minHeight: 120,
@@ -371,7 +371,7 @@ export default function ProfileEditPage() {
             rows={10}
             style={{
               width: '100%', padding: '14px',
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               fontSize: 14, outline: 'none',
               resize: 'vertical', boxSizing: 'border-box',
               lineHeight: 1.8, minHeight: 200,
@@ -401,10 +401,10 @@ export default function ProfileEditPage() {
             <div style={{
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '12px 14px',
-              background: '#F4F3F9', borderRadius: 12,
-              border: '1.5px solid #DDD9EF',
+              background: '#F7F4ED', borderRadius: 12,
+              border: '1.5px solid #E8E4DC',
             }}>
-              <FileText size={20} color="#7B82BE" strokeWidth={1.8} />
+              <FileText size={20} color="#1C1C1C" strokeWidth={1.8} />
               <span style={{ flex: 1, fontSize: 13, color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {form.attachmentName || '첨부파일'}
               </span>
@@ -420,7 +420,7 @@ export default function ProfileEditPage() {
             <div
               onClick={() => attachRef.current?.click()}
               style={{
-                border: '1.5px dashed #DDD9EF', borderRadius: 12,
+                border: '1.5px dashed #E8E4DC', borderRadius: 12,
                 padding: '28px 20px', textAlign: 'center',
                 cursor: 'pointer', background: '#FAFAFA',
                 minHeight: 100, display: 'flex',
@@ -434,7 +434,7 @@ export default function ProfileEditPage() {
                 <>
                   <Upload size={24} color="#9CA3AF" strokeWidth={1.5} />
                   <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>파일을 탭해서 업로드하세요</p>
-                  <p style={{ fontSize: 11, color: '#C8C4E4', margin: 0 }}>PDF, 이미지 등 최대 10MB</p>
+                  <p style={{ fontSize: 11, color: '#DDDDDD', margin: 0 }}>PDF, 이미지 등 최대 10MB</p>
                 </>
               )}
             </div>
@@ -469,7 +469,7 @@ export default function ProfileEditPage() {
           <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
             <div style={{
               flex: 1, display: 'flex', alignItems: 'center', gap: 8,
-              border: '1.5px solid #DDD9EF', borderRadius: 12,
+              border: '1.5px solid #E8E4DC', borderRadius: 12,
               padding: '0 12px', background: 'white',
             }}>
               <YoutubeIcon size={18} />
@@ -489,7 +489,7 @@ export default function ProfileEditPage() {
               onClick={handleAddVideo}
               style={{
                 width: 44, height: 44, borderRadius: 12,
-                background: '#7B82BE', border: 'none',
+                background: '#1C1C1C', border: 'none',
                 cursor: 'pointer', display: 'flex',
                 alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
@@ -506,7 +506,7 @@ export default function ProfileEditPage() {
 
           {/* 안내 문구 */}
           <div style={{
-            background: '#F4F3F9', borderRadius: 10,
+            background: '#F7F4ED', borderRadius: 10,
             padding: '10px 12px', marginBottom: 12,
             fontSize: 12, color: '#6B7280', lineHeight: 1.6,
             display: 'flex', alignItems: 'flex-start', gap: 6,
@@ -525,7 +525,7 @@ export default function ProfileEditPage() {
                   <div key={i} style={{
                     display: 'flex', alignItems: 'center', gap: 10,
                     background: 'white', borderRadius: 12,
-                    border: '1px solid #DDD9EF', padding: '8px',
+                    border: '1px solid #E8E4DC', padding: '8px',
                   }}>
                     {videoId ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -534,13 +534,13 @@ export default function ProfileEditPage() {
                         alt="썸네일"
                         style={{
                           width: 80, height: 54, borderRadius: 8,
-                          objectFit: 'cover', flexShrink: 0, background: '#F4F3F9',
+                          objectFit: 'cover', flexShrink: 0, background: '#F7F4ED',
                         }}
                       />
                     ) : (
                       <div style={{
                         width: 80, height: 54, borderRadius: 8,
-                        background: '#F4F3F9', flexShrink: 0,
+                        background: '#F7F4ED', flexShrink: 0,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
                         <YoutubeIcon size={20} />
@@ -556,7 +556,7 @@ export default function ProfileEditPage() {
                       </p>
                       <a href={url} target="_blank" rel="noopener noreferrer"
                         style={{
-                          fontSize: 11, color: '#7B82BE',
+                          fontSize: 11, color: '#1C1C1C',
                           display: 'flex', alignItems: 'center', gap: 3,
                           textDecoration: 'none', marginTop: 3,
                         }}>

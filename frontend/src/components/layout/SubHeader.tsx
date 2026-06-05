@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
@@ -15,7 +15,7 @@ export default function SubHeader({ title, rightElement, hideBack }: SubHeaderPr
     <div style={{
       position: 'sticky', top: 0, zIndex: 10,
       background: 'white',
-      borderBottom: '0.5px solid #DDD9EF',
+      borderBottom: '0.5px solid #E8E4DC',
     }}>
       <div style={{
         padding: '12px 16px',
@@ -28,7 +28,7 @@ export default function SubHeader({ title, rightElement, hideBack }: SubHeaderPr
             display: 'flex', alignItems: 'center',
             flexShrink: 0,
           }}>
-            <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+            <ChevronLeft size={24} color="#1C1C1C" strokeWidth={2} />
           </button>
         )}
         <h1 style={{

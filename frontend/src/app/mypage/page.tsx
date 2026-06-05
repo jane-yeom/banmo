@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -90,7 +90,7 @@ function ApplicantProfileModal({
             <div className="mb-4 flex items-center gap-4">
               <div
                 className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-2xl font-bold overflow-hidden"
-                style={{ background: '#ECEAF8', color: '#7B82BE' }}
+                style={{ background: '#F0EDE6', color: '#1C1C1C' }}
               >
                 {profile.profileImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -119,7 +119,7 @@ function ApplicantProfileModal({
                 <p className="mb-1 text-xs font-semibold text-gray-500">담당 악기</p>
                 <div className="flex flex-wrap gap-1">
                   {profile.instruments.map((inst) => (
-                    <span key={inst} className="rounded-full px-3 py-1 text-xs font-medium" style={{ background: '#ECEAF8', color: '#7B82BE' }}>
+                    <span key={inst} className="rounded-full px-3 py-1 text-xs font-medium" style={{ background: '#F0EDE6', color: '#1C1C1C' }}>
                       {inst}
                     </span>
                   ))}
@@ -135,7 +135,7 @@ function ApplicantProfileModal({
               href={`/profile/${applicantId}`}
               onClick={onClose}
               className="block w-full rounded-xl py-3 text-center text-sm font-semibold text-white"
-              style={{ background: 'linear-gradient(135deg, #7B82BE, #5A63A8)' }}
+              style={{ background: 'linear-gradient(135deg, #1C1C1C, #000000)' }}
             >
               전체 프로필 보기
             </Link>

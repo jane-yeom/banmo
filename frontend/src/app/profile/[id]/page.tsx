@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -47,7 +47,7 @@ function VideoCard({ videoId, url }: { videoId: string; url: string }) {
   const thumbnail = getYoutubeThumbnail(videoId);
 
   return (
-    <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid #DDD9EF', background: '#000' }}>
+    <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid #E8E4DC', background: '#000' }}>
       {playing ? (
         <iframe
           src={`${embedUrl}?autoplay=1&rel=0`}
@@ -124,7 +124,7 @@ export default function ProfilePage() {
 
         {/* 프로필 카드 */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
-          <div className="h-24" style={{ background: 'linear-gradient(135deg, #7B82BE, #4A52A0)' }} />
+          <div className="h-24" style={{ background: 'linear-gradient(135deg, #1C1C1C, #4A52A0)' }} />
           <div className="px-6 pb-6">
             <div className="flex items-end justify-between -mt-10 mb-4">
               <div className="flex items-end gap-4">
@@ -230,7 +230,7 @@ export default function ProfilePage() {
         {/* 비공개 항목 안내 */}
         {!isMyProfile && ((user as any).isCareerPublic === false || (user as any).isAttachmentPublic === false) && (
           <div style={{
-            background: '#F4F3F9', borderRadius: 10,
+            background: '#F7F4ED', borderRadius: 10,
             padding: '10px 14px', fontSize: 12,
             color: '#9CA3AF', textAlign: 'center',
           }}>

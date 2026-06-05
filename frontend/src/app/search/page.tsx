@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, X, ChevronLeft, MapPin } from 'lucide-react';
@@ -79,7 +79,7 @@ function SearchContent() {
       {/* 검색 헤더 */}
       <div style={{
         position: 'sticky', top: 0, background: 'white',
-        borderBottom: '0.5px solid #DDD9EF',
+        borderBottom: '0.5px solid #E8E4DC',
         padding: '10px 16px', zIndex: 10,
         display: 'flex', alignItems: 'center', gap: 10,
       }}>
@@ -87,11 +87,11 @@ function SearchContent() {
           background: 'none', border: 'none',
           cursor: 'pointer', padding: 4, flexShrink: 0,
         }}>
-          <ChevronLeft size={24} color="#7B82BE" strokeWidth={2} />
+          <ChevronLeft size={24} color="#1C1C1C" strokeWidth={2} />
         </button>
         <div style={{
           flex: 1, display: 'flex', alignItems: 'center',
-          background: '#F4F3F9', borderRadius: 12,
+          background: '#F7F4ED', borderRadius: 12,
           padding: '0 12px', gap: 8,
         }}>
           <Search size={18} color="#9CA3AF" strokeWidth={1.8} />
@@ -119,7 +119,7 @@ function SearchContent() {
         <button
           onClick={() => handleSearch(query)}
           style={{
-            background: '#7B82BE', color: 'white',
+            background: '#1C1C1C', color: 'white',
             border: 'none', borderRadius: 10,
             padding: '10px 14px', fontSize: 14,
             fontWeight: 700, cursor: 'pointer', flexShrink: 0,
@@ -147,7 +147,7 @@ function SearchContent() {
               {recentSearches.map(q => (
                 <div key={q} style={{
                   display: 'flex', alignItems: 'center', gap: 6,
-                  background: '#F4F3F9', borderRadius: 99,
+                  background: '#F7F4ED', borderRadius: 99,
                   padding: '7px 12px',
                 }}>
                   <span
@@ -183,7 +183,7 @@ function SearchContent() {
                   onClick={() => handleSearch(tag)}
                   style={{
                     padding: '7px 14px',
-                    background: '#ECEAF8', color: '#5A63A8',
+                    background: '#F0EDE6', color: '#000000',
                     border: 'none', borderRadius: 99,
                     fontSize: 13, fontWeight: 500,
                     cursor: 'pointer',
@@ -206,7 +206,7 @@ function SearchContent() {
         {searched && !loading && (
           <div>
             <div style={{ fontSize: 13, color: '#888', marginBottom: 14 }}>
-              <span style={{ color: '#7B82BE', fontWeight: 700 }}>
+              <span style={{ color: '#1C1C1C', fontWeight: 700 }}>
                 &quot;{query}&quot;
               </span>
               {' '}검색 결과 {results.length}건
@@ -232,11 +232,11 @@ function SearchContent() {
                   <div style={{
                     background: 'white', borderRadius: 12,
                     padding: '14px', marginBottom: 10,
-                    border: '0.5px solid #DDD9EF',
+                    border: '0.5px solid #E8E4DC',
                   }}>
                     <div style={{ marginBottom: 6 }}>
                       <span style={{
-                        background: '#ECEAF8', color: '#5A63A8',
+                        background: '#F0EDE6', color: '#000000',
                         fontSize: 10, fontWeight: 700,
                         padding: '3px 8px', borderRadius: 6,
                       }}>
@@ -261,7 +261,7 @@ function SearchContent() {
                         <MapPin size={12} strokeWidth={1.8} />
                         {post.region || '지역 미정'}
                       </div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#5A63A8' }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#000000' }}>
                         {post.payText || (post.payType === 'NEGOTIABLE' ? '협의' :
                           post.payType === 'HOURLY' ? `시급 ${post.payMin?.toLocaleString()}원` :
                           post.payType === 'PER_SESSION' ? `회당 ${post.payMin?.toLocaleString()}원` :
