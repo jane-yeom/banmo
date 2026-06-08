@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import './globals.css';
 import ReactQueryProvider from '@/components/providers/ReactQueryProvider';
 import AuthRestorer from '@/components/providers/AuthRestorer';
+import FCMProvider from '@/components/providers/FCMProvider';
 
 const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'],
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <ReactQueryProvider>
           <AuthRestorer />
+          <FCMProvider />
           <main style={{ paddingBottom: 80 }}>
             {children}
           </main>

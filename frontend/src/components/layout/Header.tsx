@@ -47,24 +47,6 @@ export default function Header() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // FCM 토큰 발급 + 서버 전송 (로그인 후)
-  useEffect(() => {
-    if (!user || !accessToken) return;
-    const initFcm = async () => {
-      try {
-        const { requestFcmToken } = await import('@/lib/firebase');
-        const token = await requestFcmToken();
-        if (token) {
-          await apiClient.post('/notifications/fcm-token', { token }).catch(() => {});
-        }
-      } catch {
-        // FCM 미설정 시 무시
-      }
-    };
-    initFcm();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
-
   // 로그인 후 읽지 않은 채팅 수 로드 + 소켓 실시간 알림
   useEffect(() => {
     if (!user || !accessToken) return;
