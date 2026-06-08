@@ -1,6 +1,8 @@
 'use client'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
+import apiClient from '@/lib/axios'
 import { useAuthStore } from '@/store/auth.store'
 import { useNotificationStore, AppNotification } from '@/store/notification.store'
 import { useMarkAsRead, useMarkAllAsRead } from '@/hooks/useNotifications'
@@ -46,14 +48,31 @@ function timeAgo(date: string) {
 
 export default function NotificationsPage() {
   const router = useRouter()
-  const { isLoggedIn } = useAuthStore()
-  const { notifications, unreadCount } = useNotificationStore()
+  const { isLoggedIn, user } = useAuthStore()
+  const { notifications, unreadCount, setNotifications } = useNotificationStore()
   const markAsRead    = useMarkAsRead()
   const markAllAsRead = useMarkAllAsRead()
 
   useEffect(() => {
     if (!isLoggedIn) router.replace('/login')
   }, [isLoggedIn, router])
+
+  const { isLoading } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+      const res = await apiClient.get<{
+        notifications: AppNotification[]
+        unreadCount: number
+      }>('/notifications')
+      return res.data
+    },
+    enabled: !!user,
+    staleTime: 30_000,
+  })
+
+  useEffect(() => {
+    if (!isLoading) return
+  }, [isLoading, setNotifications])
 
   const handleRead = (notif: AppNotification) => {
     if (!notif.isRead) markAsRead.mutate(notif.id)
@@ -81,7 +100,22 @@ export default function NotificationsPage() {
         }
       />
 
-      {notifications.length === 0 ? (
+      {isLoading ? (
+        <div style={{ padding: '20px 16px' }}>
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} style={{
+              display: 'flex', gap: 12, padding: '14px 0',
+              borderBottom: '0.5px solid #F4F3F9',
+            }}>
+              <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#F4F3F9' }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ height: 14, width: '60%', background: '#F4F3F9', borderRadius: 6, marginBottom: 6 }} />
+                <div style={{ height: 12, width: '80%', background: '#F4F3F9', borderRadius: 6 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : notifications.length === 0 ? (
         <div style={{
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
@@ -110,7 +144,6 @@ export default function NotificationsPage() {
                 transition: 'background 0.15s',
               }}
             >
-              {/* 아이콘 */}
               <div style={{
                 width: 44, height: 44, borderRadius: '50%',
                 background: getBg(notif.type),
@@ -120,7 +153,6 @@ export default function NotificationsPage() {
                 {getIcon(notif.type)}
               </div>
 
-              {/* 내용 */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   fontSize: 14,
@@ -144,7 +176,6 @@ export default function NotificationsPage() {
                 </div>
               </div>
 
-              {/* 읽지 않음 dot */}
               {!notif.isRead && (
                 <div style={{
                   width: 8, height: 8,
