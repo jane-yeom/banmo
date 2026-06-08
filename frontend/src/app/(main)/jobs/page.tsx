@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import PostCard from '@/components/common/PostCard';
 import { SlidersHorizontal } from 'lucide-react';
+import InstrumentSelect from '@/components/common/InstrumentSelect';
 import apiClient from '@/lib/axios';
 import { Post } from '@/types';
 import EmptyState from '@/components/common/EmptyState';
@@ -19,12 +20,6 @@ const CATEGORY_TABS = [
   { value: 'PERFORMANCE',   label: '공연 도우미' },
   { value: 'AFTERSCHOOL',   label: '방과후 교사' },
   { value: 'ETC',           label: '기타' },
-];
-
-const INSTRUMENTS = [
-  '피아노', '바이올린', '비올라', '첼로', '콘트라베이스',
-  '플루트', '오보에', '클라리넷', '바순', '호른',
-  '트럼펫', '트롬본', '타악기', '기타', '하프',
 ];
 
 const REGIONS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산'];
@@ -183,22 +178,12 @@ export default function JobsPage() {
           <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E5E7EB', padding: 16, marginBottom: 16 }}>
             <div style={{ marginBottom: 16 }}>
               <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', marginBottom: 8, letterSpacing: '0.05em' }}>악기</p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {INSTRUMENTS.map((inst) => (
-                  <button
-                    key={inst}
-                    onClick={() => setInstrument(instrument === inst ? '' : inst)}
-                    style={{
-                      borderRadius: 99, padding: '5px 12px', fontSize: 12, cursor: 'pointer', border: '1px solid',
-                      borderColor: instrument === inst ? '#1C1C1C' : '#E5E7EB',
-                      background: instrument === inst ? '#1C1C1C' : 'white',
-                      color: instrument === inst ? 'white' : '#6B7280',
-                    }}
-                  >
-                    {inst}
-                  </button>
-                ))}
-              </div>
+              <InstrumentSelect
+                value={instrument ? [instrument] : []}
+                onChange={v => setInstrument(v[0] || '')}
+                placeholder="악기 선택"
+                maxCount={1}
+              />
             </div>
             <div style={{ marginBottom: 16 }}>
               <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', marginBottom: 8, letterSpacing: '0.05em' }}>지역</p>

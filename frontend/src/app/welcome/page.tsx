@@ -7,6 +7,7 @@ import api from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
 import SubHeader from '@/components/layout/SubHeader';
 import { Plus, X } from 'lucide-react';
+import InstrumentSelect from '@/components/common/InstrumentSelect';
 import { extractYoutubeId, getYoutubeThumbnail, isValidYoutubeUrl } from '@/lib/youtube';
 
 function YoutubeIcon({ size = 18, color = '#FF0000' }: { size?: number; color?: string }) {
@@ -16,12 +17,6 @@ function YoutubeIcon({ size = 18, color = '#FF0000' }: { size?: number; color?: 
     </svg>
   );
 }
-
-const INSTRUMENTS = [
-  '피아노', '바이올린', '비올라', '첼로', '콘트라베이스',
-  '플루트', '오보에', '클라리넷', '바순', '호른',
-  '트럼펫', '트롬본', '타악기', '기타', '하프',
-];
 
 const REGIONS = [
   '서울', '경기', '인천', '부산', '대구',
@@ -79,12 +74,6 @@ export default function WelcomePage() {
     } finally {
       setUploading(false);
     }
-  };
-
-  const toggleInstrument = (inst: string) => {
-    setSelectedInstruments(prev =>
-      prev.includes(inst) ? prev.filter(i => i !== inst) : [...prev, inst]
-    );
   };
 
   const handleAddVideo = () => {
@@ -352,24 +341,10 @@ export default function WelcomePage() {
               }}>
                 악기 선택 (선택, 복수 가능)
               </label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {INSTRUMENTS.map(inst => (
-                  <button
-                    key={inst}
-                    onClick={() => toggleInstrument(inst)}
-                    style={{
-                      padding: '8px 14px',
-                      borderRadius: 99,
-                      border: `1px solid ${selectedInstruments.includes(inst) ? '#1C1C1C' : '#E5E7EB'}`,
-                      background: selectedInstruments.includes(inst) ? '#F0EDE6' : 'white',
-                      color: selectedInstruments.includes(inst) ? '#1C1C1C' : '#374151',
-                      fontSize: 13, cursor: 'pointer',
-                      fontWeight: selectedInstruments.includes(inst) ? 600 : 400,
-                    }}>
-                    {inst}
-                  </button>
-                ))}
-              </div>
+              <InstrumentSelect
+                value={selectedInstruments}
+                onChange={setSelectedInstruments}
+              />
             </div>
 
             {/* 연주 영상 */}

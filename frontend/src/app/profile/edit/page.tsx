@@ -6,6 +6,7 @@ import api from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
 import SubHeader from '@/components/layout/SubHeader';
 import { Eye, EyeOff, Upload, X, FileText, Plus, ExternalLink, User, AlertTriangle, Lock, CheckCircle, Info, ClipboardList } from 'lucide-react';
+import InstrumentSelect from '@/components/common/InstrumentSelect';
 import { extractYoutubeId, getYoutubeThumbnail, isValidYoutubeUrl } from '@/lib/youtube';
 
 function YoutubeIcon({ size = 20, color = '#FF0000' }: { size?: number; color?: string }) {
@@ -15,12 +16,6 @@ function YoutubeIcon({ size = 20, color = '#FF0000' }: { size?: number; color?: 
     </svg>
   );
 }
-
-const INSTRUMENTS = [
-  '피아노', '바이올린', '비올라', '첼로', '콘트라베이스',
-  '플루트', '오보에', '클라리넷', '바순', '호른',
-  '트럼펫', '트롬본', '타악기', '기타', '하프',
-];
 
 const REGIONS = [
   '서울', '경기', '인천', '부산', '대구',
@@ -100,15 +95,6 @@ export default function ProfileEditPage() {
       setVideoUrls((user as any).videoUrls?.filter(Boolean) || []);
     }
   }, [user]);
-
-  const toggleInstrument = (inst: string) => {
-    setForm(prev => ({
-      ...prev,
-      instruments: prev.instruments.includes(inst)
-        ? prev.instruments.filter(i => i !== inst)
-        : [...prev.instruments, inst],
-    }));
-  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -270,26 +256,10 @@ export default function ProfileEditPage() {
               onChange={v => setForm(p => ({ ...p, isInstrumentsPublic: v }))}
             />
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {INSTRUMENTS.map(inst => (
-              <button
-                key={inst}
-                type="button"
-                onClick={() => toggleInstrument(inst)}
-                style={{
-                  padding: '7px 12px', borderRadius: 99,
-                  border: `1.5px solid ${form.instruments.includes(inst) ? '#1C1C1C' : '#E8E4DC'}`,
-                  background: form.instruments.includes(inst) ? '#F0EDE6' : 'white',
-                  color: form.instruments.includes(inst) ? '#000000' : '#666',
-                  fontSize: 13,
-                  fontWeight: form.instruments.includes(inst) ? 700 : 400,
-                  cursor: 'pointer',
-                }}
-              >
-                {inst}
-              </button>
-            ))}
-          </div>
+          <InstrumentSelect
+            value={form.instruments}
+            onChange={instruments => setForm(p => ({ ...p, instruments }))}
+          />
         </div>
 
         {/* 활동 지역 */}

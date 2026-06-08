@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { X, Heart, Bell, Key, ClipboardList, Inbox } from 'lucide-react';
+import { X, Heart, Bell, Key, ClipboardList, Inbox, Download, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SubHeader from '@/components/layout/SubHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,6 +11,7 @@ import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
 import { Post } from '@/types';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
+import InstallGuideModal from '@/components/common/InstallGuideModal';
 
 type AppStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
@@ -154,6 +155,7 @@ export default function MyPage() {
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>('posts');
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(null);
+  const [showInstall, setShowInstall] = useState(false);
 
   useEffect(() => {
     if (!user) router.replace('/login');
@@ -214,6 +216,7 @@ export default function MyPage() {
 
   return (
     <>
+    {showInstall && <InstallGuideModal onClose={() => setShowInstall(false)} />}
     {selectedApplicantId && (
       <ApplicantProfileModal
         applicantId={selectedApplicantId}
@@ -393,6 +396,26 @@ export default function MyPage() {
           })}
         </div>
       )}
+      {/* 앱 설치 */}
+      <div
+        onClick={() => setShowInstall(true)}
+        style={{
+          display: 'flex', alignItems: 'center',
+          gap: 14, padding: '14px 4px',
+          borderBottom: '0.5px solid #F4F3F9',
+          cursor: 'pointer', marginTop: 8,
+        }}>
+        <div style={{
+          width: 38, height: 38, background: '#F0EDE6',
+          borderRadius: 11, display: 'flex',
+          alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <Download size={19} strokeWidth={1.8} color="#1C1C1C" />
+        </div>
+        <span style={{ flex: 1, fontSize: 15 }}>앱 설치하기</span>
+        <ChevronRight size={16} color="#DDD" />
+      </div>
+
       {/* 약관 링크 */}
       <div style={{
         marginTop: 24, paddingTop: 16,

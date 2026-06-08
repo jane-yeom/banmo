@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Bell, MessageCircle, Menu, X, ChevronRight, LogOut, Search, User } from 'lucide-react';
+import { Bell, MessageCircle, Menu, X, ChevronRight, LogOut, Search, User, Download } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
@@ -13,6 +13,7 @@ import { initKakao } from '@/lib/kakao';
 import { getSocket } from '@/lib/socket';
 import { ChatRoom } from '@/types';
 import { useNotifications } from '@/hooks/useNotifications';
+import InstallGuideModal from '@/components/common/InstallGuideModal';
 
 const navItems = [
   { label: '구인구직', href: '/jobs' },
@@ -28,6 +29,7 @@ function NotificationsInitializer() {
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
   const { user, isLoggedIn, setAuth, logout, accessToken } = useAuthStore();
   const { unreadCount, setUnreadCount } = useChatStore();
   const notifUnread = useNotificationStore(s => s.unreadCount);
@@ -100,6 +102,7 @@ export default function Header() {
   return (
     <>
       {user && <NotificationsInitializer />}
+      {showInstall && <InstallGuideModal onClose={() => setShowInstall(false)} />}
 
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
@@ -139,6 +142,19 @@ export default function Header() {
 
           {/* 우측 아이콘들 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button
+              onClick={() => setShowInstall(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                background: '#1C1C1C', color: 'white',
+                border: 'none', borderRadius: 99,
+                padding: '6px 12px', fontSize: 12,
+                fontWeight: 600, cursor: 'pointer',
+                flexShrink: 0,
+              }}>
+              <Download size={13} strokeWidth={2} />
+              앱 설치
+            </button>
             <Link href="/search" style={{
               display: 'flex', alignItems: 'center',
               textDecoration: 'none', padding: '4px 8px',

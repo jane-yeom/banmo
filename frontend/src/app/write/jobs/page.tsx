@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
 import SubHeader from '@/components/layout/SubHeader';
 import { Info, Calendar } from 'lucide-react';
+import InstrumentSelect from '@/components/common/InstrumentSelect';
 
 const DRAFT_KEY = 'draft_jobs';
 
@@ -20,12 +21,6 @@ const JOB_CATEGORIES = [
   { value: 'PERFORMANCE', label: '공연도우미 구인' },
   { value: 'AFTERSCHOOL', label: '방과후 교사 구인' },
   { value: 'ETC', label: '기타' },
-];
-
-const INSTRUMENTS = [
-  '피아노', '바이올린', '비올라', '첼로', '콘트라베이스',
-  '플루트', '오보에', '클라리넷', '바순', '호른',
-  '트럼펫', '트롬본', '타악기', '기타', '하프',
 ];
 
 const REGIONS = [
@@ -103,15 +98,6 @@ function WriteJobsContent() {
     }, 2000);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [form]);
-
-  const toggleInstrument = (inst: string) => {
-    setForm(prev => ({
-      ...prev,
-      instruments: prev.instruments.includes(inst)
-        ? prev.instruments.filter(i => i !== inst)
-        : [...prev.instruments, inst],
-    }));
-  };
 
   const handleSubmit = async () => {
     if (!form.title.trim()) return alert('제목을 입력해주세요');
@@ -227,21 +213,10 @@ function WriteJobsContent() {
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 10 }}>
             악기 선택
           </label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {INSTRUMENTS.map(inst => (
-              <button key={inst} onClick={() => toggleInstrument(inst)}
-                style={{
-                  padding: '7px 12px', borderRadius: 99,
-                  border: `1.5px solid ${form.instruments.includes(inst) ? '#1C1C1C' : '#E8E4DC'}`,
-                  background: form.instruments.includes(inst) ? '#F0EDE6' : 'white',
-                  color: form.instruments.includes(inst) ? '#000000' : '#666',
-                  fontSize: 13, fontWeight: form.instruments.includes(inst) ? 700 : 400,
-                  cursor: 'pointer',
-                }}>
-                {inst}
-              </button>
-            ))}
-          </div>
+          <InstrumentSelect
+            value={form.instruments}
+            onChange={instruments => setForm(p => ({ ...p, instruments }))}
+          />
         </div>
 
         {/* 지역 */}
