@@ -17,6 +17,22 @@ export const metadata: Metadata = {
   title: '반모 - 반주의 모든것',
   description: '반주자와 연주자를 연결하는 매칭 플랫폼. 피아노, 바이올린, 첼로 등 다양한 반주자를 찾아보세요.',
   keywords: '반주자, 반주, 피아노, 바이올린, 첼로, 레슨, 구인구직',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: '반모',
+    startupImage: '/icon-512.png',
+  },
+  icons: {
+    icon: [
+      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   openGraph: {
     title: '반모 - 반주의 모든것',
     description: '반주자와 연주자를 연결하는 매칭 플랫폼',
