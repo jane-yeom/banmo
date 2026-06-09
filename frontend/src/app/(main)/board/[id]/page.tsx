@@ -172,6 +172,26 @@ export default function BoardDetailPage() {
             </span>
           </div>
           <h1 className="text-xl font-bold text-gray-900">{board.title}</h1>
+
+          {board.tags && board.tags.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+              {board.tags.map((tag: string) => (
+                <button
+                  key={tag}
+                  onClick={() => router.push(`/board?type=${board.type}&tag=${tag}`)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 3,
+                    background: '#F0EDE6', color: '#555',
+                    border: 'none', borderRadius: 99,
+                    padding: '5px 12px', fontSize: 13,
+                    fontWeight: 500, cursor: 'pointer',
+                  }}>
+                  <span style={{ color: '#9CA3AF' }}>#</span>
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* 작성자 정보 */}

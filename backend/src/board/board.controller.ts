@@ -21,13 +21,38 @@ export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   @Get()
-  findAll(@Query('type') type?: BoardType) {
-    return this.boardService.findAll(type);
+  findAll(
+    @Query('type') type?: BoardType,
+    @Query('tag') tag?: string,
+    @Query('sort') sort?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.boardService.findAll({ type, tag, sort, page: page ? +page : undefined, limit: limit ? +limit : undefined });
   }
 
   @Get('hot')
   getHot() {
     return this.boardService.getHotBoards();
+  }
+
+  @Get('tags/popular')
+  getPopularTags() {
+    return this.boardService.getPopularTags();
+  }
+
+  @Get('tags/search')
+  searchTags(@Query('q') q: string) {
+    return this.boardService.searchTags(q);
+  }
+
+  @Get('tags/:tag')
+  getBoardsByTag(
+    @Param('tag') tag: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
+  ) {
+    return this.boardService.getBoardsByTag(tag, +page, +limit);
   }
 
   @Get(':id')

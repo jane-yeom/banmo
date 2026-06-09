@@ -4,8 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { Like, MoreThanOrEqual, Repository } from 'typeorm';
 import { Board, BoardType } from './board.entity';
+import { BoardTag } from './board-tag.entity';
 import { BoardComment } from './board-comment.entity';
 import { CreateBoardDto, CreateCommentDto } from './board.dto';
 import { UserRole } from '../users/user.entity';
@@ -18,16 +19,51 @@ export class BoardService {
     private readonly boardsRepository: Repository<Board>,
     @InjectRepository(BoardComment)
     private readonly commentsRepository: Repository<BoardComment>,
+    @InjectRepository(BoardTag)
+    private readonly boardTagRepository: Repository<BoardTag>,
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  async findAll(type?: BoardType): Promise<Board[]> {
-    const where = type ? { type } : {};
-    return this.boardsRepository.find({
-      where,
-      relations: ['author'],
-      order: { createdAt: 'DESC' },
-    });
+  async findAll(filter: {
+    type?: BoardType;
+    tag?: string;
+    sort?: string;
+    page?: number;
+    limit?: number;
+  } = {}): Promise<{ data: Board[]; total: number; page: number; limit: number }> {
+    const page = filter.page || 1;
+    const limit = filter.limit || 20;
+
+    const query = this.boardsRepository
+      .createQueryBuilder('board')
+      .leftJoinAndSelect('board.author', 'author')
+      .where('1=1');
+
+    if (filter.type) {
+      query.andWhere('board.type = :type', { type: filter.type });
+    }
+
+    if (filter.tag) {
+      query.andWhere('board.tags LIKE :tag', { tag: `%${filter.tag}%` });
+    }
+
+    switch (filter.sort) {
+      case 'popular':
+        query.orderBy('board.viewCount', 'DESC');
+        break;
+      case 'comments':
+        query.orderBy('board.commentCount', 'DESC');
+        break;
+      default:
+        query.orderBy('board.createdAt', 'DESC');
+    }
+
+    const [data, total] = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    return { data, total, page, limit };
   }
 
   async getHotBoards(limit = 3): Promise<Board[]> {
@@ -51,6 +87,38 @@ export class BoardService {
     });
   }
 
+  async getPopularTags(): Promise<BoardTag[]> {
+    return this.boardTagRepository.find({
+      order: { useCount: 'DESC' },
+      take: 30,
+    });
+  }
+
+  async searchTags(q: string): Promise<BoardTag[]> {
+    if (!q || q.length < 1) return [];
+    return this.boardTagRepository.find({
+      where: { name: Like(`%${q}%`) },
+      order: { useCount: 'DESC' },
+      take: 10,
+    });
+  }
+
+  async getBoardsByTag(
+    tag: string,
+    page: number,
+    limit: number,
+  ): Promise<{ data: Board[]; total: number; page: number; limit: number }> {
+    const [data, total] = await this.boardsRepository
+      .createQueryBuilder('board')
+      .leftJoinAndSelect('board.author', 'author')
+      .where('board.tags LIKE :tag', { tag: `%${tag}%` })
+      .orderBy('board.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+    return { data, total, page, limit };
+  }
+
   async findOne(id: string, userId?: string): Promise<{ board: Board; comments: BoardComment[] }> {
     const board = await this.boardsRepository.findOne({
       where: { id },
@@ -70,7 +138,6 @@ export class BoardService {
       order: { createdAt: 'ASC' },
     });
 
-    // 익명 처리: 닉네임/프로필 숨김
     const sanitizedBoard = this.sanitizeAnonymous(board);
     const sanitizedComments = comments.map((c) => this.sanitizeAnonymousComment(c));
 
@@ -80,7 +147,26 @@ export class BoardService {
   async create(userId: string, dto: CreateBoardDto): Promise<Board> {
     const isAnonymous = dto.type === BoardType.ANONYMOUS ? (dto.isAnonymous ?? true) : false;
     const board = this.boardsRepository.create({ ...dto, authorId: userId, isAnonymous });
-    return this.boardsRepository.save(board);
+    const saved = await this.boardsRepository.save(board);
+
+    if (dto.tags && dto.tags.length > 0) {
+      await this.updateTagCounts(dto.tags);
+    }
+
+    return saved;
+  }
+
+  private async updateTagCounts(tags: string[]): Promise<void> {
+    for (const tagName of tags) {
+      const tag = await this.boardTagRepository.findOne({ where: { name: tagName } });
+      if (tag) {
+        await this.boardTagRepository.update(tag.id, { useCount: tag.useCount + 1 });
+      } else {
+        await this.boardTagRepository.save(
+          this.boardTagRepository.create({ name: tagName, useCount: 1 }),
+        );
+      }
+    }
   }
 
   async delete(userId: string, userRole: UserRole, id: string): Promise<void> {
@@ -100,7 +186,6 @@ export class BoardService {
 
     await this.boardsRepository.increment({ id: boardId }, 'commentCount', 1);
 
-    // 댓글 알림 (비동기, 실패 무시)
     this.notificationsService
       .sendCommentNotification(userId, board.authorId, boardId)
       .catch(() => {});

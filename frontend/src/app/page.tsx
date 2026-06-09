@@ -339,6 +339,7 @@ export default function HomePage() {
   const [promoPosts, setPromoPosts] = useState<any[]>([]);
   const [hotBoards, setHotBoards] = useState<any[]>([]);
   const [recentBoards, setRecentBoards] = useState<any[]>([]);
+  const [popularTags, setPopularTags] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -347,11 +348,12 @@ export default function HomePage() {
         const JOB_CATS = 'JOB_OFFER,JOB_SEEK,LESSON_OFFER,LESSON_SEEK,PERFORMANCE,AFTERSCHOOL,ETC';
         const PROMO_CATS = 'PROMO_CONCERT,PROMO_SPACE';
 
-        const [jobs, promo, hot, recent] = await Promise.all([
+        const [jobs, promo, hot, recent, tags] = await Promise.all([
           api.get(`/posts?limit=3&categories=${JOB_CATS}`).catch(() => ({ data: { items: [] } })),
           api.get(`/posts?limit=3&categories=${PROMO_CATS}`).catch(() => ({ data: { items: [] } })),
           api.get('/board/hot').catch(() => ({ data: [] })),
-          api.get('/board?type=FREE').catch(() => ({ data: [] })),
+          api.get('/board?type=FREE&limit=5').catch(() => ({ data: { data: [] } })),
+          api.get('/board/tags/popular').catch(() => ({ data: [] })),
         ]);
 
         const extract = (res: any) =>
@@ -361,8 +363,9 @@ export default function HomePage() {
         setJobPosts(extract(jobs));
         setPromoPosts(extract(promo));
         setHotBoards(Array.isArray(hot.data) ? hot.data : hot.data?.data || []);
-        const recentAll = Array.isArray(recent.data) ? recent.data : recent.data?.data || [];
+        const recentAll = recent.data?.data || (Array.isArray(recent.data) ? recent.data : []);
         setRecentBoards(recentAll.slice(0, 5));
+        setPopularTags(Array.isArray(tags.data) ? tags.data : []);
       } catch (e) {
         console.error('홈 데이터 로딩 실패:', e);
       } finally {
@@ -426,6 +429,50 @@ export default function HomePage() {
             promoPosts.map((post: any) => <SectionCard key={post.id} post={post} />)
           )}
         </div>
+
+        {/* 인기 태그 섹션 */}
+        {popularTags.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between',
+              alignItems: 'center', marginBottom: 12,
+            }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
+                🔥 지금 뜨는 이야기
+              </h2>
+              <Link href="/board?type=FREE" style={{
+                fontSize: 13, color: '#888', textDecoration: 'none',
+              }}>
+                더보기 →
+              </Link>
+            </div>
+            <div style={{
+              display: 'flex', gap: 6,
+              overflowX: 'auto', scrollbarWidth: 'none',
+            }}>
+              {popularTags.slice(0, 10).map((tag: any) => (
+                <Link
+                  key={tag.name}
+                  href={`/board?type=FREE&tag=${tag.name}`}
+                  style={{ textDecoration: 'none', flexShrink: 0 }}>
+                  <div style={{
+                    background: 'white',
+                    border: '0.5px solid #E8E4DC',
+                    borderRadius: 99, padding: '7px 14px',
+                    fontSize: 13, color: '#1C1C1C',
+                    display: 'flex', alignItems: 'center', gap: 4,
+                  }}>
+                    <span style={{ color: '#9CA3AF' }}>#</span>
+                    {tag.name}
+                    <span style={{ color: '#9CA3AF', fontSize: 11 }}>
+                      {tag.useCount}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 자유게시판 섹션 */}
         <div style={{ marginBottom: 28 }}>
