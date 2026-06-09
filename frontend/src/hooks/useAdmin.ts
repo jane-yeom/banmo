@@ -15,6 +15,7 @@ export interface AdminStats {
 
 export interface AdminUser {
   id: string;
+  username?: string | null;
   nickname: string | null;
   email: string | null;
   noteGrade: string;
