@@ -62,6 +62,9 @@ export class User {
   email: string;
 
   @Column({ nullable: true })
+  phone: string;
+
+  @Column({ nullable: true })
   profileImage: string;
 
   @Column({ nullable: true, type: 'text' })

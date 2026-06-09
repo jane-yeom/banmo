@@ -146,7 +146,15 @@ export class BoardService {
 
   async create(userId: string, dto: CreateBoardDto): Promise<Board> {
     const isAnonymous = dto.type === BoardType.ANONYMOUS ? (dto.isAnonymous ?? true) : false;
-    const board = this.boardsRepository.create({ ...dto, authorId: userId, isAnonymous });
+    const tagsString = dto.tags && dto.tags.length > 0 ? dto.tags.join(',') : undefined;
+    const board = this.boardsRepository.create({
+      type: dto.type,
+      title: dto.title,
+      content: dto.content,
+      isAnonymous,
+      authorId: userId,
+      tags: tagsString,
+    });
     const saved = await this.boardsRepository.save(board);
 
     if (dto.tags && dto.tags.length > 0) {

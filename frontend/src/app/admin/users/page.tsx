@@ -107,6 +107,15 @@ export default function AdminUsersPage() {
       ),
     },
     {
+      key: 'username',
+      label: '아이디',
+      render: (u: AdminUser) => (
+        <span className="text-gray-700 text-sm" style={{ fontFamily: 'monospace' }}>
+          {u.username ?? '-'}
+        </span>
+      ),
+    },
+    {
       key: 'nickname',
       label: '닉네임',
       render: (u: AdminUser) => (
@@ -121,6 +130,15 @@ export default function AdminUsersPage() {
       ),
     },
     {
+      key: 'loginType',
+      label: '가입유형',
+      render: (u: AdminUser) => (
+        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-700">
+          {u.loginType === 'KAKAO' ? '카카오' : u.loginType === 'EMAIL' ? '이메일' : u.loginType ?? '-'}
+        </span>
+      ),
+    },
+    {
       key: 'noteGrade',
       label: '등급',
       render: (u: AdminUser) => (
@@ -130,11 +148,27 @@ export default function AdminUsersPage() {
       ),
     },
     {
+      key: 'trustScore',
+      label: '신뢰도',
+      render: (u: AdminUser) => (
+        <span className="text-gray-600 text-sm">{u.trustScore}점</span>
+      ),
+    },
+    {
       key: 'createdAt',
       label: '가입일',
       render: (u: AdminUser) => (
         <span className="text-gray-500 text-sm">
           {new Date(u.createdAt).toLocaleDateString('ko-KR')}
+        </span>
+      ),
+    },
+    {
+      key: 'phone',
+      label: '전화번호',
+      render: (u: AdminUser) => (
+        <span className="text-gray-600 text-sm" style={{ fontFamily: 'monospace' }}>
+          {u.phone || '-'}
         </span>
       ),
     },
@@ -445,8 +479,10 @@ export default function AdminUsersPage() {
           <div>
             <div className="grid grid-cols-2 gap-3 mb-4">
               {[
+                ['아이디', userDetail.user.username ?? '-'],
                 ['닉네임', userDetail.user.nickname ?? '-'],
                 ['이메일', userDetail.user.email ?? '-'],
+                ['가입유형', userDetail.user.loginType === 'KAKAO' ? '카카오' : userDetail.user.loginType === 'EMAIL' ? '이메일' : userDetail.user.loginType ?? '-'],
                 [
                   '등급',
                   GRADE_LABEL[userDetail.user.noteGrade] ?? userDetail.user.noteGrade,
@@ -457,10 +493,11 @@ export default function AdminUsersPage() {
                   new Date(userDetail.user.createdAt).toLocaleDateString('ko-KR'),
                 ],
                 ['상태', userDetail.user.isBanned ? '밴됨' : '정상'],
+                ['전화번호', userDetail.user.phone || '미수집 (비즈앱 승인 후 수집 예정)'],
               ].map(([label, value]) => (
                 <div key={label} className="bg-gray-50 rounded-lg p-3">
                   <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-                  <p className="text-sm font-medium text-gray-800">{value}</p>
+                  <p className="text-sm font-medium text-gray-800" style={label === '아이디' || label === '전화번호' ? { fontFamily: 'monospace' } : undefined}>{value}</p>
                 </div>
               ))}
             </div>

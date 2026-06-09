@@ -45,10 +45,10 @@ export class Board {
   @Column({ type: 'int', default: 0 })
   commentCount: number;
 
-  @Column({ type: 'simple-array', nullable: true })
-  tags: string[];
+  @Column({ name: 'tags', type: 'text', nullable: true })
+  tags: string;
 
-  @Column({ default: 0 })
+  @Column({ name: 'like_count', default: 0 })
   likeCount: number;
 
   @CreateDateColumn()
