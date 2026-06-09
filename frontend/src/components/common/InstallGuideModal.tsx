@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 
 interface InstallGuideModalProps {
-  isOpen: boolean
   onClose: () => void
 }
 
@@ -63,7 +62,7 @@ const androidSteps = [
 
 type Os = 'ios' | 'android' | 'other'
 
-export default function InstallGuideModal({ isOpen, onClose }: InstallGuideModalProps) {
+export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
   const [os, setOs] = useState<Os>('other')
   const [step, setStep] = useState(0)
 
@@ -77,12 +76,6 @@ export default function InstallGuideModal({ isOpen, onClose }: InstallGuideModal
       setOs('other')
     }
   }, [])
-
-  useEffect(() => {
-    if (isOpen) setStep(0)
-  }, [isOpen])
-
-  if (!isOpen) return null
 
   const steps = os === 'ios' ? iosSteps : androidSteps
   const currentStep = steps[step]
