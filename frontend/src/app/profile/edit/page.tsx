@@ -82,6 +82,7 @@ export default function ProfileEditPage() {
 
   useEffect(() => {
     if (user) {
+      setVideoUrls((user as any).videoUrls || []);
       setForm({
         nickname: user.nickname || '',
         profileImage: user.profileImage || '',
@@ -97,7 +98,6 @@ export default function ProfileEditPage() {
         isInstrumentsPublic: (user as any).isInstrumentsPublic ?? true,
         isRegionPublic: (user as any).isRegionPublic ?? true,
       });
-      setVideoUrls((user as any).videoUrls?.filter(Boolean) || []);
     }
   }, [user]);
 
@@ -130,16 +130,34 @@ export default function ProfileEditPage() {
     }
     setAttachUploading(true);
     try {
-      const url = await uploadImage(file);
+      const formData = new FormData();
+      formData.append('file', file);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch(`${apiUrl}/media/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) throw new Error('업로드 실패');
+      const data = await res.json();
+      const url = data.url || data.data?.url;
       setForm(prev => ({ ...prev, attachmentUrl: url, attachmentName: file.name }));
-    } catch { alert('파일 업로드 실패'); }
-    finally { setAttachUploading(false); }
+      alert('파일이 업로드되었습니다');
+    } catch (e) {
+      console.error('첨부파일 업로드 에러:', e);
+      alert('파일 업로드에 실패했습니다');
+    } finally {
+      setAttachUploading(false);
+      if (attachRef.current) attachRef.current.value = '';
+    }
   };
 
   const handleAddVideo = () => {
     setVideoError('');
-    if (!videoInput.trim()) return;
-    if (!isValidYoutubeUrl(videoInput)) {
+    const url = videoInput.trim();
+    if (!url) return;
+    if (!isValidYoutubeUrl(url)) {
       setVideoError('올바른 유튜브 URL을 입력해주세요');
       return;
     }
@@ -147,12 +165,13 @@ export default function ProfileEditPage() {
       setVideoError('최대 5개까지 등록 가능합니다');
       return;
     }
-    if (videoUrls.includes(videoInput.trim())) {
+    if (videoUrls.includes(url)) {
       setVideoError('이미 추가된 영상입니다');
       return;
     }
-    setVideoUrls(prev => [...prev, videoInput.trim()]);
+    setVideoUrls(prev => [...prev, url]);
     setVideoInput('');
+    console.log('영상 추가됨:', url, '현재 목록:', [...videoUrls, url]);
   };
 
   const handleRemoveVideo = (url: string) => {
@@ -164,12 +183,30 @@ export default function ProfileEditPage() {
     if (form.nickname.trim().length < 2) return alert('닉네임은 2자 이상이어야 합니다');
     setSaving(true);
     try {
-      const res = await api.patch('/users/me', { ...form, videoUrls });
+      const payload = {
+        nickname: form.nickname,
+        profileImage: form.profileImage || null,
+        bio: form.bio || null,
+        career: form.career || null,
+        region: form.region || null,
+        instruments: form.instruments || [],
+        attachmentUrl: form.attachmentUrl || null,
+        attachmentName: form.attachmentName || null,
+        videoUrls: videoUrls || [],
+        isBioPublic: form.isBioPublic,
+        isCareerPublic: form.isCareerPublic,
+        isAttachmentPublic: form.isAttachmentPublic,
+        isInstrumentsPublic: form.isInstrumentsPublic,
+        isRegionPublic: form.isRegionPublic,
+      };
+      console.log('저장 payload:', payload);
+      const res = await api.patch('/users/me', payload);
       const updated = res.data?.data || res.data;
       setAuth(updated, accessToken!);
       alert('프로필이 저장되었습니다');
       router.back();
     } catch (e: any) {
+      console.error('저장 에러:', e);
       alert(e.response?.data?.message || '저장 실패');
     } finally {
       setSaving(false);

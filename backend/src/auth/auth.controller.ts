@@ -1,7 +1,7 @@
 // TODO: 이메일 로그인 - 현재 카카오 로그인만 지원
 // 추후 필요시 register/login 주석 해제
 
-import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs/common';
 import { IsEmail, IsString } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -34,6 +34,10 @@ export class AuthController {
   /** 이메일 회원가입 */
   @Post('register')
   async register(@Body() dto: RegisterDto) {
+    console.log('[Auth] 회원가입 요청:', { ...dto, password: '***' });
+    if (!dto || !dto.email || !dto.username) {
+      throw new BadRequestException('필수 정보가 누락되었습니다');
+    }
     return this.authService.register(dto);
   }
 

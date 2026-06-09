@@ -26,6 +26,7 @@ export class AuthService {
 
   // ── 회원가입 (아이디/비밀번호 방식) ──────────────────────────────────
   async register(dto: RegisterDto): Promise<{ message: string }> {
+    console.log('[Auth] 회원가입 처리:', dto.username, dto.email);
     const usernameRegex = /^[a-zA-Z0-9_]{4,20}$/;
     if (!usernameRegex.test(dto.username)) {
       throw new BadRequestException('아이디는 영문, 숫자, _(밑줄)만 4~20자 사용 가능합니다.');
@@ -50,11 +51,20 @@ export class AuthService {
       nickname: dto.nickname,
       instruments: dto.instruments,
     });
+    console.log('[Auth] 유저 생성 완료:', user.id);
     const token = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await this.usersService.updateVerifyToken(user.id, token, expires);
-    await this.sendVerifyEmail(dto.email, token);
-    return { message: '가입 완료! 입력하신 이메일로 인증 링크를 보냈어요.' };
+
+    // 이메일 발송 실패해도 가입 완료
+    try {
+      await this.sendVerifyEmail(dto.email, dto.nickname, token);
+      console.log('[Auth] 인증 이메일 발송 완료:', dto.email);
+    } catch (e: any) {
+      console.error('[Auth] 이메일 발송 실패:', e.message);
+    }
+
+    return { message: '가입이 완료되었습니다. 이메일을 확인해주세요.' };
   }
 
   // ── 이메일 인증 ───────────────────────────────────────────────────────
@@ -78,38 +88,54 @@ export class AuthService {
     const token = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await this.usersService.updateVerifyToken(user.id, token, expires);
-    await this.sendVerifyEmail(email, token);
+    await this.sendVerifyEmail(email, user.nickname || '', token);
     return { message: '인증 이메일이 재발송되었습니다.' };
   }
 
   // ── 인증 이메일 발송 ──────────────────────────────────────────────────
-  async sendVerifyEmail(email: string, token: string): Promise<void> {
+  async sendVerifyEmail(email: string, nickname: string, token: string): Promise<void> {
+    const mailUser = this.config.get('MAIL_USER');
+    const mailPass = this.config.get('MAIL_PASS');
+    if (!mailUser || !mailPass) {
+      console.warn('[Auth] MAIL_USER 또는 MAIL_PASS 환경변수 미설정');
+      throw new Error('이메일 설정이 없습니다');
+    }
+    const verifyUrl = `${this.config.get('FRONTEND_URL')}/auth/verify-email?token=${token}`;
+    console.log('[Auth] 인증 URL:', verifyUrl);
     const nodemailer = require('nodemailer');
     const transporter = nodemailer.createTransport({
       service: 'gmail',
-      auth: {
-        user: this.config.get('MAIL_USER'),
-        pass: this.config.get('MAIL_PASS'),
-      },
+      auth: { user: mailUser, pass: mailPass },
     });
-    const verifyUrl = `${this.config.get('FRONTEND_URL')}/auth/verify-email?token=${token}`;
+    await transporter.verify();
+    console.log('[Auth] Gmail SMTP 연결 성공');
     await transporter.sendMail({
-      from: `반모 <${this.config.get('MAIL_USER')}>`,
+      from: `반모 <${mailUser}>`,
       to: email,
-      subject: '[반모] 이메일 인증',
+      subject: '[반모] 이메일 인증을 완료해주세요',
       html: `
-        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
-          <h2>이메일 인증</h2>
-          <p>아래 버튼을 클릭하여 이메일 인증을 완료해주세요.</p>
-          <p>링크는 24시간 후 만료됩니다.</p>
-          <a href="${verifyUrl}"
-            style="display:inline-block; padding:12px 24px;
-            background:#7B82BE; color:white; border-radius:8px;
-            text-decoration:none; font-weight:bold;">
-            이메일 인증하기
-          </a>
-          <p style="color:#999; font-size:12px; margin-top:20px;">
-            본인이 요청하지 않았다면 이 이메일을 무시해주세요.
+        <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:40px 20px;">
+          <h1 style="font-size:28px;color:#1C1C1C;">🎵 반모</h1>
+          <h2 style="font-size:20px;color:#1C1C1C;">안녕하세요, ${nickname}님!</h2>
+          <p style="color:#444;line-height:1.7;margin-bottom:28px;">
+            반모 가입을 환영해요!<br/>
+            아래 버튼을 눌러 이메일 인증을 완료해주세요.<br/>
+            인증 링크는 <strong>24시간</strong> 후 만료됩니다.
+          </p>
+          <div style="text-align:center;margin-bottom:32px;">
+            <a href="${verifyUrl}"
+              style="display:inline-block;padding:14px 40px;
+              background:#1C1C1C;color:white;
+              border-radius:12px;text-decoration:none;
+              font-size:16px;font-weight:700;">
+              이메일 인증하기
+            </a>
+          </div>
+          <p style="font-size:12px;color:#9CA3AF;">
+            버튼이 작동하지 않으면 아래 링크를 복사해서 브라우저에 붙여넣으세요:<br/>
+            <a href="${verifyUrl}" style="color:#1C1C1C;word-break:break-all;">
+              ${verifyUrl}
+            </a>
           </p>
         </div>
       `,

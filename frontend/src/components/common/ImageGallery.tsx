@@ -5,9 +5,10 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 interface ImageGalleryProps {
   images: string[]
   borderRadius?: number
+  aspectRatio?: string
 }
 
-export default function ImageGallery({ images, borderRadius = 14 }: ImageGalleryProps) {
+export default function ImageGallery({ images, borderRadius = 14, aspectRatio = '16/9' }: ImageGalleryProps) {
   const [current, setCurrent] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
   const touchStartX = useRef(0)
@@ -38,7 +39,7 @@ export default function ImageGallery({ images, borderRadius = 14 }: ImageGallery
         style={{
           position: 'relative',
           width: '100%',
-          aspectRatio: '16/9',
+          aspectRatio: aspectRatio,
           borderRadius,
           overflow: 'hidden',
           background: '#F7F4ED',
