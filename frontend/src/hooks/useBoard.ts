@@ -11,6 +11,8 @@ export interface BoardPost {
   authorId: string;
   isAnonymous: boolean;
   viewCount: number;
+  commentCount: number;
+  tags: string[];
   createdAt: string;
   updatedAt: string;
   author: {
@@ -36,12 +38,23 @@ export interface BoardComment {
   };
 }
 
-export function useBoardPosts(type?: string) {
-  return useQuery<BoardPost[]>({
-    queryKey: ['board', type],
+export function useBoardPosts(params?: {
+  type?: string;
+  tag?: string;
+  sort?: string;
+  page?: number;
+  limit?: number;
+}) {
+  return useQuery<{ data: BoardPost[]; total: number; page: number; limit: number }>({
+    queryKey: ['board', params],
     queryFn: async () => {
-      const params = type ? { type } : {};
-      const res = await apiClient.get('/board', { params });
+      const p = new URLSearchParams();
+      if (params?.type) p.set('type', params.type);
+      if (params?.tag) p.set('tag', params.tag);
+      if (params?.sort) p.set('sort', params.sort);
+      if (params?.page) p.set('page', String(params.page));
+      if (params?.limit) p.set('limit', String(params.limit));
+      const res = await apiClient.get(`/board?${p.toString()}`);
       return res.data;
     },
   });
@@ -61,8 +74,13 @@ export function useBoardPost(id: string) {
 export function useCreateBoardPost() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { type: string; title: string; content: string; isAnonymous?: boolean }) =>
-      apiClient.post('/board', data),
+    mutationFn: (data: {
+      type: string;
+      title: string;
+      content: string;
+      isAnonymous?: boolean;
+      tags?: string[];
+    }) => apiClient.post('/board', data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['board'] }),
   });
 }

@@ -66,7 +66,10 @@ export default function PromoDetailPage() {
         {/* 이미지 갤러리 */}
         {images.length > 0 && (
           <div style={{ marginBottom: 20 }}>
-            <ImageGallery images={images} />
+            <ImageGallery
+              images={images}
+              aspectRatio={post.category === 'PROMO_CONCERT' ? '3/4' : '16/9'}
+            />
           </div>
         )}
 

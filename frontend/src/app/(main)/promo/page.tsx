@@ -22,7 +22,10 @@ function PromoCard({ post }: { post: Post }) {
     <Link href={`/promo/${post.id}`}>
       <div className={`group relative flex flex-col rounded-2xl bg-white shadow-sm border overflow-hidden transition-shadow hover:shadow-md ${isPremium ? 'border-amber-300' : 'border-gray-100'}`}>
         {/* 썸네일 */}
-        <div className="relative h-44 bg-gradient-to-br from-indigo-50 to-indigo-100 overflow-hidden">
+        <div
+          className="relative bg-gradient-to-br from-indigo-50 to-indigo-100 overflow-hidden"
+          style={{ aspectRatio: post.category === 'PROMO_CONCERT' ? '3/4' : '16/9' }}
+        >
           {firstImage ? (
             <Image src={firstImage} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
           ) : (

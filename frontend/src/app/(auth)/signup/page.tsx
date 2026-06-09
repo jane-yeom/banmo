@@ -90,11 +90,32 @@ export default function SignupPage() {
           <h1 style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A', marginBottom: 10 }}>
             인증 메일을 확인해주세요
           </h1>
-          <p style={{ fontSize: 14, color: '#9CA3AF', lineHeight: 1.7, marginBottom: 32 }}>
+          <p style={{ fontSize: 14, color: '#9CA3AF', lineHeight: 1.7, marginBottom: 24 }}>
             <strong style={{ color: '#000000' }}>{form.email}</strong>로<br />
             인증 메일을 발송했습니다.<br />
             메일의 링크를 클릭하면 가입이 완료됩니다.
           </p>
+          <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 12 }}>
+            메일이 오지 않으면 스팸함을 확인하거나<br />
+            아래 버튼으로 재발송해주세요
+          </p>
+          <button onClick={async () => {
+            try {
+              await apiClient.post('/auth/resend-verify', { email: form.email });
+              alert('인증 이메일을 재발송했습니다!');
+            } catch (e: any) {
+              alert(e.response?.data?.message || '재발송 실패');
+            }
+          }} style={{
+            width: '100%', padding: '12px',
+            background: '#F0EDE6', color: '#1C1C1C',
+            border: '1px solid #E8E4DC',
+            borderRadius: 12, fontSize: 14,
+            fontWeight: 600, cursor: 'pointer',
+            marginBottom: 10,
+          }}>
+            인증 이메일 재발송
+          </button>
           <button onClick={() => router.push('/login')} style={{
             width: '100%', padding: '14px', background: '#1C1C1C',
             color: 'white', border: 'none', borderRadius: 12,
