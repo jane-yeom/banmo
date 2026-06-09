@@ -164,6 +164,15 @@ export default function AdminUsersPage() {
       ),
     },
     {
+      key: 'phone',
+      label: '전화번호',
+      render: (u: AdminUser) => (
+        <span className="text-gray-600 text-sm" style={{ fontFamily: 'monospace' }}>
+          {u.phone || '-'}
+        </span>
+      ),
+    },
+    {
       key: 'status',
       label: '상태',
       render: (u: AdminUser) => (
@@ -484,10 +493,11 @@ export default function AdminUsersPage() {
                   new Date(userDetail.user.createdAt).toLocaleDateString('ko-KR'),
                 ],
                 ['상태', userDetail.user.isBanned ? '밴됨' : '정상'],
+                ['전화번호', userDetail.user.phone || '미수집 (비즈앱 승인 후 수집 예정)'],
               ].map(([label, value]) => (
                 <div key={label} className="bg-gray-50 rounded-lg p-3">
                   <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-                  <p className="text-sm font-medium text-gray-800" style={label === '아이디' ? { fontFamily: 'monospace' } : undefined}>{value}</p>
+                  <p className="text-sm font-medium text-gray-800" style={label === '아이디' || label === '전화번호' ? { fontFamily: 'monospace' } : undefined}>{value}</p>
                 </div>
               ))}
             </div>

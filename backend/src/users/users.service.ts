@@ -112,6 +112,7 @@ export class UsersService {
     kakaoProfileImage?: string;
     email?: string;
     profileImage?: string;
+    phone?: string | null;
   }): Promise<User> {
     const partial: Partial<User> = {
       kakaoId: data.kakaoId,
@@ -121,6 +122,7 @@ export class UsersService {
       kakaoProfileImage: data.kakaoProfileImage ?? undefined,
       email: data.email ?? undefined,
       profileImage: data.profileImage ?? undefined,
+      phone: data.phone ?? undefined,
       loginType: LoginType.KAKAO,
     };
     const user = this.usersRepository.create(partial as User);

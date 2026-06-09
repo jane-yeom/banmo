@@ -18,6 +18,7 @@ export interface AdminUser {
   username?: string | null;
   nickname: string | null;
   email: string | null;
+  phone?: string | null;
   noteGrade: string;
   trustScore: number;
   isBanned: boolean;

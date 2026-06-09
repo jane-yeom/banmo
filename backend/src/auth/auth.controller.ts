@@ -1,11 +1,10 @@
 // TODO: 이메일 로그인 - 현재 카카오 로그인만 지원
 // 추후 필요시 register/login 주석 해제
 
-import { BadRequestException, Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { IsEmail, IsString } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto } from './auth.dto';
 import { CurrentUser } from './current-user.decorator';
 import { User } from '../users/user.entity';
 
@@ -31,49 +30,29 @@ class AdminLoginDto {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  /** 이메일 회원가입 */
-  @Post('register')
-  async register(@Body() dto: RegisterDto) {
-    console.log('[Auth] 회원가입 요청:', { ...dto, password: '***' });
-    if (!dto || !dto.email || !dto.username) {
-      throw new BadRequestException('필수 정보가 누락되었습니다');
-    }
-    return this.authService.register(dto);
-  }
+  // 이메일 회원가입 비활성화 (카카오 로그인만 사용)
+  // @Post('register')
+  // async register(@Body() dto: RegisterDto) { ... }
 
-  /** 이메일 인증 */
-  @Post('verify-email')
-  @HttpCode(200)
-  async verifyEmail(@Body('token') token: string) {
-    return this.authService.verifyEmail(token);
-  }
+  // 이메일 인증 비활성화
+  // @Post('verify-email')
+  // async verifyEmail(@Body('token') token: string) { ... }
 
-  /** 인증 메일 재발송 */
-  @Post('resend-verify')
-  @HttpCode(200)
-  async resendVerify(@Body('email') email: string) {
-    return this.authService.resendVerifyEmail(email);
-  }
+  // 이메일 재발송 비활성화
+  // @Post('resend-verify')
+  // async resendVerify(@Body('email') email: string) { ... }
 
-  /** 이메일 로그인 */
-  @Post('login')
-  @HttpCode(200)
-  async emailLogin(@Body() dto: LoginDto) {
-    return this.authService.emailLogin(dto);
-  }
+  // 이메일 로그인 비활성화
+  // @Post('login')
+  // async emailLogin(@Body() dto: LoginDto) { ... }
 
-  /** 아이디 중복확인 */
-  @Get('check-username')
-  async checkUsername(@Query('username') username: string) {
-    return this.authService.checkUsernameAvailability(username);
-  }
+  // 아이디 중복확인 비활성화
+  // @Get('check-username')
+  // async checkUsername(@Query('username') username: string) { ... }
 
-  /** 일반 유저 비밀번호 찾기 (아이디 + 이메일) */
-  @Post('forgot-password')
-  @HttpCode(200)
-  async forgotPassword(@Body() dto: { username: string; email: string }) {
-    return this.authService.forgotPasswordUser(dto);
-  }
+  // 비밀번호 찾기 비활성화
+  // @Post('forgot-password')
+  // async forgotPassword(@Body() dto: { username: string; email: string }) { ... }
 
   /** 카카오 AccessToken 방식 (레거시) */
   @Post('kakao')

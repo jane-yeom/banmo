@@ -247,10 +247,13 @@ export class AuthService {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
+      const kakaoAccount = userRes.data.kakao_account;
       const kakaoId      = String(userRes.data.id);
-      const nickname     = userRes.data.kakao_account?.profile?.nickname || '반모유저';
-      const email        = userRes.data.kakao_account?.email as string | undefined;
-      const profileImage = userRes.data.kakao_account?.profile?.profile_image_url as string | undefined;
+      const nickname     = kakaoAccount?.profile?.nickname || '반모유저';
+      const email        = kakaoAccount?.email as string | undefined;
+      const profileImage = kakaoAccount?.profile?.profile_image_url as string | undefined;
+      const phone        = kakaoAccount?.phone_number || null;
+      console.log('[Kakao] 전화번호:', phone ? '수신됨' : '없음');
 
       // 3단계: DB에서 유저 찾거나 생성
       let user = await this.usersService.findByKakaoId(kakaoId);
@@ -264,6 +267,7 @@ export class AuthService {
           kakaoProfileImage: profileImage,
           email,
           profileImage,
+          phone,
         });
       }
 
