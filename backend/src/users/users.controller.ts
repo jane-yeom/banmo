@@ -46,8 +46,20 @@ export class UsersController {
 
   @Patch('me')
   @UseGuards(AuthGuard('jwt'))
-  updateProfile(@Request() req: any, @Body() dto: UpdateProfileDto) {
-    return this.usersService.updateProfile(req.user.id, dto);
+  async updateProfile(@Req() req: any, @Body() dto: UpdateProfileDto) {
+    console.log('[Users] 프로필 업데이트 요청 userId:', req.user.id);
+    console.log('[Users] 요청 body:', JSON.stringify({
+      ...dto,
+      profileImage: dto.profileImage ? '이미지URL있음' : null,
+      videoUrls: dto.videoUrls,
+    }));
+    const result = await this.usersService.updateProfile(req.user.id, dto);
+    console.log('[Users] 저장 결과:', JSON.stringify({
+      profileImage: result.profileImage ? '저장됨' : null,
+      videoUrls: result.videoUrls,
+      bio: result.bio,
+    }));
+    return result;
   }
 
   @Patch('me/profile-image')

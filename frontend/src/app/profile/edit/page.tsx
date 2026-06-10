@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
-import { uploadImage } from '@/lib/upload';
 import SubHeader from '@/components/layout/SubHeader';
 import { Eye, EyeOff, Upload, X, FileText, Plus, ExternalLink, User, AlertTriangle, Lock, CheckCircle, Info, ClipboardList } from 'lucide-react';
 import InstrumentSelect from '@/components/common/InstrumentSelect';
@@ -76,35 +75,63 @@ export default function ProfileEditPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      setVideoUrls((user as any).videoUrls || []);
-      setForm({
-        nickname: user.nickname || '',
-        profileImage: user.profileImage || '',
-        bio: (user as any).bio || '',
-        career: (user as any).career || '',
-        region: (user as any).region || '',
-        instruments: (user as any).instruments || [],
-        attachmentUrl: (user as any).attachmentUrl || '',
-        attachmentName: (user as any).attachmentName || '',
-        isBioPublic: (user as any).isBioPublic ?? true,
-        isCareerPublic: (user as any).isCareerPublic ?? false,
-        isAttachmentPublic: (user as any).isAttachmentPublic ?? false,
-        isInstrumentsPublic: (user as any).isInstrumentsPublic ?? true,
-        isRegionPublic: (user as any).isRegionPublic ?? true,
-      });
-    }
+    if (!user) return;
+    console.log('[ProfileEdit] user 로드:', {
+      profileImage: user.profileImage ? '있음' : '없음',
+      videoUrls: (user as any).videoUrls,
+      bio: (user as any).bio,
+    });
+    setForm({
+      nickname: user.nickname || '',
+      profileImage: user.profileImage || '',
+      bio: (user as any).bio || '',
+      career: (user as any).career || '',
+      region: (user as any).region || '',
+      instruments: (user as any).instruments || [],
+      attachmentUrl: (user as any).attachmentUrl || '',
+      attachmentName: (user as any).attachmentName || '',
+      isBioPublic: (user as any).isBioPublic ?? true,
+      isCareerPublic: (user as any).isCareerPublic ?? false,
+      isAttachmentPublic: (user as any).isAttachmentPublic ?? false,
+      isInstrumentsPublic: (user as any).isInstrumentsPublic ?? true,
+      isRegionPublic: (user as any).isRegionPublic ?? true,
+    });
+    const urls = (user as any).videoUrls;
+    if (Array.isArray(urls)) setVideoUrls(urls);
+    else if (typeof urls === 'string' && urls) {
+      try { setVideoUrls(JSON.parse(urls)); }
+      catch { setVideoUrls([]); }
+    } else setVideoUrls([]);
   }, [user]);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return alert('5MB 이하만 가능합니다');
     setUploading(true);
     try {
-      const url = await uploadImage(file);
+      const formData = new FormData();
+      formData.append('file', file);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const token = localStorage.getItem('accessToken') || '';
+      const res = await fetch(`${apiUrl}/media/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) throw new Error(`업로드 실패 ${res.status}`);
+      const data = await res.json();
+      const url = data.url || data.data?.url;
+      if (!url) throw new Error('URL 없음');
+      console.log('[ProfileEdit] 이미지 업로드 완료:', url);
       setForm(prev => ({ ...prev, profileImage: url }));
-    } catch { alert('이미지 업로드 실패'); }
-    finally { setUploading(false); }
+    } catch (e: any) {
+      console.error('[ProfileEdit] 이미지 업로드 에러:', e);
+      alert('이미지 업로드 실패: ' + e.message);
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
   };
 
   const handleAttachChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,22 +169,17 @@ export default function ProfileEditPage() {
   const handleAddVideo = () => {
     setVideoError('');
     const url = videoInput.trim();
-    if (!url) return;
-    if (!isValidYoutubeUrl(url)) {
-      setVideoError('올바른 유튜브 URL을 입력해주세요');
+    if (!url) { setVideoError('URL을 입력해주세요'); return; }
+    const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+    if (!isValidYoutubeUrl(fullUrl)) {
+      setVideoError('유튜브 URL만 가능합니다 (youtube.com 또는 youtu.be)');
       return;
     }
-    if (videoUrls.length >= 5) {
-      setVideoError('최대 5개까지 등록 가능합니다');
-      return;
-    }
-    if (videoUrls.includes(url)) {
-      setVideoError('이미 추가된 영상입니다');
-      return;
-    }
-    setVideoUrls(prev => [...prev, url]);
+    if (videoUrls.length >= 5) { setVideoError('최대 5개까지 가능합니다'); return; }
+    if (videoUrls.includes(fullUrl)) { setVideoError('이미 추가된 영상입니다'); return; }
+    console.log('[ProfileEdit] 유튜브 추가:', fullUrl);
+    setVideoUrls(prev => [...prev, fullUrl]);
     setVideoInput('');
-    console.log('영상 추가됨:', url, '현재 목록:', [...videoUrls, url]);
   };
 
   const handleRemoveVideo = (url: string) => {
@@ -170,29 +192,37 @@ export default function ProfileEditPage() {
     setSaving(true);
     try {
       const payload = {
-        nickname: form.nickname,
+        nickname: form.nickname.trim(),
         profileImage: form.profileImage || null,
         bio: form.bio || null,
         career: form.career || null,
         region: form.region || null,
-        instruments: form.instruments || [],
+        instruments: form.instruments,
+        videoUrls: videoUrls,
         attachmentUrl: form.attachmentUrl || null,
         attachmentName: form.attachmentName || null,
-        videoUrls: videoUrls || [],
         isBioPublic: form.isBioPublic,
         isCareerPublic: form.isCareerPublic,
         isAttachmentPublic: form.isAttachmentPublic,
         isInstrumentsPublic: form.isInstrumentsPublic,
         isRegionPublic: form.isRegionPublic,
       };
-      console.log('저장 payload:', payload);
+      console.log('[ProfileEdit] 저장 payload:', JSON.stringify({
+        ...payload,
+        profileImage: payload.profileImage ? '있음' : null,
+        videoUrls: payload.videoUrls,
+      }));
       const res = await api.patch('/users/me', payload);
       const updated = res.data?.data || res.data;
+      console.log('[ProfileEdit] 저장 결과:', {
+        profileImage: updated.profileImage ? '있음' : null,
+        videoUrls: updated.videoUrls,
+      });
       setAuth(updated, accessToken!);
       alert('프로필이 저장되었습니다');
       router.back();
     } catch (e: any) {
-      console.error('저장 에러:', e);
+      console.error('[ProfileEdit] 저장 에러:', e.response?.data || e);
       alert(e.response?.data?.message || '저장 실패');
     } finally {
       setSaving(false);
