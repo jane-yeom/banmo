@@ -11,10 +11,11 @@ import { useAuthStore } from '@/store/auth.store';
 import { User, Post } from '@/types';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
 import PostCard from '@/components/common/PostCard';
+import AttachmentViewer from '@/components/common/AttachmentViewer';
 import { extractYoutubeId, getYoutubeEmbedUrl, getYoutubeThumbnail } from '@/lib/youtube';
-import { Play } from 'lucide-react';
+import { Play, FileText, ChevronRight } from 'lucide-react';
 
-function YoutubeIcon({ size = 20, color = 'white' }: { size?: number; color?: string }) {
+function YoutubeIcon({ size = 16, color = '#FF0000' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
       <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
@@ -41,52 +42,88 @@ function useUserPosts(userId: string) {
   });
 }
 
-function VideoCard({ videoId, url }: { videoId: string; url: string }) {
-  const [playing, setPlaying] = useState(false);
-  const embedUrl = getYoutubeEmbedUrl(videoId);
-  const thumbnail = getYoutubeThumbnail(videoId);
+function VideoCard({ url }: { url: string }) {
+  const [playing, setPlaying] = useState(false)
+  const videoId = extractYoutubeId(url)
+
+  if (!videoId) return null
+
+  const thumbnail = getYoutubeThumbnail(videoId)
+  const embedUrl = getYoutubeEmbedUrl(videoId)
 
   return (
-    <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid #E8E4DC', background: '#000' }}>
+    <div style={{
+      borderRadius: 14, overflow: 'hidden',
+      border: '1px solid #E8E4DC',
+      marginBottom: 12,
+    }}>
       {playing ? (
-        <iframe
-          src={`${embedUrl}?autoplay=1&rel=0`}
-          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block' }}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
+          <iframe
+            src={`${embedUrl}?autoplay=1&rel=0&modestbranding=1`}
+            style={{
+              position: 'absolute', top: 0, left: 0,
+              width: '100%', height: '100%',
+              border: 'none',
+            }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
       ) : (
         <div
           onClick={() => setPlaying(true)}
-          style={{ position: 'relative', cursor: 'pointer', aspectRatio: '16/9' }}
-        >
+          style={{
+            position: 'relative',
+            paddingBottom: '56.25%',
+            height: 0,
+            cursor: 'pointer',
+            background: '#000',
+          }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={thumbnail}
             alt="영상 썸네일"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{
+              position: 'absolute', top: 0, left: 0,
+              width: '100%', height: '100%',
+              objectFit: 'cover',
+              opacity: 0.85,
+            }}
           />
           <div style={{
             position: 'absolute', inset: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(0,0,0,0.3)',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'center',
           }}>
             <div style={{
-              width: 56, height: 56, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.9)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+              width: 64, height: 64, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.92)',
+              display: 'flex', alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+              transition: 'transform 0.15s',
             }}>
-              <Play size={24} color="#FF0000" fill="#FF0000" />
+              <Play
+                size={28} color="#FF0000"
+                fill="#FF0000" strokeWidth={0}
+                style={{ marginLeft: 3 }}
+              />
             </div>
           </div>
-          <div style={{ position: 'absolute', bottom: 8, right: 8 }}>
-            <YoutubeIcon size={20} color="white" />
+          <div style={{
+            position: 'absolute', bottom: 10, right: 10,
+            background: 'rgba(0,0,0,0.6)',
+            borderRadius: 4, padding: '3px 6px',
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            <YoutubeIcon size={14} color="white" />
+            <span style={{ color: 'white', fontSize: 10 }}>YouTube</span>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }
 
 export default function ProfilePage() {
@@ -98,6 +135,9 @@ export default function ProfilePage() {
   const { data: postsData } = useUserPosts(id);
 
   const isMyProfile = me?.id === id;
+  const isOwner = isMyProfile;
+  const isRecruiter = false;
+  const [showAttachment, setShowAttachment] = useState(false);
   const videos = (user?.videoUrls ?? []).filter(v => v && extractYoutubeId(v));
   const instruments = user?.instruments?.filter(Boolean) ?? [];
 
@@ -212,19 +252,66 @@ export default function ProfilePage() {
         )}
 
         {/* 첨부파일 */}
-        {(user as any).isAttachmentPublic && (user as any).attachmentUrl && (
-          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
-            <h2 className="text-base font-bold text-gray-800 mb-3">📎 첨부파일</h2>
-            <a
-              href={(user as any).attachmentUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-indigo-600 text-sm hover:underline"
-            >
-              <span>📋</span>
-              <span>{(user as any).attachmentName || '첨부파일 다운로드'}</span>
-            </a>
+        {((user as any).isAttachmentPublic || isOwner || isRecruiter) && (user as any).attachmentUrl && (
+          <div style={{ marginBottom: 24 }}>
+            <h3 style={{
+              fontSize: 15, fontWeight: 700,
+              marginBottom: 12, color: '#1A1A1A',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <FileText size={16} strokeWidth={1.8} />
+              첨부파일
+              {!(user as any).isAttachmentPublic && (
+                <span style={{
+                  fontSize: 11, color: '#D4A03A',
+                  background: '#FEF6E4', borderRadius: 4,
+                  padding: '2px 6px', fontWeight: 500,
+                }}>비공개</span>
+              )}
+            </h3>
+
+            <div
+              onClick={() => setShowAttachment(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '14px 16px',
+                background: '#F7F4ED',
+                border: '1px solid #E8E4DC',
+                borderRadius: 12, cursor: 'pointer',
+                transition: 'background 0.15s',
+              }}>
+              <div style={{
+                width: 44, height: 44,
+                background: '#1C1C1C', borderRadius: 10,
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'center', flexShrink: 0,
+              }}>
+                <FileText size={22} color="white" strokeWidth={1.5} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: 14, fontWeight: 600,
+                  color: '#1A1A1A', marginBottom: 2,
+                  overflow: 'hidden', textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {(user as any).attachmentName || '첨부파일'}
+                </div>
+                <div style={{ fontSize: 12, color: '#888' }}>
+                  탭해서 보기
+                </div>
+              </div>
+              <ChevronRight size={18} color="#9CA3AF" />
+            </div>
           </div>
+        )}
+
+        {showAttachment && (user as any).attachmentUrl && (
+          <AttachmentViewer
+            attachmentUrl={(user as any).attachmentUrl}
+            attachmentName={(user as any).attachmentName || '첨부파일'}
+            onClose={() => setShowAttachment(false)}
+          />
         )}
 
         {/* 비공개 항목 안내 */}
@@ -239,19 +326,19 @@ export default function ProfilePage() {
         )}
 
         {/* 연주 영상 */}
-        {videos.length > 0 && (
-          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
-            <h2 className="text-base font-bold text-gray-800 mb-4" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <YoutubeIcon size={18} color="#FF0000" />
+        {user.videoUrls && user.videoUrls.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <h3 style={{
+              fontSize: 15, fontWeight: 700,
+              marginBottom: 12, color: '#1A1A1A',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <YoutubeIcon size={16} color="#FF0000" />
               연주 영상
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {videos.map((url, i) => {
-                const videoId = extractYoutubeId(url);
-                if (!videoId) return null;
-                return <VideoCard key={i} videoId={videoId} url={url} />;
-              })}
-            </div>
+            </h3>
+            {user.videoUrls.map((url: string, i: number) => (
+              <VideoCard key={i} url={url} />
+            ))}
           </div>
         )}
 
