@@ -99,6 +99,7 @@ export class NotificationsService {
       [NotificationType.FAVORITE_POST]: 'favoritePost',
       [NotificationType.SYSTEM]: 'system',
       [NotificationType.NOTICE]: 'notice',
+      [NotificationType.GRADE_UP]: 'system',
     };
     return setting[map[type]] as boolean;
   }

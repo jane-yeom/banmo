@@ -13,8 +13,9 @@ import NoteGradeBadge from '@/components/common/NoteGradeBadge';
 import PostCard from '@/components/common/PostCard';
 import AttachmentViewer from '@/components/common/AttachmentViewer';
 import ResumeViewer from '@/components/common/ResumeViewer';
+import ReviewModal from '@/components/common/ReviewModal';
 import { extractYoutubeId, getYoutubeEmbedUrl, getYoutubeThumbnail } from '@/lib/youtube';
-import { Play, FileText, ChevronRight } from 'lucide-react';
+import { Play, FileText, ChevronRight, Star, MessageSquare } from 'lucide-react';
 
 function YoutubeIcon({ size = 16, color = '#FF0000' }: { size?: number; color?: string }) {
   return (
@@ -134,12 +135,18 @@ export default function ProfilePage() {
 
   const { data: user, isLoading } = useUserProfile(id);
   const { data: postsData } = useUserPosts(id);
+  const { data: reviewsData } = useQuery({
+    queryKey: ['reviews', id],
+    queryFn: () => apiClient.get<{ reviews: any[]; avgRating: number; count: number }>(`/reviews/user/${id}`).then(r => r.data),
+    enabled: !!id,
+  });
 
   const isMyProfile = me?.id === id;
   const isOwner = isMyProfile;
   const isRecruiter = false;
   const [showAttachment, setShowAttachment] = useState(false);
   const [showResume, setShowResume] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const videos = (user?.videoUrls ?? []).filter(v => v && extractYoutubeId(v));
   const instruments = user?.instruments?.filter(Boolean) ?? [];
 
@@ -163,6 +170,13 @@ export default function ProfilePage() {
     <>
       {showResume && (
         <ResumeViewer user={user} onClose={() => setShowResume(false)} />
+      )}
+      {showReviewModal && !isMyProfile && (
+        <ReviewModal
+          revieweeId={id}
+          revieweeName={user?.nickname ?? ''}
+          onClose={() => setShowReviewModal(false)}
+        />
       )}
       <SubHeader title="프로필" />
       <div className="mx-auto max-w-2xl px-4 py-8 space-y-5">
@@ -360,6 +374,74 @@ export default function ProfilePage() {
             ))}
           </div>
         )}
+
+        {/* 후기 섹션 */}
+        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h2 className="text-base font-bold text-gray-800">
+              ⭐ 후기 {reviewsData ? `(${reviewsData.count})` : ''}
+              {reviewsData && reviewsData.count > 0 && (
+                <span style={{ fontSize: 13, fontWeight: 500, color: '#F59E0B', marginLeft: 6 }}>
+                  {reviewsData.avgRating.toFixed(1)}점
+                </span>
+              )}
+            </h2>
+            {!isMyProfile && me && (
+              <button
+                onClick={() => setShowReviewModal(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  background: '#F7F4ED', border: '1px solid #E8E4DC',
+                  borderRadius: 8, padding: '6px 12px',
+                  fontSize: 12, fontWeight: 600,
+                  color: '#1C1C1C', cursor: 'pointer',
+                }}>
+                <MessageSquare size={13} strokeWidth={1.8} />
+                후기 남기기
+              </button>
+            )}
+          </div>
+          {!reviewsData || reviewsData.count === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-4">아직 후기가 없습니다.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {reviewsData.reviews.slice(0, 5).map((review: any) => (
+                <div key={review.id} style={{
+                  background: '#F7F4ED', borderRadius: 12,
+                  padding: '12px 14px',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{
+                        width: 28, height: 28, borderRadius: '50%',
+                        background: '#E8E4DC', overflow: 'hidden',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 13, fontWeight: 700,
+                      }}>
+                        {review.reviewer?.profileImage
+                          ? <img src={review.reviewer.profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : (review.reviewer?.nickname ?? '?')[0]
+                        }
+                      </div>
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>{review.reviewer?.nickname ?? '익명'}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 2 }}>
+                      {[1,2,3,4,5].map(n => (
+                        <Star key={n} size={12} fill={review.rating >= n ? '#FBBF24' : 'none'} color={review.rating >= n ? '#FBBF24' : '#D1D5DB'} strokeWidth={1.5} />
+                      ))}
+                    </div>
+                  </div>
+                  {review.content && (
+                    <p style={{ fontSize: 13, color: '#555', lineHeight: 1.6, margin: 0 }}>{review.content}</p>
+                  )}
+                  <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
+                    {new Date(review.createdAt).toLocaleDateString('ko-KR')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* 작성한 공고 */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5">

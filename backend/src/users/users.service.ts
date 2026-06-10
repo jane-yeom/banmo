@@ -1,9 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
 import { IsArray, IsOptional, IsString } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, LoginType, NoteGrade } from './user.entity';
 import { Block } from './block.entity';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/notification.entity';
 
 function calcGrade(score: number): NoteGrade {
   if (score >= 100) return NoteGrade.WHOLE;
@@ -77,6 +79,8 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Block)
     private readonly blockRepository: Repository<Block>,
+    @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async findByKakaoId(kakaoId: string): Promise<User | null> {
@@ -139,14 +143,34 @@ export class UsersService {
   }
 
   async updateTrustScore(id: string, delta: number): Promise<User> {
-    const user = await this.usersRepository.findOneOrFail({ where: { id } });
+    return this.addTrustScore(id, delta, 'manual');
+  }
+
+  async addTrustScore(userId: string, delta: number, reason: string): Promise<User> {
+    const user = await this.usersRepository.findOneOrFail({ where: { id: userId } });
     const oldGrade = user.noteGrade;
     user.trustScore = Math.max(0, user.trustScore + delta);
     user.noteGrade = calcGrade(user.trustScore);
+    const saved = await this.usersRepository.save(user);
+
     if (user.noteGrade !== oldGrade) {
-      // grade changed
+      const gradeLabel: Record<NoteGrade, string> = {
+        [NoteGrade.WHOLE]: '온음표',
+        [NoteGrade.HALF]: '2분음표',
+        [NoteGrade.QUARTER]: '4분음표',
+        [NoteGrade.EIGHTH]: '8분음표',
+        [NoteGrade.SIXTEENTH]: '16분음표',
+      };
+      this.notificationsService.create({
+        recipientId: userId,
+        type: NotificationType.GRADE_UP,
+        title: '음표 등급이 올랐어요!',
+        body: `${gradeLabel[user.noteGrade]} 등급 달성! (${reason})`,
+        link: `/profile/${userId}`,
+      }).catch(() => {});
     }
-    return this.usersRepository.save(user);
+
+    return saved;
   }
 
   async updateProfile(id: string, dto: UpdateProfileDto): Promise<User> {

@@ -11,6 +11,7 @@ import { BoardComment } from './board-comment.entity';
 import { CreateBoardDto, CreateCommentDto } from './board.dto';
 import { UserRole } from '../users/user.entity';
 import { NotificationsService } from '../notifications/notifications.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class BoardService {
@@ -22,6 +23,7 @@ export class BoardService {
     @InjectRepository(BoardTag)
     private readonly boardTagRepository: Repository<BoardTag>,
     private readonly notificationsService: NotificationsService,
+    private readonly usersService: UsersService,
   ) {}
 
   async findAll(filter: {
@@ -215,6 +217,22 @@ export class BoardService {
     await this.commentsRepository.remove(comment);
     await this.boardsRepository.decrement({ id: boardId }, 'commentCount', 1);
     return { success: true };
+  }
+
+  async likeBoard(boardId: string, userId: string): Promise<{ likeCount: number }> {
+    const board = await this.boardsRepository.findOne({ where: { id: boardId } });
+    if (!board) throw new NotFoundException('게시글을 찾을 수 없습니다.');
+
+    await this.boardsRepository.increment({ id: boardId }, 'likeCount', 1);
+    const updated = await this.boardsRepository.findOne({ where: { id: boardId } });
+    const newCount = updated!.likeCount;
+
+    // 좋아요 10 단위마다 작성자 신뢰점수 +5
+    if (newCount % 10 === 0) {
+      this.usersService.addTrustScore(board.authorId, 5, 'board_like_milestone').catch(() => {});
+    }
+
+    return { likeCount: newCount };
   }
 
   private sanitizeAnonymous(board: Board): Board {

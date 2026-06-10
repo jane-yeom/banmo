@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, User, MoreVertical, Image as ImageIcon, Send, Ban, LockOpen, ChevronDown, Music, ShieldCheck, ClipboardList } from 'lucide-react';
+import { ChevronLeft, User, MoreVertical, Image as ImageIcon, Send, Ban, LockOpen, ChevronDown, Music, ShieldCheck, ClipboardList, Star } from 'lucide-react';
+import ReviewModal from '@/components/common/ReviewModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useChatMessages } from '@/hooks/useChat';
@@ -66,6 +67,7 @@ export default function ChatRoomPage() {
   const [imageUploading, setImageUploading] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [opponent, setOpponent] = useState<any>(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
@@ -242,6 +244,14 @@ export default function ChatRoomPage() {
 
   return (
     <div className="flex h-[100dvh] flex-col bg-gray-50" onClick={() => showMenu && setShowMenu(false)}>
+      {showReviewModal && otherId && (
+        <ReviewModal
+          revieweeId={otherId}
+          revieweeName={other?.nickname ?? ''}
+          postId={room?.postId ?? undefined}
+          onClose={() => setShowReviewModal(false)}
+        />
+      )}
       {/* 채팅방 헤더 */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
@@ -473,6 +483,21 @@ export default function ChatRoomPage() {
                   </button>
                 )}
               </div>
+              {room?.post && otherId && (
+                <button
+                  onClick={() => setShowReviewModal(true)}
+                  style={{
+                    width: '100%', marginTop: 8, padding: '10px',
+                    background: '#1C1C1C', color: 'white',
+                    border: 'none', borderRadius: 10,
+                    fontSize: 13, fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', gap: 6,
+                  }}>
+                  <Star size={14} fill="white" strokeWidth={0} /> 후기 남기기
+                </button>
+              )}
             </div>
           )}
         </>

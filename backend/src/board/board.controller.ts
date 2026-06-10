@@ -83,6 +83,12 @@ export class BoardController {
     return this.boardService.addComment(user.id, id, dto);
   }
 
+  @Post(':id/like')
+  @UseGuards(AuthGuard('jwt'))
+  like(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.boardService.likeBoard(id, user.id);
+  }
+
   @Delete(':boardId/comments/:commentId')
   @UseGuards(AuthGuard('jwt'))
   deleteComment(

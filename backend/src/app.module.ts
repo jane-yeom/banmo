@@ -15,6 +15,8 @@ import { PaymentsModule } from './payments/payments.module';
 import { QnaModule } from './qna/qna.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { AttendanceModule } from './attendance/attendance.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -50,6 +52,8 @@ const isProd = process.env.NODE_ENV === 'production';
     QnaModule,
     NotificationsModule,
     FavoritesModule,
+    ReviewsModule,
+    AttendanceModule,
   ],
 })
 export class AppModule {}
