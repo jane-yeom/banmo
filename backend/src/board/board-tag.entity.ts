@@ -8,9 +8,9 @@ export class BoardTag {
   @Column({ unique: true })
   name: string;
 
-  @Column({ default: 0 })
+  @Column({ name: 'use_count', default: 0 })
   useCount: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }
