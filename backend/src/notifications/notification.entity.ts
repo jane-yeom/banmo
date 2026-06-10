@@ -17,6 +17,7 @@ export enum NotificationType {
   FAVORITE_POST = 'FAVORITE_POST',
   SYSTEM = 'SYSTEM',
   NOTICE = 'NOTICE',
+  GRADE_UP = 'GRADE_UP',
 }
 
 @Entity('notifications')

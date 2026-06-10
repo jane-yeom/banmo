@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { X, Heart, Bell, Key, ClipboardList, Inbox, Download, ChevronRight } from 'lucide-react';
+import { X, Heart, Bell, Key, ClipboardList, Inbox, Download, ChevronRight, Calendar, Flame } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SubHeader from '@/components/layout/SubHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -182,6 +182,28 @@ export default function MyPage() {
     enabled: !!user && tab === 'received',
   });
 
+  interface AttendanceStatus {
+    todayChecked: boolean
+    streakDays: number
+    totalDays: number
+    recentDates: string[]
+  }
+
+  const { data: attendanceStatus, refetch: refetchAttendance } = useQuery({
+    queryKey: ['attendanceStatus'],
+    queryFn: () => apiClient.get<AttendanceStatus>('/attendance/status').then(r => r.data),
+    enabled: !!user,
+  })
+
+  const checkInMutation = useMutation({
+    mutationFn: () => apiClient.post('/attendance/check-in'),
+    onSuccess: () => {
+      toast.success('출석체크 완료! 신뢰점수 +1')
+      refetchAttendance()
+    },
+    onError: (e: any) => toast.error(e.response?.data?.message || '이미 출석했습니다'),
+  })
+
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: AppStatus }) =>
       apiClient.patch(`/applications/${id}/status`, { status }),
@@ -266,6 +288,54 @@ export default function MyPage() {
         >
           로그아웃
         </button>
+      </div>
+
+      {/* 출석체크 카드 */}
+      <div style={{
+        background: attendanceStatus?.todayChecked ? '#EAF6EF' : '#1C1C1C',
+        borderRadius: 16, padding: '16px 20px',
+        marginBottom: 20, display: 'flex',
+        alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 12,
+            background: attendanceStatus?.todayChecked ? '#5AAB7A' : 'rgba(255,255,255,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Calendar size={22} color={attendanceStatus?.todayChecked ? 'white' : '#9CA3AF'} />
+          </div>
+          <div>
+            <div style={{
+              fontSize: 14, fontWeight: 700,
+              color: attendanceStatus?.todayChecked ? '#1A5C35' : 'white',
+            }}>
+              {attendanceStatus?.todayChecked ? '오늘 출석 완료!' : '오늘 출석체크'}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+              <Flame size={13} color="#F97316" fill="#F97316" />
+              <span style={{
+                fontSize: 12,
+                color: attendanceStatus?.todayChecked ? '#5AAB7A' : '#9CA3AF',
+              }}>
+                {attendanceStatus?.streakDays ?? 0}일 연속 · 총 {attendanceStatus?.totalDays ?? 0}일
+              </span>
+            </div>
+          </div>
+        </div>
+        {!attendanceStatus?.todayChecked && (
+          <button
+            onClick={() => checkInMutation.mutate()}
+            disabled={checkInMutation.isPending}
+            style={{
+              background: 'white', color: '#1C1C1C',
+              border: 'none', borderRadius: 10,
+              padding: '8px 16px', fontSize: 13,
+              fontWeight: 700, cursor: 'pointer',
+            }}>
+            {checkInMutation.isPending ? '처리 중...' : '출석하기'}
+          </button>
+        )}
       </div>
 
       {/* 탭 */}
