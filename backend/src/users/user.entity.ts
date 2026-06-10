@@ -100,7 +100,13 @@ export class User {
   @Column({ type: 'simple-array', nullable: true, default: '' })
   instruments: string[];
 
-  @Column({ type: 'simple-array', nullable: true, default: '' })
+  @Column({ type: 'text', nullable: true, transformer: {
+    to: (value: string[]) => value ? JSON.stringify(value) : null,
+    from: (value: string) => {
+      if (!value) return []
+      try { return JSON.parse(value) } catch { return [] }
+    }
+  }})
   videoUrls: string[];
 
   @Column({

@@ -16,6 +16,7 @@ import { useAuthStore } from '@/store/auth.store';
 import apiClient from '@/lib/axios';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
 import PayBadge from '@/components/common/PayBadge';
+import ResumeViewer from '@/components/common/ResumeViewer';
 // TODO: 유료 기능 활성화시 주석 해제
 // import PremiumModal from '@/components/payment/PremiumModal';
 
@@ -133,6 +134,7 @@ export default function JobDetailPage() {
   const [isClosing, setIsClosing] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [detailTab, setDetailTab] = useState<'info' | 'applicants'>('info');
+  const [resumeUser, setResumeUser] = useState<any>(null);
   // TODO: 유료 기능 활성화시 주석 해제
   // const [showPremium, setShowPremium] = useState(false);
 
@@ -287,6 +289,12 @@ export default function JobDetailPage() {
           targetId={post.id}
           targetName={post.title}
           onClose={() => setShowReport(false)}
+        />
+      )}
+      {resumeUser && (
+        <ResumeViewer
+          user={resumeUser}
+          onClose={() => setResumeUser(null)}
         />
       )}
       {/* TODO: 유료 기능 활성화시 주석 해제
@@ -476,6 +484,15 @@ export default function JobDetailPage() {
                             )}
                           </div>
                           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                            <button onClick={() => setResumeUser(app.applicant)} style={{
+                              padding: '6px 12px',
+                              background: '#1C1C1C', color: 'white',
+                              border: 'none', borderRadius: 8,
+                              fontSize: 12, fontWeight: 600,
+                              cursor: 'pointer',
+                            }}>
+                              이력서 보기
+                            </button>
                             <Link
                               href={`/profile/${app.applicant.id}`}
                               style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, border: '1px solid #1C1C1C', color: '#1C1C1C', textDecoration: 'none' }}

@@ -12,6 +12,7 @@ import { User, Post } from '@/types';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
 import PostCard from '@/components/common/PostCard';
 import AttachmentViewer from '@/components/common/AttachmentViewer';
+import ResumeViewer from '@/components/common/ResumeViewer';
 import { extractYoutubeId, getYoutubeEmbedUrl, getYoutubeThumbnail } from '@/lib/youtube';
 import { Play, FileText, ChevronRight } from 'lucide-react';
 
@@ -138,6 +139,7 @@ export default function ProfilePage() {
   const isOwner = isMyProfile;
   const isRecruiter = false;
   const [showAttachment, setShowAttachment] = useState(false);
+  const [showResume, setShowResume] = useState(false);
   const videos = (user?.videoUrls ?? []).filter(v => v && extractYoutubeId(v));
   const instruments = user?.instruments?.filter(Boolean) ?? [];
 
@@ -159,6 +161,9 @@ export default function ProfilePage() {
 
   return (
     <>
+      {showResume && (
+        <ResumeViewer user={user} onClose={() => setShowResume(false)} />
+      )}
       <SubHeader title="프로필" />
       <div className="mx-auto max-w-2xl px-4 py-8 space-y-5">
 
@@ -200,14 +205,28 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {isMyProfile && (
-                <Link
-                  href="/profile/edit"
-                  className="mt-12 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100 transition-colors"
-                >
-                  프로필 편집
-                </Link>
-              )}
+              <div className="mt-12 flex gap-2">
+                <button onClick={() => setShowResume(true)} style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '6px 14px',
+                  background: '#1C1C1C', color: 'white',
+                  border: 'none', borderRadius: 8,
+                  fontSize: 12, fontWeight: 600,
+                  cursor: 'pointer',
+                }}>
+                  <FileText size={14} />
+                  이력서 보기
+                </button>
+                {isMyProfile && (
+                  <Link
+                    href="/profile/edit"
+                    className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100 transition-colors"
+                    style={{ display: 'flex', alignItems: 'center' }}
+                  >
+                    프로필 편집
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* 기본 정보 */}

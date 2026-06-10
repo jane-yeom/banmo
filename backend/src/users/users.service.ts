@@ -22,6 +22,10 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
+  profileImage?: string;
+
+  @IsOptional()
+  @IsString()
   bio?: string;
 
   @IsOptional()
@@ -44,6 +48,11 @@ export class UpdateProfileDto {
   @IsArray()
   @IsString({ each: true })
   instruments?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  videoUrls?: string[];
 
   @IsOptional()
   isBioPublic?: boolean;
@@ -142,19 +151,28 @@ export class UsersService {
 
   async updateProfile(id: string, dto: UpdateProfileDto): Promise<User> {
     const user = await this.usersRepository.findOneOrFail({ where: { id } });
+
+    console.log('[Users] 업데이트 전 videoUrls:', user.videoUrls);
+    console.log('[Users] 업데이트 할 videoUrls:', dto.videoUrls);
+
     if (dto.nickname !== undefined) user.nickname = dto.nickname;
+    if (dto.profileImage !== undefined) user.profileImage = dto.profileImage;
     if (dto.bio !== undefined) user.bio = dto.bio;
     if (dto.career !== undefined) (user as any).career = dto.career;
     if (dto.attachmentUrl !== undefined) (user as any).attachmentUrl = dto.attachmentUrl;
     if (dto.attachmentName !== undefined) (user as any).attachmentName = dto.attachmentName;
     if (dto.region !== undefined) user.region = dto.region;
     if (dto.instruments !== undefined) user.instruments = dto.instruments;
+    if (dto.videoUrls !== undefined) user.videoUrls = dto.videoUrls;
     if (dto.isBioPublic !== undefined) (user as any).isBioPublic = dto.isBioPublic;
     if (dto.isCareerPublic !== undefined) (user as any).isCareerPublic = dto.isCareerPublic;
     if (dto.isAttachmentPublic !== undefined) (user as any).isAttachmentPublic = dto.isAttachmentPublic;
     if (dto.isInstrumentsPublic !== undefined) (user as any).isInstrumentsPublic = dto.isInstrumentsPublic;
     if (dto.isRegionPublic !== undefined) (user as any).isRegionPublic = dto.isRegionPublic;
-    return this.usersRepository.save(user);
+
+    const saved = await this.usersRepository.save(user);
+    console.log('[Users] 저장 완료 videoUrls:', saved.videoUrls);
+    return saved;
   }
 
   async updateProfileImage(id: string, imageUrl: string): Promise<User> {
