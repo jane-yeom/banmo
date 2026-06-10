@@ -61,7 +61,7 @@ export class User {
   @Column({ nullable: true, unique: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: null })
   phone: string;
 
   @Column({ nullable: true })
