@@ -9,7 +9,8 @@ import { usePost } from '@/hooks/usePosts';
 import { useCreateChatRoom } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
-import ImageGallery from '@/components/common/ImageGallery';
+import dynamic from 'next/dynamic';
+const ImageGallery = dynamic(() => import('@/components/common/ImageGallery'), { ssr: false });
 import { MapPin, Music, Coins, Calendar, Eye, MessageCircle, Pencil, AlertCircle } from 'lucide-react';
 import ReportModal from '@/components/common/ReportModal';
 

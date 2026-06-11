@@ -72,7 +72,15 @@ export class PostsService {
 
     const qb = this.postsRepository
       .createQueryBuilder('post')
-      .leftJoinAndSelect('post.author', 'author');
+      .select([
+        'post.id', 'post.title', 'post.category',
+        'post.status', 'post.payText', 'post.payType', 'post.payMin',
+        'post.region', 'post.instruments', 'post.viewCount',
+        'post.createdAt', 'post.imageUrls', 'post.expiresAt',
+        'author.id', 'author.nickname', 'author.profileImage',
+        'author.noteGrade', 'author.isVerified',
+      ])
+      .leftJoin('post.author', 'author');
 
     if (authorId) {
       if (status === 'ALL') {

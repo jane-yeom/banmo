@@ -7,18 +7,18 @@ export class Attendance {
   id: string
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   user: User
 
-  @Column()
+  @Column({ name: 'user_id' })
   userId: string
 
   @Column({ type: 'date' })
   date: string
 
-  @Column({ default: 1 })
+  @Column({ name: 'streak_days', default: 1 })
   streakDays: number
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date
 }

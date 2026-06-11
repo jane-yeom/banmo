@@ -348,26 +348,31 @@ export default function HomePage() {
         const JOB_CATS = 'JOB_OFFER,JOB_SEEK,LESSON_OFFER,LESSON_SEEK,PERFORMANCE,AFTERSCHOOL,ETC';
         const PROMO_CATS = 'PROMO_CONCERT,PROMO_SPACE';
 
-        const [jobs, promo, hot, recent, tags] = await Promise.all([
-          api.get(`/posts?limit=3&categories=${JOB_CATS}`).catch(() => ({ data: { items: [] } })),
-          api.get(`/posts?limit=3&categories=${PROMO_CATS}`).catch(() => ({ data: { items: [] } })),
-          api.get('/board/hot').catch(() => ({ data: [] })),
-          api.get('/board?type=FREE&limit=5').catch(() => ({ data: { data: [] } })),
-          api.get('/board/tags/popular').catch(() => ({ data: [] })),
+        const [jobsRes, promoRes, hotRes, recentRes, tagsRes] = await Promise.allSettled([
+          api.get(`/posts?limit=5&status=ACTIVE&categories=${JOB_CATS}`),
+          api.get(`/posts?limit=4&status=ACTIVE&categories=${PROMO_CATS}`),
+          api.get('/board/hot'),
+          api.get('/board?type=FREE&limit=5'),
+          api.get('/board/tags/popular'),
         ]);
 
         const extract = (res: any) =>
           res.data?.items || res.data?.data || res.data?.posts ||
           (Array.isArray(res.data) ? res.data : []);
 
-        setJobPosts(extract(jobs));
-        setPromoPosts(extract(promo));
-        setHotBoards(Array.isArray(hot.data) ? hot.data : hot.data?.data || []);
-        const recentAll = recent.data?.data || (Array.isArray(recent.data) ? recent.data : []);
-        setRecentBoards(recentAll.slice(0, 5));
-        setPopularTags(Array.isArray(tags.data) ? tags.data : []);
-      } catch (e) {
-        console.error('홈 데이터 로딩 실패:', e);
+        if (jobsRes.status === 'fulfilled') setJobPosts(extract(jobsRes.value));
+        if (promoRes.status === 'fulfilled') setPromoPosts(extract(promoRes.value));
+        if (hotRes.status === 'fulfilled') {
+          const d = hotRes.value.data;
+          setHotBoards(Array.isArray(d) ? d : d?.data || []);
+        }
+        if (recentRes.status === 'fulfilled') {
+          const recentAll = recentRes.value.data?.data || (Array.isArray(recentRes.value.data) ? recentRes.value.data : []);
+          setRecentBoards(recentAll.slice(0, 5));
+        }
+        if (tagsRes.status === 'fulfilled') {
+          setPopularTags(Array.isArray(tagsRes.value.data) ? tagsRes.value.data : []);
+        }
       } finally {
         setLoading(false);
       }
