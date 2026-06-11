@@ -8,24 +8,24 @@ export class Review {
   id: string
 
   @ManyToOne(() => User, { onDelete: 'CASCADE', eager: false })
-  @JoinColumn({ name: 'reviewerId' })
+  @JoinColumn({ name: 'reviewer_id' })
   reviewer: User
 
-  @Column()
+  @Column({ name: 'reviewer_id' })
   reviewerId: string
 
   @ManyToOne(() => User, { onDelete: 'CASCADE', eager: false })
-  @JoinColumn({ name: 'revieweeId' })
+  @JoinColumn({ name: 'reviewee_id' })
   reviewee: User
 
-  @Column()
+  @Column({ name: 'reviewee_id' })
   revieweeId: string
 
   @ManyToOne(() => Post, { nullable: true, onDelete: 'SET NULL', eager: false })
-  @JoinColumn({ name: 'postId' })
+  @JoinColumn({ name: 'post_id' })
   post: Post
 
-  @Column({ nullable: true })
+  @Column({ name: 'post_id', nullable: true })
   postId: string
 
   @Column({ type: 'int' })
@@ -34,9 +34,9 @@ export class Review {
   @Column({ type: 'text', nullable: true })
   content: string
 
-  @Column({ default: true })
+  @Column({ name: 'is_public', default: true })
   isPublic: boolean
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date
 }

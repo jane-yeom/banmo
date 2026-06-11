@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Share2, Heart, MessageCircle, Send, Pencil, Trash2, CheckCircle, RotateCcw, MapPin, Music, Eye, Calendar, ClipboardList, AlertCircle, Users } from 'lucide-react';
 import Avatar from '@/components/common/Avatar';
-import ImageGallery from '@/components/common/ImageGallery';
+import dynamic from 'next/dynamic';
+const ImageGallery = dynamic(() => import('@/components/common/ImageGallery'), { ssr: false });
 import ReportModal from '@/components/common/ReportModal';
 import SubHeader from '@/components/layout/SubHeader';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,7 +17,7 @@ import { useAuthStore } from '@/store/auth.store';
 import apiClient from '@/lib/axios';
 import NoteGradeBadge from '@/components/common/NoteGradeBadge';
 import PayBadge from '@/components/common/PayBadge';
-import ResumeViewer from '@/components/common/ResumeViewer';
+const ResumeViewer = dynamic(() => import('@/components/common/ResumeViewer'), { ssr: false });
 // TODO: 유료 기능 활성화시 주석 해제
 // import PremiumModal from '@/components/payment/PremiumModal';
 

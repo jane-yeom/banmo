@@ -26,10 +26,10 @@ export function getSocket(token: string): Socket {
   _currentToken = token;
   _socket = io(WS_URL, {
     auth: { token },
-    transports: ['websocket', 'polling'],
+    transports: ['websocket'],
     reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000,
+    reconnectionAttempts: 3,
+    reconnectionDelay: 2000,
   });
 
   _socket.on('connect', () => {

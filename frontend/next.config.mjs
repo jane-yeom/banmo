@@ -12,7 +12,12 @@ const nextConfig = {
       { protocol: 'https', hostname: 'img.youtube.com' },
       { protocol: 'https', hostname: 'i.ytimg.com' },
     ],
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 86400,
   },
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: false,
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL,
