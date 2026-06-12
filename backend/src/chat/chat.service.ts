@@ -101,13 +101,14 @@ export class ChatService {
       throw new ForbiddenException('접근 권한이 없습니다.');
     }
 
+    // 상대방이 보낸 메시지만 읽음 처리 (내가 보낸 메시지는 건드리지 않음)
+    const otherId = room.senderId === userId ? room.receiverId : room.senderId;
     await this.messagesRepository.update(
-      { roomId, isRead: false },
+      { roomId, isRead: false, senderId: otherId },
       { isRead: true },
     );
-    if (room.receiverId === userId) {
-      await this.roomsRepository.update(roomId, { isRead: true });
-    }
+    // sender/receiver 모두 채팅방 열면 isRead 초기화 (양방향 읽음 처리)
+    await this.roomsRepository.update(roomId, { isRead: true });
   }
 
   async getReceiverId(roomId: string, senderId: string): Promise<string> {

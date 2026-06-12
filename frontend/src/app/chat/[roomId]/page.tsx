@@ -202,6 +202,8 @@ export default function ChatRoomPage() {
     const socket = getSocket(accessToken!);
     socket.emit('sendMessage', { roomId, content });
     setInput('');
+    // 새 메시지 보내면 상대방이 아직 안 읽었으므로 ✓✓ 초기화
+    setReadByOther(false);
     inputRef.current?.focus();
   }, [input, connected, accessToken, roomId]);
 
@@ -213,6 +215,7 @@ export default function ChatRoomPage() {
       const url = await uploadImage(file);
       const socket = getSocket(accessToken!);
       socket.emit('sendImage', { roomId, imageUrl: url });
+      setReadByOther(false);
     } catch {
       toast.error('이미지 전송 실패');
     } finally {
@@ -568,7 +571,8 @@ export default function ChatRoomPage() {
                   {/* 시간 + 읽음 표시 */}
                   {showTime && (
                     <div className={`flex items-center gap-1 px-1 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
-                      {isMine && (
+                      {/* ✓/✓✓ 는 내 메시지 중 마지막 메시지에만 표시 */}
+                      {isMine && isLast && (
                         <span className={`text-xs ${readByOther ? 'text-purple-400' : 'text-gray-300'}`}>
                           {readByOther ? '✓✓' : '✓'}
                         </span>

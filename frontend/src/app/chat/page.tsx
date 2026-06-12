@@ -50,11 +50,10 @@ export default function ChatListPage() {
   }, [accessToken, qc]);
 
   // 읽지 않은 방 수 계산 → 전역 스토어 업데이트
+  // isRead:false 인 방은 sender/receiver 모두 안읽음으로 처리
   useEffect(() => {
     if (!rooms || !user) return;
-    const count = rooms.filter(
-      (r) => !r.isRead && r.receiver.id === user.id,
-    ).length;
+    const count = rooms.filter((r) => !r.isRead).length;
     setUnreadCount(count);
   }, [rooms, user, setUnreadCount]);
 
@@ -96,7 +95,8 @@ export default function ChatListPage() {
         <div className="bg-white divide-y divide-gray-100 sm:rounded-2xl sm:border sm:border-gray-100 sm:shadow-sm overflow-hidden">
           {sortedRooms.map((room) => {
             const other = getOtherUser(room);
-            const isUnread = !room.isRead && room.receiver.id === user?.id;
+            // isRead:false면 나(sender든 receiver든)가 아직 안 읽은 메시지 있음
+            const isUnread = !room.isRead;
             return (
               <Link
                 key={room.id}

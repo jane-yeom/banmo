@@ -233,15 +233,33 @@ describe('ChatService', () => {
         .rejects.toThrow(ForbiddenException);
     });
 
-    it('읽음 처리 성공', async () => {
+    it('읽음 처리 성공 - receiver가 읽으면 sender 메시지만 읽음 처리', async () => {
       mockRoomRepository.findOne.mockResolvedValue(mockRoom);
       mockMessageRepository.update.mockResolvedValue(undefined);
+      mockRoomRepository.update.mockResolvedValue(undefined);
 
       await expect(service.markAsRead(RECEIVER_ID, ROOM_ID)).resolves.not.toThrow();
+      // receiver가 읽으면 sender(상대방)가 보낸 메시지만 isRead:true
       expect(mockMessageRepository.update).toHaveBeenCalledWith(
-        { roomId: ROOM_ID, isRead: false },
+        { roomId: ROOM_ID, isRead: false, senderId: SENDER_ID },
         { isRead: true },
       );
+      // 채팅방 isRead도 true로 갱신
+      expect(mockRoomRepository.update).toHaveBeenCalledWith(ROOM_ID, { isRead: true });
+    });
+
+    it('읽음 처리 성공 - sender가 읽어도 isRead 갱신됨', async () => {
+      mockRoomRepository.findOne.mockResolvedValue(mockRoom);
+      mockMessageRepository.update.mockResolvedValue(undefined);
+      mockRoomRepository.update.mockResolvedValue(undefined);
+
+      await expect(service.markAsRead(SENDER_ID, ROOM_ID)).resolves.not.toThrow();
+      // sender가 읽으면 receiver(상대방)가 보낸 메시지만 isRead:true
+      expect(mockMessageRepository.update).toHaveBeenCalledWith(
+        { roomId: ROOM_ID, isRead: false, senderId: RECEIVER_ID },
+        { isRead: true },
+      );
+      expect(mockRoomRepository.update).toHaveBeenCalledWith(ROOM_ID, { isRead: true });
     });
   });
 });
