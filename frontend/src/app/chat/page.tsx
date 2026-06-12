@@ -32,7 +32,7 @@ export default function ChatListPage() {
   const qc = useQueryClient();
 
   useEffect(() => {
-    if (!user) { router.push('/login'); return; }
+    if (!user) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
   }, [user, router]);
 
   // 소켓 연결 + roomUpdated 이벤트로 목록 갱신

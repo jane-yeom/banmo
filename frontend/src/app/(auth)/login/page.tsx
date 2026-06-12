@@ -6,11 +6,27 @@ import { kakaoLogin } from '@/lib/kakao'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { isLoggedIn } = useAuthStore()
+  const { isLoggedIn, logout } = useAuthStore()
 
   useEffect(() => {
-    if (isLoggedIn) router.replace('/')
-  }, [isLoggedIn])
+    if (!isLoggedIn) return
+
+    // Zustand persist에 isLoggedIn:true가 남아있어도
+    // 실제 토큰(쿠키 or localStorage)이 없으면 stale 상태 → 초기화
+    const hasToken =
+      localStorage.getItem('accessToken') ||
+      document.cookie.split(';').some((c) => c.trim().startsWith('accessToken='))
+
+    if (hasToken) {
+      // 로그인 상태 정상 → 홈으로
+      const params = new URLSearchParams(window.location.search)
+      const redirect = params.get('redirect')
+      router.replace(redirect || '/')
+    } else {
+      // Zustand stale 상태 → 초기화 후 로그인 페이지 유지
+      logout()
+    }
+  }, [isLoggedIn, logout, router])
 
   return (
     <div style={{

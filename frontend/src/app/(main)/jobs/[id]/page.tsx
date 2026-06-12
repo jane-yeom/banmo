@@ -172,7 +172,7 @@ export default function JobDetailPage() {
   });
 
   const handleFavorite = () => {
-    if (!user) { router.push('/login'); return; }
+    if (!user) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
     favMutation.mutate();
   };
 
@@ -186,7 +186,7 @@ export default function JobDetailPage() {
   });
 
   const handleChat = async () => {
-    if (!user) { router.push('/login'); return; }
+    if (!user) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
     if (!post) return;
     try {
       const room = await createRoom.mutateAsync({ receiverId: post.author.id, postId: post.id });
@@ -603,7 +603,7 @@ export default function JobDetailPage() {
               {canApply && post.status !== 'CLOSED' && (
                 <button
                   onClick={() => {
-                    if (!user) { router.push('/login'); return; }
+                    if (!user) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
                     setShowApply(true);
                   }}
                   className="flex-1 rounded-xl border-2 py-3.5 text-base font-semibold transition-colors"

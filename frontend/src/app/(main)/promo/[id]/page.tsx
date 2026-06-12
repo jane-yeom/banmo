@@ -28,7 +28,7 @@ export default function PromoDetailPage() {
   const [showReport, setShowReport] = useState(false);
 
   const handleChat = async () => {
-    if (!user) { router.push('/login'); return; }
+    if (!user) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
     if (!post) return;
     const room = await createRoom.mutateAsync({ receiverId: post.author.id, postId: post.id });
     router.push(`/chat/${room.id}`);
