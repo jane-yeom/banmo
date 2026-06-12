@@ -4,6 +4,9 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'k.kakaocdn.net' },
       { protocol: 'https', hostname: '*.kakaocdn.net' },
+      // Kakao 프로필 이미지 URL이 http:// 로 오는 경우 대응
+      { protocol: 'http', hostname: 'k.kakaocdn.net' },
+      { protocol: 'http', hostname: '*.kakaocdn.net' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: '*.railway.app' },
       { protocol: 'https', hostname: 'pub-0f7951488c3d49b498e60ef2261a7fbe.r2.dev' },
