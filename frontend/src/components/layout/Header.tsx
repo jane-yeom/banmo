@@ -229,6 +229,7 @@ export default function Header() {
             <button
               onClick={() => setMenuOpen(true)}
               className="mobile-menu-btn"
+              aria-label="메뉴 열기"
               style={{
                 background: 'none', border: 'none',
                 cursor: 'pointer', padding: '4px 8px',
@@ -271,7 +272,7 @@ export default function Header() {
         }}>
           <img src="/banmo-logo.png" alt="반모"
             style={{ height: 28, width: 'auto', mixBlendMode: 'multiply' }}/>
-          <button onClick={() => setMenuOpen(false)} style={{
+          <button onClick={() => setMenuOpen(false)} aria-label="메뉴 닫기" style={{
             background: 'none', border: 'none',
             cursor: 'pointer', color: '#6B7280',
             display: 'flex', alignItems: 'center', padding: 4,

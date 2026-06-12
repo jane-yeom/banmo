@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 
 // ─── mocks ────────────────────────────────────────────────────────────────────
 jest.mock('next/navigation', () => ({
@@ -76,7 +76,6 @@ describe('모바일 헤더', () => {
 
   it('로고가 렌더링된다 (헤더 + 드로어 2개)', () => {
     render(<Header />)
-    // 헤더 로고 + 드로어 로고 = 2개
     const logos = screen.getAllByAltText('반모')
     expect(logos.length).toBeGreaterThanOrEqual(1)
     expect(logos[0]).toBeInTheDocument()
@@ -84,14 +83,13 @@ describe('모바일 헤더', () => {
 
   it('햄버거 메뉴 버튼이 보인다', () => {
     render(<Header />)
-    const menuBtn = screen.getByText('☰')
+    const menuBtn = screen.getByRole('button', { name: '메뉴 열기' })
     expect(menuBtn).toBeInTheDocument()
   })
 
   it('햄버거 버튼 클릭시 드로어 메뉴가 열린다', () => {
     render(<Header />)
-    fireEvent.click(screen.getByText('☰'))
-    // 드로어 내 네비 항목들 확인 (여러 개일 수 있으므로 getAllByText)
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
     const navItems = screen.getAllByText('구인구직')
     expect(navItems.length).toBeGreaterThanOrEqual(1)
     const boardItems = screen.getAllByText('게시판')
@@ -100,16 +98,15 @@ describe('모바일 헤더', () => {
 
   it('드로어에서 X 버튼 클릭시 닫힌다', () => {
     render(<Header />)
-    fireEvent.click(screen.getByText('☰'))
-    fireEvent.click(screen.getByText('✕'))
-    // 드로어 컨테이너가 여전히 DOM에 있지만 transform으로 숨겨짐
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 닫기' }))
     const loginLink = screen.getByText('카카오로 로그인')
     expect(loginLink).toBeInTheDocument()
   })
 
   it('비로그인시 드로어에 로그인 버튼이 표시된다', () => {
     render(<Header />)
-    fireEvent.click(screen.getByText('☰'))
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
     expect(screen.getByText('카카오로 로그인')).toBeInTheDocument()
   })
 
@@ -129,8 +126,7 @@ describe('모바일 헤더', () => {
       accessToken: 'token',
     }
     render(<Header />)
-    fireEvent.click(screen.getByText('☰'))
-    // 닉네임이 드로어와 헤더 우측 모두에 표시될 수 있음
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
     const nicknames = screen.getAllByText('김피아노유저')
     expect(nicknames.length).toBeGreaterThanOrEqual(1)
   })
@@ -151,7 +147,7 @@ describe('모바일 헤더', () => {
       accessToken: 'token',
     }
     render(<Header />)
-    fireEvent.click(screen.getByText('☰'))
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
     expect(screen.getByText('♩ 4분음표')).toBeInTheDocument()
   })
 
@@ -171,18 +167,15 @@ describe('모바일 헤더', () => {
       accessToken: 'token',
     }
     render(<Header />)
-    fireEvent.click(screen.getByText('☰'))
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
     fireEvent.click(screen.getByText('로그아웃'))
     expect(mockLogout).toHaveBeenCalled()
   })
 
   it('ESC 키로 드로어가 닫힌다', () => {
     render(<Header />)
-    fireEvent.click(screen.getByText('☰'))
-    // 드로어가 열린 상태 확인 (오버레이 존재)
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
     fireEvent.keyDown(window, { key: 'Escape' })
-    // ESC 후 오버레이가 사라짐 (렌더 조건이 menuOpen인 overlay)
-    // 닫힘을 드로어의 transform 스타일로 간접 확인
     expect(screen.queryByText('배경없음')).not.toBeInTheDocument()
   })
 
@@ -202,7 +195,7 @@ describe('모바일 헤더', () => {
       accessToken: 'token',
     }
     render(<Header />)
-    fireEvent.click(screen.getByText('☰'))
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
     expect(screen.getByText('마이페이지')).toBeInTheDocument()
     expect(screen.getByText('채팅')).toBeInTheDocument()
     expect(screen.getByText('즐겨찾기')).toBeInTheDocument()
@@ -218,7 +211,7 @@ describe('모바일 헤더', () => {
       accessToken: 'token',
     }
     render(<Header />)
-    fireEvent.click(screen.getByText('☰'))
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
     expect(screen.getByText('♩ 2분음표')).toBeInTheDocument()
   })
 })

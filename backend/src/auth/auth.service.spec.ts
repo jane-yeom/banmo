@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -14,18 +14,24 @@ describe('AuthService', () => {
 
   const mockUser = {
     id: 'user-uuid-1',
+    username: 'testuser',
     email: 'test@test.com',
     password: '$2b$10$hashedpassword',
     nickname: '테스터',
     role: 'USER',
     isBanned: false,
+    isEmailVerified: true,
   };
 
   const mockUsersService = {
     findByEmail: jest.fn(),
+    findByUsername: jest.fn(),
+    findByNickname: jest.fn(),
     findByKakaoId: jest.fn(),
     createEmailUser: jest.fn(),
     createKakaoUser: jest.fn(),
+    saveResetToken: jest.fn(),
+    updateVerifyToken: jest.fn().mockResolvedValue(undefined),
   };
 
   const mockKakaoUser = {
@@ -62,42 +68,57 @@ describe('AuthService', () => {
 
   // ─── 이메일 인증 테스트 ──────────────────────────────────────────
   describe('이메일 인증', () => {
-    it('회원가입 성공', async () => {
+    it('회원가입 성공 - 이메일 인증 메일 발송', async () => {
+      mockUsersService.findByUsername.mockResolvedValue(null);
       mockUsersService.findByEmail.mockResolvedValue(null);
+      mockUsersService.findByNickname.mockResolvedValue(null);
       mockUsersService.createEmailUser.mockResolvedValue(mockUser);
 
       const result = await service.register({
+        username: 'testuser',
         email: 'new@test.com',
         password: 'password123!',
         nickname: '새유저',
-        instruments: [],
       });
 
       expect(result).toBeDefined();
-      expect(result.accessToken).toBe('mock.jwt.token');
-      expect(result.user).toBeDefined();
+      expect(result.message).toBeDefined();
     });
 
     it('중복 이메일 회원가입 실패', async () => {
+      mockUsersService.findByUsername.mockResolvedValue(null);
       mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
       await expect(
         service.register({
+          username: 'testuser',
           email: 'test@test.com',
           password: 'password123!',
           nickname: '테스터',
-          instruments: [],
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(ConflictException);
     });
 
-    it('이메일 로그인 성공', async () => {
+    it('중복 아이디 회원가입 실패', async () => {
+      mockUsersService.findByUsername.mockResolvedValue(mockUser);
+
+      await expect(
+        service.register({
+          username: 'testuser',
+          email: 'new@test.com',
+          password: 'password123!',
+          nickname: '새유저',
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('이메일(username) 로그인 성공', async () => {
       const hashed = await bcrypt.hash('correct_password', 10);
       const userWithHash = { ...mockUser, password: hashed };
-      mockUsersService.findByEmail.mockResolvedValue(userWithHash);
+      mockUsersService.findByUsername.mockResolvedValue(userWithHash);
 
       const result = await service.emailLogin({
-        email: 'test@test.com',
+        username: 'testuser',
         password: 'correct_password',
       });
 
@@ -109,22 +130,37 @@ describe('AuthService', () => {
     it('잘못된 비밀번호 로그인 실패', async () => {
       const hashed = await bcrypt.hash('correct_password', 10);
       const userWithHash = { ...mockUser, password: hashed };
-      mockUsersService.findByEmail.mockResolvedValue(userWithHash);
+      mockUsersService.findByUsername.mockResolvedValue(userWithHash);
+      mockUsersService.findByEmail.mockResolvedValue(null);
 
       await expect(
         service.emailLogin({
-          email: 'test@test.com',
+          username: 'testuser',
           password: 'wrong_password',
         }),
       ).rejects.toThrow(UnauthorizedException);
     });
 
-    it('존재하지 않는 이메일 로그인 실패', async () => {
+    it('존재하지 않는 계정 로그인 실패', async () => {
+      mockUsersService.findByUsername.mockResolvedValue(null);
       mockUsersService.findByEmail.mockResolvedValue(null);
 
       await expect(
         service.emailLogin({
-          email: 'notexist@test.com',
+          username: 'notexist',
+          password: 'password123!',
+        }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('이메일 미인증 계정 로그인 실패', async () => {
+      const hashed = await bcrypt.hash('password123!', 10);
+      const unverifiedUser = { ...mockUser, password: hashed, isEmailVerified: false };
+      mockUsersService.findByUsername.mockResolvedValue(unverifiedUser);
+
+      await expect(
+        service.emailLogin({
+          username: 'testuser',
           password: 'password123!',
         }),
       ).rejects.toThrow(UnauthorizedException);
@@ -133,17 +169,16 @@ describe('AuthService', () => {
     it('JWT 토큰 발급 확인', async () => {
       const hashed = await bcrypt.hash('password123!', 10);
       const userWithHash = { ...mockUser, password: hashed };
-      mockUsersService.findByEmail.mockResolvedValue(userWithHash);
+      mockUsersService.findByUsername.mockResolvedValue(userWithHash);
 
       const result = await service.emailLogin({
-        email: 'test@test.com',
+        username: 'testuser',
         password: 'password123!',
       });
 
       expect(mockJwtService.sign).toHaveBeenCalledWith(
         expect.objectContaining({
           sub: mockUser.id,
-          email: mockUser.email,
           role: mockUser.role,
         }),
       );
