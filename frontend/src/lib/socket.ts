@@ -26,9 +26,12 @@ export function getSocket(token: string): Socket {
   _currentToken = token;
   _socket = io(WS_URL, {
     auth: { token },
-    transports: ['websocket'],
+    // polling을 먼저 사용해 연결 수립 후 websocket으로 업그레이드.
+    // wss:// 직접 연결 시 SSL 인증서 문제(ERR_CERT_COMMON_NAME_INVALID)를 우회:
+    // Cloudflare가 HTTP polling은 중계하지만 WebSocket upgrade는 별도 설정 필요.
+    transports: ['polling', 'websocket'],
     reconnection: true,
-    reconnectionAttempts: 3,
+    reconnectionAttempts: 5,
     reconnectionDelay: 2000,
   });
 
