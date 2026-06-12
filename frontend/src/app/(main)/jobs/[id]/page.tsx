@@ -188,8 +188,14 @@ export default function JobDetailPage() {
   const handleChat = async () => {
     if (!user) { router.push('/login'); return; }
     if (!post) return;
-    const room = await createRoom.mutateAsync({ receiverId: post.author.id, postId: post.id });
-    router.push(`/chat/${room.id}`);
+    try {
+      const room = await createRoom.mutateAsync({ receiverId: post.author.id, postId: post.id });
+      if (!room?.id) throw new Error('채팅방 생성 실패');
+      router.push(`/chat/${room.id}`);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? err?.message ?? '채팅방을 열 수 없습니다. 다시 시도해주세요.';
+      toast.error(msg);
+    }
   };
 
   const handleDelete = () => {

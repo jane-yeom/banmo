@@ -31,10 +31,12 @@ export class ChatService {
     const saved = await this.roomsRepository.save(room);
 
     // eager relation이 save() 후 자동 로딩 안 될 수 있으므로 재조회
-    return this.roomsRepository.findOne({
+    const found = await this.roomsRepository.findOne({
       where: { id: saved.id },
       relations: ['post'],
-    }) as Promise<ChatRoom>;
+    });
+    if (!found) throw new NotFoundException('채팅방 생성 후 조회에 실패했습니다.');
+    return found;
   }
 
   async getMyRooms(userId: string): Promise<ChatRoom[]> {

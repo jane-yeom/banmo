@@ -30,7 +30,15 @@ apiClient.interceptors.response.use(
       // 로그인/회원가입/콜백 페이지에서는 리다이렉트 안 함
       const path = window.location.pathname;
       if (path !== '/login' && path !== '/signup' && !path.startsWith('/auth/')) {
+        // localStorage + cookie + Zustand 상태 모두 초기화
+        // (Zustand만 남으면 로그인 페이지가 isLoggedIn:true 보고 /로 재리다이렉트됨)
         localStorage.removeItem('accessToken');
+        document.cookie = 'accessToken=;max-age=0;path=/';
+        try {
+          // Zustand 스토어를 훅 없이 직접 접근 (인터셉터는 React 외부)
+          const { useAuthStore } = require('@/store/auth.store');
+          useAuthStore.getState().logout();
+        } catch {}
         window.location.href = '/login';
       }
     }
