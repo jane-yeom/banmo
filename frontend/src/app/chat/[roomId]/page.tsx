@@ -60,7 +60,6 @@ export default function ChatRoomPage() {
   const { data: initialMessages } = useChatMessages(roomId);
   const [room, setRoom] = useState<RoomInfo | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [readByOther, setReadByOther] = useState(false); // 상대방이 읽었는지
   const [input, setInput] = useState('');
   const [connected, setConnected] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -168,8 +167,12 @@ export default function ChatRoomPage() {
 
     const onMessagesRead = ({ userId }: { roomId: string; userId: string }) => {
       if (userId !== user?.id) {
-        // 상대방이 읽음 → 내 메시지 전부 ✓✓ 표시
-        setReadByOther(true);
+        // 상대방이 읽음 → 내가 보낸 메시지들의 isRead를 true로 갱신
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.sender.id === user?.id ? { ...m, isRead: true } : m,
+          ),
+        );
       }
     };
 
@@ -202,8 +205,6 @@ export default function ChatRoomPage() {
     const socket = getSocket(accessToken!);
     socket.emit('sendMessage', { roomId, content });
     setInput('');
-    // 새 메시지 보내면 상대방이 아직 안 읽었으므로 ✓✓ 초기화
-    setReadByOther(false);
     inputRef.current?.focus();
   }, [input, connected, accessToken, roomId]);
 
@@ -215,7 +216,6 @@ export default function ChatRoomPage() {
       const url = await uploadImage(file);
       const socket = getSocket(accessToken!);
       socket.emit('sendImage', { roomId, imageUrl: url });
-      setReadByOther(false);
     } catch {
       toast.error('이미지 전송 실패');
     } finally {
@@ -238,12 +238,6 @@ export default function ChatRoomPage() {
       : room.sender
     : null;
 
-  // 초기 읽음 여부 (마지막 메시지가 내 것이고 isRead인 경우)
-  useEffect(() => {
-    if (!messages.length || !user) return;
-    const myLastMsg = [...messages].reverse().find((m) => m.sender.id === user.id);
-    if (myLastMsg?.isRead) setReadByOther(true);
-  }, [messages, user]);
 
   return (
     <div className="flex h-[100dvh] flex-col bg-gray-50" onClick={() => showMenu && setShowMenu(false)}>
@@ -571,10 +565,19 @@ export default function ChatRoomPage() {
                   {/* 시간 + 읽음 표시 */}
                   {showTime && (
                     <div className={`flex items-center gap-1 px-1 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
-                      {/* ✓/✓✓ 는 내 메시지 중 마지막 메시지에만 표시 */}
-                      {isMine && isLast && (
-                        <span className={`text-xs ${readByOther ? 'text-purple-400' : 'text-gray-300'}`}>
-                          {readByOther ? '✓✓' : '✓'}
+                      {/* 내 메시지: 안읽음이면 "1" 배지, 읽었으면 "읽음" */}
+                      {isMine && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            lineHeight: 1,
+                            color: msg.isRead ? '#9CA3AF' : '#F59E0B',
+                            minWidth: 14,
+                            textAlign: 'center',
+                          }}
+                        >
+                          {msg.isRead ? '읽음' : '1'}
                         </span>
                       )}
                       <p className="text-xs text-gray-400">{formatTime(msg.createdAt)}</p>

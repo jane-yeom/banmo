@@ -16,12 +16,19 @@ messaging.onBackgroundMessage((payload) => {
   const title = payload.notification?.title || '반모 알림';
   const body = payload.notification?.body || '';
   const link = payload.data?.link || '/';
+  const badgeCount = parseInt(payload.data?.badgeCount || '1', 10);
+
+  // 앱 아이콘 배지 숫자 표시 (iOS Safari 16.4+, Chrome/Edge 지원)
+  if (self.navigator?.setAppBadge) {
+    self.navigator.setAppBadge(badgeCount).catch(() => {});
+  }
 
   self.registration.showNotification(title, {
     body,
-    icon: '/banmo-logo.png',
-    badge: '/banmo-logo.png',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png', // 단색 마스크 아이콘 (Android 상단 바)
     data: { link },
+    vibrate: [200, 100, 200],
   });
 });
 
