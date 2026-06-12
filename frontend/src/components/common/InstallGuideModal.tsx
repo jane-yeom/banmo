@@ -1,66 +1,88 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { X } from 'lucide-react'
+import { X, ExternalLink } from 'lucide-react'
 
 interface InstallGuideModalProps {
   onClose: () => void
 }
 
+const BANMO_URL = 'https://banmo.kr'
+
 const iosSteps = [
   {
     icon: '🧭',
     title: 'Safari로 접속',
-    desc: 'Safari 브라우저로\nbamno.kr 에 접속해주세요',
+    desc: 'Safari 브라우저로\nbanmo.kr 에 접속해주세요',
     tip: '크롬 등 다른 브라우저에서는 설치가 안 돼요',
+    hasBrowserBtn: true,
   },
   {
     icon: '📤',
     title: '공유 버튼 탭',
     desc: '하단 가운데 공유 버튼(📤)을\n탭해주세요',
     tip: '주소창 아래 툴바에 있어요',
+    hasBrowserBtn: false,
   },
   {
     icon: '➕',
     title: '"홈 화면에 추가" 탭',
     desc: '스크롤을 내려\n"홈 화면에 추가"를 탭해주세요',
     tip: '아이콘과 함께 표시돼요',
+    hasBrowserBtn: false,
   },
   {
     icon: '✅',
     title: '추가 완료!',
     desc: '우측 상단 "추가"를 탭하면\n홈 화면에 반모 아이콘이 생겨요!',
     tip: '이제 앱처럼 사용할 수 있어요 🎉',
+    hasBrowserBtn: false,
   },
 ]
 
 const androidSteps = [
   {
     icon: '🌐',
-    title: 'Chrome으로 접속',
-    desc: 'Chrome 브라우저로\nbamno.kr 에 접속해주세요',
-    tip: '안드로이드 기본 브라우저예요',
+    title: '기본 브라우저로 접속',
+    desc: '기본 브라우저(Chrome 등)로\nbanmo.kr 에 접속해주세요',
+    tip: '삼성 인터넷, Chrome 모두 지원돼요',
+    hasBrowserBtn: true,
   },
   {
     icon: '⋮',
     title: '메뉴 버튼 탭',
     desc: '주소창 오른쪽\n점 세개(⋮) 버튼을 탭해주세요',
     tip: '화면 우측 상단에 있어요',
+    hasBrowserBtn: false,
   },
   {
     icon: '📲',
     title: '"앱 설치" 선택',
     desc: '메뉴에서 "앱 설치" 또는\n"홈 화면에 추가"를 탭해주세요',
     tip: '"앱 설치"가 없으면 "홈 화면에 추가"를 선택하세요',
+    hasBrowserBtn: false,
   },
   {
     icon: '✅',
     title: '설치 완료!',
     desc: '"설치" 버튼을 탭하면\n홈 화면에 반모 아이콘이 생겨요!',
     tip: '이제 앱처럼 사용할 수 있어요 🎉',
+    hasBrowserBtn: false,
   },
 ]
 
 type Os = 'ios' | 'android' | 'other'
+
+/** OS에 맞는 외부 브라우저로 banmo.kr 열기 */
+function openInBrowser(os: Os) {
+  if (os === 'android') {
+    // Android: Chrome intent → 설치 안됐으면 기본 브라우저로 폴백
+    const intentUrl = `intent://${BANMO_URL.replace('https://', '')}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(BANMO_URL)};end`
+    window.location.href = intentUrl
+  } else {
+    // iOS: Safari가 기본 브라우저 — _blank로 열면 Safari에서 열림
+    window.open(BANMO_URL, '_blank', 'noopener,noreferrer')
+  }
+}
 
 export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
   const [os, setOs] = useState<Os>('other')
@@ -84,6 +106,9 @@ export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
     os === 'ios' ? 'iPhone / iPad 기준' :
     os === 'android' ? 'Android 기준' :
     'PC에서는 모바일로 접속해주세요'
+
+  const browserBtnLabel =
+    os === 'ios' ? 'Safari에서 열기 →' : '브라우저에서 열기 →'
 
   return (
     <div
@@ -136,7 +161,7 @@ export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
                 🍎 iPhone
               </div>
               <div style={{ fontSize: 13, color: '#555', lineHeight: 1.7, marginBottom: 16 }}>
-                1. Safari로 bamno.kr 접속<br/>
+                1. Safari로 banmo.kr 접속<br/>
                 2. 하단 공유 버튼(📤) 탭<br/>
                 3. "홈 화면에 추가" 탭<br/>
                 4. "추가" 탭
@@ -145,7 +170,7 @@ export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
                 🤖 Android
               </div>
               <div style={{ fontSize: 13, color: '#555', lineHeight: 1.7 }}>
-                1. Chrome으로 bamno.kr 접속<br/>
+                1. Chrome으로 banmo.kr 접속<br/>
                 2. 우측 상단 ⋮ 탭<br/>
                 3. "앱 설치" 또는 "홈 화면에 추가" 탭<br/>
                 4. "설치" 탭
@@ -153,7 +178,7 @@ export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
             </div>
             <p style={{ fontSize: 12, color: '#9CA3AF', lineHeight: 1.6 }}>
               스마트폰으로 QR 코드를 스캔하거나<br/>
-              주소창에 bamno.kr 을 직접 입력해주세요
+              주소창에 banmo.kr 을 직접 입력해주세요
             </p>
           </div>
         ) : (
@@ -196,6 +221,24 @@ export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
               }}>
                 💡 {currentStep.tip}
               </div>
+
+              {/* 브라우저 바로 열기 버튼 (1단계에만 표시) */}
+              {currentStep.hasBrowserBtn && (
+                <button
+                  onClick={() => openInBrowser(os)}
+                  style={{
+                    marginTop: 16,
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    padding: '10px 20px',
+                    background: '#1C1C1C', color: 'white',
+                    border: 'none', borderRadius: 10,
+                    fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
+                  <ExternalLink size={15} strokeWidth={2} />
+                  {browserBtnLabel}
+                </button>
+              )}
             </div>
 
             {/* 스텝 목록 (미니) */}
@@ -256,15 +299,17 @@ export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
                 </button>
               ) : (
                 <button
-                  onClick={onClose}
+                  onClick={() => openInBrowser(os)}
                   style={{
                     flex: 1, padding: '14px',
                     background: '#1C1C1C', border: 'none',
                     borderRadius: 12, fontSize: 15, fontWeight: 700,
                     color: 'white', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   }}
                 >
-                  설치하러 가기 🎉
+                  <ExternalLink size={16} strokeWidth={2} />
+                  {os === 'ios' ? 'Safari에서 설치하기 🎉' : '브라우저에서 설치하기 🎉'}
                 </button>
               )}
             </div>
