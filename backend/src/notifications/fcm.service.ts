@@ -42,7 +42,7 @@ export class FcmService {
 
   async sendToDevice(
     token: string,
-    notification: { title: string; body: string; link?: string },
+    notification: { title: string; body: string; link?: string; badgeCount?: number },
   ): Promise<boolean> {
     if (!this.app) return false;
 
@@ -54,6 +54,11 @@ export class FcmService {
         notification: {
           title: notification.title,
           body: notification.body,
+        },
+        // data 필드: 서비스워커에서 배지 카운트 수신용 (문자열만 허용)
+        data: {
+          link: notification.link ?? '/',
+          badgeCount: String(notification.badgeCount ?? 1),
         },
         webpush: {
           fcmOptions: {

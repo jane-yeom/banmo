@@ -140,10 +140,15 @@ export class NotificationsService {
 
       // FCM 푸시
       if (setting.pushEnabled && setting.fcmToken) {
+        // 이 알림 포함한 미읽음 수 계산 → 배지 카운트로 전달
+        const unreadCount = await this.notificationRepo.count({
+          where: { recipientId: dto.recipientId, isRead: false },
+        });
         const sent = await this.fcmService.sendToDevice(setting.fcmToken, {
           title: dto.title,
           body: dto.body,
           link: dto.link,
+          badgeCount: unreadCount,
         });
         if (!sent) {
           // 만료된 토큰 삭제
