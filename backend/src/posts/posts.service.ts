@@ -127,9 +127,7 @@ export class PostsService {
     if (!post) throw new NotFoundException('공고를 찾을 수 없습니다.');
 
     if (!userId || userId !== post.author.id) {
-      await this.postsRepository.update(id, {
-        viewCount: () => 'view_count + 1',
-      });
+      await this.postsRepository.increment({ id }, 'viewCount', 1);
       post.viewCount += 1;
     }
     return post;
