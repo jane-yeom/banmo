@@ -13,6 +13,8 @@ describe('PostsService', () => {
   const getManyAndCountMock = jest.fn().mockResolvedValue([[], 0]);
 
   const mockQb = {
+    select: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
     leftJoinAndSelect: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
@@ -28,6 +30,7 @@ describe('PostsService', () => {
     save: jest.fn(),
     findOne: jest.fn(),
     remove: jest.fn(),
+    update: jest.fn().mockResolvedValue(undefined),
     increment: jest.fn().mockResolvedValue(undefined),
     createQueryBuilder: jest.fn(() => mockQb),
   };
@@ -73,14 +76,14 @@ describe('PostsService', () => {
     });
 
     it('공고 상세 조회 + 조회수 증가', async () => {
-      const mockPost = { id: '1', title: '공고', viewCount: 3, authorId: 'user-1' };
+      const mockPost = { id: '1', title: '공고', viewCount: 3, authorId: 'user-1', author: { id: 'author-1' } };
       mockPostRepository.findOne.mockResolvedValue(mockPost);
-      mockPostRepository.increment.mockResolvedValue(undefined);
+      mockPostRepository.update.mockResolvedValue(undefined);
 
-      const result = await service.findOne('1');
+      const result = await service.findOne('1', 'other-user');
       expect(result).toBeDefined();
       expect(result.viewCount).toBe(4);
-      expect(mockPostRepository.increment).toHaveBeenCalledWith({ id: '1' }, 'viewCount', 1);
+      expect(mockPostRepository.update).toHaveBeenCalledWith('1', expect.objectContaining({ viewCount: expect.any(Function) }));
     });
 
     it('공고 작성 성공', async () => {

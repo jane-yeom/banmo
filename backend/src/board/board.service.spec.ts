@@ -4,8 +4,10 @@ import { BoardService } from './board.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Board, BoardType } from './board.entity';
 import { BoardComment } from './board-comment.entity';
+import { BoardTag } from './board-tag.entity';
 import { UserRole } from '../users/user.entity';
 import { NotificationsService } from '../notifications/notifications.service';
+import { UsersService } from '../users/users.service';
 
 describe('BoardService', () => {
   let service: BoardService;
@@ -18,7 +20,9 @@ describe('BoardService', () => {
     delete: jest.fn(),
     remove: jest.fn(),
     count: jest.fn(),
+    update: jest.fn().mockResolvedValue(undefined),
     increment: jest.fn().mockResolvedValue(undefined),
+    decrement: jest.fn().mockResolvedValue(undefined),
     createQueryBuilder: jest.fn(() => ({
       leftJoinAndSelect: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
@@ -39,8 +43,20 @@ describe('BoardService', () => {
     remove: jest.fn(),
   };
 
+  const mockBoardTagRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+    find: jest.fn().mockResolvedValue([]),
+    findOne: jest.fn(),
+    delete: jest.fn(),
+  };
+
   const mockNotificationsService = {
     sendCommentNotification: jest.fn().mockResolvedValue(undefined),
+  };
+
+  const mockUsersService = {
+    findById: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -56,8 +72,16 @@ describe('BoardService', () => {
           useValue: mockCommentRepository,
         },
         {
+          provide: getRepositoryToken(BoardTag),
+          useValue: mockBoardTagRepository,
+        },
+        {
           provide: NotificationsService,
           useValue: mockNotificationsService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
         },
       ],
     }).compile();
@@ -72,14 +96,21 @@ describe('BoardService', () => {
       const mockBoards = [
         { id: '1', title: '테스트', type: BoardType.FREE, isAnonymous: false, createdAt: new Date() },
       ];
-      mockBoardRepository.find.mockResolvedValue(mockBoards);
+      // findAll은 createQueryBuilder를 사용하므로 getManyAndCount mock 설정
+      mockBoardRepository.createQueryBuilder.mockReturnValue({
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([mockBoards, 1]),
+      });
 
-      const result = await service.findAll(BoardType.FREE);
+      const result = await service.findAll({ type: BoardType.FREE });
       expect(result).toBeDefined();
-      expect(Array.isArray(result)).toBe(true);
-      expect(mockBoardRepository.find).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { type: BoardType.FREE } }),
-      );
+      expect(Array.isArray(result.data)).toBe(true);
+      expect(result.total).toBe(1);
     });
 
     it('게시글 작성 성공', async () => {
@@ -96,17 +127,17 @@ describe('BoardService', () => {
 
     it('게시글 상세 조회 성공 + 조회수 증가', async () => {
       const mockBoard = {
-        id: '1', title: '테스트', viewCount: 5,
+        id: '1', title: '테스트', viewCount: 5, authorId: 'user-1',
         isAnonymous: false, author: { id: 'user-1', nickname: '김철수' },
       };
       mockBoardRepository.findOne.mockResolvedValue(mockBoard);
-      mockBoardRepository.increment.mockResolvedValue(undefined);
+      mockBoardRepository.update.mockResolvedValue(undefined);
 
-      const result = await service.findOne('1');
+      const result = await service.findOne('1', 'other-user');
       expect(result).toBeDefined();
       expect(result.board).toBeDefined();
       expect(result.board.viewCount).toBe(6);
-      expect(mockBoardRepository.increment).toHaveBeenCalledWith({ id: '1' }, 'viewCount', 1);
+      expect(mockBoardRepository.update).toHaveBeenCalledWith('1', expect.anything());
     });
 
     it('존재하지 않는 게시글 조회시 NotFoundException', async () => {
