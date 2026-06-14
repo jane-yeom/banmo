@@ -22,17 +22,15 @@ function CallbackContent() {
 
     const handleCallback = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        console.log('[Callback] API URL:', apiUrl);
-
-        const res = await fetch(`${apiUrl}/auth/kakao/callback`, {
+        // Next.js API route를 통해 프록시 - Safari의 SSL 인증서 검증 문제 우회
+        const res = await fetch('/api/auth/kakao', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code }),
         });
 
         const data = await res.json();
-        console.log('[Callback] 응답:', data);
+        console.log('[Callback] 응답 status:', res.status);
 
         if (!res.ok) throw new Error(data.message || '로그인 실패');
 

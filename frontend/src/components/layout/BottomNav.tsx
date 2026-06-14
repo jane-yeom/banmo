@@ -37,6 +37,8 @@ export default function BottomNav() {
   const hideOn = ['/login', '/welcome', '/auth/callback', '/admin'];
   if (hideOn.some((p) => pathname.startsWith(p))) return null;
 
+  const writeTab = tabs.find((t) => t.highlight)!;
+
   return (
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
@@ -46,47 +48,49 @@ export default function BottomNav() {
       zIndex: 50,
       paddingBottom: 'env(safe-area-inset-bottom)',
       boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
+      overflow: 'visible',
     }}>
+      {/* 글쓰기 버튼: position:absolute로 배치하면 Safari에서 transform 없이도 올바른 touch area 확보 */}
+      <Link
+        href={writeTab.href}
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: -28,
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textDecoration: 'none',
+          touchAction: 'manipulation',
+        }}
+      >
+        <div style={{
+          width: 46, height: 46,
+          background: '#1C1C1C',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 2,
+          boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+        }}>
+          <writeTab.Icon size={20} strokeWidth={2} color="white" />
+        </div>
+        <span style={{ fontSize: 10, color: '#1C1C1C', fontWeight: 600 }}>
+          {writeTab.label}
+        </span>
+      </Link>
+
       {tabs.map((tab) => {
         const isActive =
           tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
         const { Icon } = tab;
 
         if (tab.highlight) {
+          // 글쓰기는 위에서 absolute로 렌더링, 여기선 공간만 차지
           return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              style={{
-                flex: 1, display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '8px 0',
-                textDecoration: 'none',
-              }}
-            >
-              <div style={{
-                width: 46, height: 46,
-                background: '#1C1C1C',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 2,
-                boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
-                transform: 'translateY(-10px)',
-              }}>
-                <Icon size={20} strokeWidth={2} color="white" />
-              </div>
-              <span style={{
-                fontSize: 10, color: '#1C1C1C',
-                fontWeight: 600,
-                transform: 'translateY(-10px)',
-              }}>
-                {tab.label}
-              </span>
-            </Link>
+            <div key={tab.href} style={{ flex: 1 }} aria-hidden />
           );
         }
 

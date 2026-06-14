@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Noto_Sans_KR } from 'next/font/google';
 import Script from 'next/script';
 import { Toaster } from 'react-hot-toast';
@@ -12,6 +12,14 @@ const notoSansKR = Noto_Sans_KR({
   weight: ['400', '500', '700'],
   variable: '--font-noto-sans-kr',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   title: '반모 - 반주의 모든것',
