@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 import { initFirebase, requestNotificationPermission, onForegroundMessage } from '@/lib/firebase';
 import apiClient from '@/lib/axios';
-import toast from 'react-hot-toast';
 
 export function useFCM() {
   const { isLoggedIn } = useAuthStore();
@@ -22,23 +21,9 @@ export function useFCM() {
           await apiClient.post('/notifications/fcm-token', { token }).catch(() => {});
         }
 
-        cleanup = onForegroundMessage((payload) => {
-          const title = payload.notification?.title;
-          const body = payload.notification?.body ?? '';
-          if (title) {
-            toast(`${title}\n${body}`, {
-              icon: '🔔',
-              duration: 5000,
-              style: {
-                background: '#1C1C1C',
-                color: 'white',
-                borderRadius: '12px',
-                fontSize: '14px',
-                padding: '12px 16px',
-                whiteSpace: 'pre-line',
-              },
-            });
-          }
+        // 포그라운드 메시지는 소켓 알림(useNotifications)이 토스트를 처리하므로 여기서는 무시
+        cleanup = onForegroundMessage((_payload) => {
+          // 앱이 포그라운드일 때 FCM 수신 → 소켓 알림이 이미 토스트 표시하므로 중복 방지
         });
       } catch (e) {
         console.warn('[FCM] 설정 실패:', e);

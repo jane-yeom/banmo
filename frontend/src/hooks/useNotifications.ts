@@ -56,14 +56,16 @@ export function useNotifications() {
 
       // 토스트 알림 표시
       const icon = TYPE_ICON[notification.type] ?? '🔔';
-      toast(`${icon} ${notification.title}\n${notification.body}`, {
-        duration: 3000,
+      toast(`${icon} ${notification.title}${notification.body ? `\n${notification.body}` : ''}`, {
+        duration: 4000,
         style: {
-          background: '#f5f3ff',
-          color: '#5b21b6',
-          border: '1px solid #ede9fe',
+          background: '#1C1C1C',
+          color: 'white',
+          borderRadius: '12px',
           fontSize: '13px',
-          maxWidth: '320px',
+          padding: '12px 16px',
+          maxWidth: '340px',
+          whiteSpace: 'pre-line',
         },
       });
     };

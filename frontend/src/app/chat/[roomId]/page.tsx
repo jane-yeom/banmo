@@ -244,7 +244,7 @@ export default function ChatRoomPage() {
 
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-gray-50" onClick={() => showMenu && setShowMenu(false)}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#F9FAFB' }} onClick={() => showMenu && setShowMenu(false)}>
       {showReviewModal && otherId && (
         <ReviewModal
           revieweeId={otherId}

@@ -49,8 +49,20 @@ export const requestNotificationPermission = async (): Promise<string | null> =>
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return null;
 
+    // 서비스워커 명시적 등록 후 FCM 토큰 발급
+    let swRegistration: ServiceWorkerRegistration | undefined;
+    if ('serviceWorker' in navigator) {
+      try {
+        swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+        await navigator.serviceWorker.ready;
+      } catch (e) {
+        console.warn('[FCM] SW 등록 실패:', e);
+      }
+    }
+
     const token = await getToken(m, {
       vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: swRegistration,
     });
     return token || null;
   } catch (e) {
