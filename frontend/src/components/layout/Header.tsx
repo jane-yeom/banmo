@@ -53,14 +53,14 @@ export default function Header() {
   useEffect(() => {
     if (!user || !accessToken) return;
     apiClient.get<ChatRoom[]>('/chat/rooms').then(({ data }) => {
-      const count = data.filter((r) => !r.isRead && r.receiver.id === user.id).length;
+      const count = data.filter((r) => !r.isRead && r.lastSenderId !== user.id).length;
       setUnreadCount(count);
     }).catch(() => {});
     const socket = getSocket(accessToken);
     const handleRoomUpdated = () => {
       qc.invalidateQueries({ queryKey: ['chatRooms'] });
       apiClient.get<ChatRoom[]>('/chat/rooms').then(({ data }) => {
-        const count = data.filter((r) => !r.isRead && r.receiver.id === user.id).length;
+        const count = data.filter((r) => !r.isRead && r.lastSenderId !== user.id).length;
         setUnreadCount(count);
       }).catch(() => {});
     };

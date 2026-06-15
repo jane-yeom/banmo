@@ -45,6 +45,7 @@ export interface ChatRoom {
   receiver: User;
   lastMessage: string | null;
   lastMessageAt: string | null;
+  lastSenderId: string | null;
   isRead: boolean;
   createdAt: string;
 }

@@ -88,6 +88,7 @@ export class ChatService {
     await this.roomsRepository.update(roomId, {
       lastMessage: imageUrl ? '[이미지]' : content,
       lastMessageAt: new Date(),
+      lastSenderId: senderId,
       isRead: false,
     });
 

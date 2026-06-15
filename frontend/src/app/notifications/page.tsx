@@ -79,6 +79,17 @@ export default function NotificationsPage() {
     if (notif.link)   router.push(notif.link)
   }
 
+  // CHAT_MESSAGE는 같은 채팅방(link) 기준으로 최신 1개만 표시
+  const deduplicatedNotifications = notifications.reduce<AppNotification[]>((acc, notif) => {
+    if (notif.type === 'CHAT_MESSAGE' && notif.link) {
+      const exists = acc.find(n => n.type === 'CHAT_MESSAGE' && n.link === notif.link);
+      if (!exists) acc.push(notif); // 이미 최신순 정렬돼 있으므로 첫 번째만 유지
+    } else {
+      acc.push(notif);
+    }
+    return acc;
+  }, [])
+
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', background: 'white', minHeight: '100vh' }}>
       <SubHeader
@@ -115,7 +126,7 @@ export default function NotificationsPage() {
             </div>
           ))}
         </div>
-      ) : notifications.length === 0 ? (
+      ) : deduplicatedNotifications.length === 0 ? (
         <div style={{
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
@@ -131,7 +142,7 @@ export default function NotificationsPage() {
         </div>
       ) : (
         <div style={{ padding: '0 16px' }}>
-          {notifications.map(notif => (
+          {deduplicatedNotifications.map(notif => (
             <div
               key={notif.id}
               onClick={() => handleRead(notif)}

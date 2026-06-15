@@ -41,6 +41,9 @@ export class ChatRoom {
   @Column({ type: 'timestamptz', nullable: true })
   lastMessageAt: Date;
 
+  @Column({ nullable: true })
+  lastSenderId: string;
+
   @Column({ default: false })
   isRead: boolean;
 
