@@ -104,9 +104,13 @@ export default function ChatRoomPage() {
     onError: () => toast.error('오류가 발생했습니다'),
   });
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   useEffect(() => {
+    if (!mounted) return;
     if (!user) { router.push('/login'); return; }
-  }, [user, router]);
+  }, [mounted, user, router]);
 
   // 채팅방 정보 로드
   useEffect(() => {

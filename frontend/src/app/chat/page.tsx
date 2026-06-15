@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -31,9 +31,15 @@ export default function ChatListPage() {
   const { setUnreadCount } = useChatStore();
   const qc = useQueryClient();
 
+  // Zustand persist는 첫 렌더 후 비동기로 localStorage에서 rehydrate.
+  // mounted 체크 없이 바로 !user 판단하면 항상 로그인 페이지로 튕김.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   useEffect(() => {
+    if (!mounted) return;
     if (!user) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
-  }, [user, router]);
+  }, [mounted, user, router]);
 
   // 소켓 연결 + roomUpdated 이벤트로 목록 갱신
   useEffect(() => {
