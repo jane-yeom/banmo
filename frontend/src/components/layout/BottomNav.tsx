@@ -40,115 +40,107 @@ export default function BottomNav() {
   const writeTab = tabs.find((t) => t.highlight)!;
 
   return (
-    <>
-      {/* 글쓰기 버튼: nav 탭바(56px) 바로 위에 위치 */}
-      <Link
-        href={writeTab.href}
-        style={{
-          position: 'fixed',
-          bottom: 'calc(56px + env(safe-area-inset-bottom))',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 51,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textDecoration: 'none',
-          touchAction: 'manipulation',
-          WebkitTapHighlightColor: 'transparent',
-        }}
-      >
-        <div style={{
-          width: 50, height: 50,
-          background: '#1C1C1C',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
-        }}>
-          <writeTab.Icon size={22} strokeWidth={2} color="white" />
-        </div>
-        <span style={{ fontSize: 10, color: '#1C1C1C', fontWeight: 600, marginTop: 2 }}>
-          {writeTab.label}
-        </span>
-      </Link>
-
-      {/* 탭바: 56px 고정 + 아래 safe-area만 padding으로 추가 */}
-      <nav style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: 'white',
-        borderTop: '1px solid #E8E4DC',
-        zIndex: 50,
-        boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
-      }}>
+    <nav style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0,
+      background: 'white',
+      borderTop: '1px solid #E8E4DC',
+      zIndex: 50,
+      boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
+      overflow: 'visible',
+    }}>
       {/* 탭 아이콘 영역: 항상 56px */}
-      <div style={{ display: 'flex', height: 56 }}>
-      {tabs.map((tab) => {
-        const isActive =
-          tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
-        const { Icon } = tab;
+      <div style={{ display: 'flex', height: 56, alignItems: 'center' }}>
+        {tabs.map((tab) => {
+          const isActive =
+            tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
+          const { Icon } = tab;
 
-        if (tab.highlight) {
-          // 글쓰기는 위에서 absolute로 렌더링, 여기선 공간만 차지
-          return (
-            <div key={tab.href} style={{ flex: 1 }} aria-hidden />
-          );
-        }
-
-        return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            style={{
-              flex: 1, display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '10px 0',
-              textDecoration: 'none',
-              position: 'relative',
-            }}
-          >
-            <div style={{ position: 'relative', marginBottom: 3 }}>
-              <Icon
-                size={24}
-                strokeWidth={isActive ? 2.2 : 1.6}
-                color={isActive ? '#1C1C1C' : '#9CA3AF'}
-              />
-              {tab.showBadge && unreadCount > 0 && (
-                <span style={{
-                  position: 'absolute', top: -4, right: -8,
-                  background: '#EF4444', color: 'white',
-                  borderRadius: '50%', width: 16, height: 16,
-                  fontSize: 10, fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+          if (tab.highlight) {
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                style={{
+                  flex: 1, display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textDecoration: 'none',
+                  touchAction: 'manipulation',
+                  WebkitTapHighlightColor: 'transparent',
+                  marginTop: -18,
+                }}
+              >
+                <div style={{
+                  width: 50, height: 50,
+                  background: '#1C1C1C',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
+                  flexShrink: 0,
                 }}>
-                  {unreadCount > 9 ? '9+' : unreadCount}
+                  <Icon size={22} strokeWidth={2} color="white" />
+                </div>
+                <span style={{ fontSize: 10, color: '#1C1C1C', fontWeight: 600, marginTop: 2 }}>
+                  {tab.label}
                 </span>
+              </Link>
+            );
+          }
+
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              style={{
+                flex: 1, display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '10px 0',
+                textDecoration: 'none',
+                position: 'relative',
+              }}
+            >
+              <div style={{ position: 'relative', marginBottom: 3 }}>
+                <Icon
+                  size={24}
+                  strokeWidth={isActive ? 2.2 : 1.6}
+                  color={isActive ? '#1C1C1C' : '#9CA3AF'}
+                />
+                {tab.showBadge && unreadCount > 0 && (
+                  <span style={{
+                    position: 'absolute', top: -4, right: -8,
+                    background: '#EF4444', color: 'white',
+                    borderRadius: '50%', width: 16, height: 16,
+                    fontSize: 10, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
+              <span style={{
+                fontSize: 10,
+                color: isActive ? '#1C1C1C' : '#9CA3AF',
+                fontWeight: isActive ? 700 : 400,
+              }}>
+                {tab.label}
+              </span>
+              {isActive && (
+                <div style={{
+                  position: 'absolute', bottom: 0,
+                  width: 4, height: 4, borderRadius: '50%',
+                  background: '#1C1C1C',
+                }} />
               )}
-            </div>
-            <span style={{
-              fontSize: 10,
-              color: isActive ? '#1C1C1C' : '#9CA3AF',
-              fontWeight: isActive ? 700 : 400,
-            }}>
-              {tab.label}
-            </span>
-            {isActive && (
-              <div style={{
-                position: 'absolute', bottom: 0,
-                width: 4, height: 4, borderRadius: '50%',
-                background: '#1C1C1C',
-              }} />
-            )}
-          </Link>
-        );
-      })}
+            </Link>
+          );
+        })}
       </div>
       {/* safe-area 여백 */}
       <div style={{ height: 'env(safe-area-inset-bottom)', background: 'white' }} />
     </nav>
-    </>
   );
 }
