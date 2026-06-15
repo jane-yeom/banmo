@@ -33,6 +33,11 @@ class UpdateProfileImageDto {
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get('public')
+  getPublicProfiles() {
+    return this.usersService.getPublicProfiles();
+  }
+
   @Get(':id')
   getProfile(@Param('id') id: string) {
     return this.usersService.getPublicProfile(id, 'public');

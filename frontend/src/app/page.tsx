@@ -5,7 +5,9 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import api from '@/lib/axios';
-import { Music2, Mic, BookOpen, Star, MessageSquare, LucideIcon, MapPin, ChevronRight, Music, Eye, School, GraduationCap } from 'lucide-react';
+import { Music2, Mic, BookOpen, Star, MessageSquare, MapPin, ChevronRight, Music, Eye, School, GraduationCap } from 'lucide-react';
+import Image from 'next/image';
+import NoteGradeBadge from '@/components/common/NoteGradeBadge';
 import { IconJob, IconPromo, IconBoard } from '@/components/common/SectionIcons';
 
 // 슬라이딩 배너 컴포넌트
@@ -334,12 +336,69 @@ function QuickMenu() {
   );
 }
 
+function ProfileCard({ profile }: { profile: any }) {
+  const instruments: string[] = Array.isArray(profile.instruments) ? profile.instruments : [];
+  return (
+    <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', flexShrink: 0, width: 160 }}>
+      <div style={{
+        background: 'white', borderRadius: 16,
+        border: '1px solid #E8E4DC',
+        padding: '16px 12px', textAlign: 'center',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+      }}>
+        <div style={{
+          width: 60, height: 60, borderRadius: '50%',
+          margin: '0 auto 8px', overflow: 'hidden',
+          background: '#F0EDE6',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: '2px solid #E8E4DC',
+        }}>
+          {profile.profileImage ? (
+            <Image src={profile.profileImage} alt={profile.nickname ?? '?'} width={60} height={60} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+          ) : (
+            <span style={{ fontSize: 24, color: '#1C1C1C', fontWeight: 700 }}>
+              {(profile.nickname ?? '?')[0]}
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+          <NoteGradeBadge grade={profile.noteGrade} showLabel={false} size="sm" />
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#1C1C1C', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {profile.nickname ?? '익명'}
+        </div>
+        {instruments.length > 0 && (
+          <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            🎵 {instruments.slice(0, 2).join(' · ')}
+          </div>
+        )}
+        {profile.region && (
+          <div style={{ fontSize: 11, color: '#9CA3AF', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+            <MapPin size={10} /> {profile.region}
+          </div>
+        )}
+        {profile.bio && (
+          <div style={{
+            fontSize: 11, color: '#6B7280', marginTop: 6,
+            overflow: 'hidden', display: '-webkit-box',
+            WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            lineHeight: 1.4, textAlign: 'left',
+          }}>
+            {profile.bio}
+          </div>
+        )}
+      </div>
+    </Link>
+  );
+}
+
 export default function HomePage() {
   const [jobPosts, setJobPosts] = useState<any[]>([]);
   const [promoPosts, setPromoPosts] = useState<any[]>([]);
   const [hotBoards, setHotBoards] = useState<any[]>([]);
   const [recentBoards, setRecentBoards] = useState<any[]>([]);
   const [popularTags, setPopularTags] = useState<any[]>([]);
+  const [publicProfiles, setPublicProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -348,12 +407,13 @@ export default function HomePage() {
         const JOB_CATS = 'JOB_OFFER,JOB_SEEK,LESSON_OFFER,LESSON_SEEK,PERFORMANCE,AFTERSCHOOL,ETC';
         const PROMO_CATS = 'PROMO_CONCERT,PROMO_SPACE';
 
-        const [jobsRes, promoRes, hotRes, recentRes, tagsRes] = await Promise.allSettled([
+        const [jobsRes, promoRes, hotRes, recentRes, tagsRes, profilesRes] = await Promise.allSettled([
           api.get(`/posts?limit=5&status=ACTIVE&categories=${JOB_CATS}`),
           api.get(`/posts?limit=4&status=ACTIVE&categories=${PROMO_CATS}`),
           api.get('/board/hot'),
           api.get('/board?type=FREE&limit=5'),
           api.get('/board/tags/popular'),
+          api.get('/users/public'),
         ]);
 
         const extract = (res: any) =>
@@ -372,6 +432,9 @@ export default function HomePage() {
         }
         if (tagsRes.status === 'fulfilled') {
           setPopularTags(Array.isArray(tagsRes.value.data) ? tagsRes.value.data : []);
+        }
+        if (profilesRes.status === 'fulfilled') {
+          setPublicProfiles(Array.isArray(profilesRes.value.data) ? profilesRes.value.data : []);
         }
       } finally {
         setLoading(false);
@@ -394,6 +457,32 @@ export default function HomePage() {
 
         {/* 빠른 메뉴 */}
         <QuickMenu />
+
+        {/* 공개 프로필 섹션 */}
+        {publicProfiles.length > 0 && (
+          <div style={{ marginBottom: 28 }}>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between',
+              alignItems: 'center', marginBottom: 14,
+            }}>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#1A1A1A', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 32, height: 32, background: '#F0EDE6', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Music2 size={18} strokeWidth={2} color="#1C1C1C" />
+                </div>
+                반주자 소개
+              </h2>
+            </div>
+            <div style={{
+              display: 'flex', gap: 10,
+              overflowX: 'auto', scrollbarWidth: 'none',
+              paddingBottom: 4,
+            }}>
+              {publicProfiles.map((profile) => (
+                <ProfileCard key={profile.id} profile={profile} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 구인구직 섹션 */}
         <div style={{ marginBottom: 28 }}>

@@ -70,6 +70,9 @@ export class UpdateProfileDto {
 
   @IsOptional()
   isRegionPublic?: boolean;
+
+  @IsOptional()
+  isProfilePublic?: boolean;
 }
 
 @Injectable()
@@ -219,6 +222,28 @@ export class UsersService {
     const user = await this.usersRepository.findOneOrFail({ where: { id } });
     user.videoUrls = (user.videoUrls ?? []).filter((v) => v !== videoUrl);
     return this.usersRepository.save(user);
+  }
+
+  async getPublicProfiles(limit = 20): Promise<Partial<User>[]> {
+    const users = await this.usersRepository.find({
+      where: { isProfilePublic: true, isBanned: false },
+      order: { updatedAt: 'DESC' },
+      take: limit,
+    });
+    return users.map((user) => ({
+      id: user.id,
+      nickname: user.nickname,
+      profileImage: user.profileImage,
+      bio: user.isBioPublic ? user.bio : null,
+      career: user.isCareerPublic ? user.career : null,
+      region: user.isRegionPublic ? user.region : null,
+      instruments: user.isInstrumentsPublic ? user.instruments : [],
+      videoUrls: user.videoUrls,
+      attachmentUrl: user.isAttachmentPublic ? user.attachmentUrl : null,
+      attachmentName: user.isAttachmentPublic ? user.attachmentName : null,
+      noteGrade: user.noteGrade,
+      trustScore: user.trustScore,
+    }));
   }
 
   async getPublicProfile(id: string, viewerType: 'public' | 'owner' | 'recruiter' = 'public'): Promise<Partial<User>> {

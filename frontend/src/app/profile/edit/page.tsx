@@ -66,6 +66,7 @@ export default function ProfileEditPage() {
     isAttachmentPublic: false,
     isInstrumentsPublic: true,
     isRegionPublic: true,
+    isProfilePublic: false,
   });
   const [videoUrls, setVideoUrls] = useState<string[]>([]);
   const [videoInput, setVideoInput] = useState('');
@@ -95,6 +96,7 @@ export default function ProfileEditPage() {
       isAttachmentPublic: (user as any).isAttachmentPublic ?? false,
       isInstrumentsPublic: (user as any).isInstrumentsPublic ?? true,
       isRegionPublic: (user as any).isRegionPublic ?? true,
+      isProfilePublic: (user as any).isProfilePublic ?? false,
     });
     const urls = (user as any).videoUrls;
     if (Array.isArray(urls)) setVideoUrls(urls);
@@ -206,6 +208,7 @@ export default function ProfileEditPage() {
         isAttachmentPublic: form.isAttachmentPublic,
         isInstrumentsPublic: form.isInstrumentsPublic,
         isRegionPublic: form.isRegionPublic,
+        isProfilePublic: form.isProfilePublic,
       };
       console.log('[ProfileEdit] 저장 payload:', JSON.stringify({
         ...payload,
@@ -291,6 +294,27 @@ export default function ProfileEditPage() {
           }}>
             사진 변경
           </button>
+        </div>
+
+        {/* 메인 노출 설정 */}
+        <div style={{
+          background: form.isProfilePublic ? '#F0EDE6' : '#F7F4ED',
+          border: `1.5px solid ${form.isProfilePublic ? '#1C1C1C' : '#E8E4DC'}`,
+          borderRadius: 14, padding: '16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#1C1C1C', marginBottom: 4 }}>
+              메인 페이지 노출
+            </div>
+            <div style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.5 }}>
+              공개로 설정하면 메인에 프로필이 노출됩니다.{'\n'}자기소개와 악기가 공개 상태일 때 효과적입니다.
+            </div>
+          </div>
+          <VisibilityToggle
+            value={form.isProfilePublic}
+            onChange={v => setForm(p => ({ ...p, isProfilePublic: v }))}
+          />
         </div>
 
         {/* 닉네임 */}

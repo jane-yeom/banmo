@@ -94,6 +94,9 @@ export class User {
   @Column({ default: true })
   isRegionPublic: boolean;
 
+  @Column({ default: false })
+  isProfilePublic: boolean;
+
   @Column({ nullable: true })
   region: string;
 
