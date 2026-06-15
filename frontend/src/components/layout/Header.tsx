@@ -165,7 +165,7 @@ export default function Header() {
             }}>
               <Search size={22} strokeWidth={1.8} color="#555" />
             </Link>
-            {(isLoggedIn || isRestoring) && (
+            {(isLoggedIn || isRestoring || !!accessToken) && (
               <Link href="/notifications" style={{
                 position: 'relative',
                 display: 'flex', alignItems: 'center',

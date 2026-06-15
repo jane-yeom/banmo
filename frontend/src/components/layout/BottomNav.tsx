@@ -39,49 +39,56 @@ export default function BottomNav() {
 
   const writeTab = tabs.find((t) => t.highlight)!;
 
+  // iOS PWA에서 position:fixed 엘리먼트 밖으로 나온 자식은 터치 이벤트 차단됨
+  // → 글쓰기 버튼을 nav와 별개의 독립 fixed 엘리먼트로 분리
+  const navHeight = 56;
+  const btnSize = 52;
+
   return (
+    <>
+      {/* 글쓰기 버튼: nav와 독립된 fixed 엘리먼트 (iOS PWA 터치 이슈 방지) */}
+      <Link
+        href={writeTab.href}
+        style={{
+          position: 'fixed',
+          bottom: `calc(${navHeight}px + env(safe-area-inset-bottom) + 4px)`,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 51,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textDecoration: 'none',
+          touchAction: 'manipulation',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+      >
+        <div style={{
+          width: btnSize, height: btnSize,
+          background: '#1C1C1C',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
+        }}>
+          <writeTab.Icon size={22} strokeWidth={2} color="white" />
+        </div>
+        <span style={{ fontSize: 10, color: '#1C1C1C', fontWeight: 600, marginTop: 2 }}>
+          {writeTab.label}
+        </span>
+      </Link>
+
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
       background: 'white',
       borderTop: '1px solid #E8E4DC',
       display: 'flex',
       zIndex: 50,
+      height: navHeight,
       paddingBottom: 'env(safe-area-inset-bottom)',
       boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
-      overflow: 'visible',
     }}>
-      {/* 글쓰기 버튼: position:absolute로 배치하면 Safari에서 transform 없이도 올바른 touch area 확보 */}
-      <Link
-        href={writeTab.href}
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: -28,
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textDecoration: 'none',
-          touchAction: 'manipulation',
-        }}
-      >
-        <div style={{
-          width: 46, height: 46,
-          background: '#1C1C1C',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 2,
-          boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
-        }}>
-          <writeTab.Icon size={20} strokeWidth={2} color="white" />
-        </div>
-        <span style={{ fontSize: 10, color: '#1C1C1C', fontWeight: 600 }}>
-          {writeTab.label}
-        </span>
-      </Link>
-
       {tabs.map((tab) => {
         const isActive =
           tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
@@ -144,5 +151,6 @@ export default function BottomNav() {
         );
       })}
     </nav>
+    </>
   );
 }

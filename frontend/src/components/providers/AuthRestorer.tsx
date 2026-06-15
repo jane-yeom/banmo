@@ -3,17 +3,33 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 
+// iOS PWA는 Safari와 localStorage가 분리되지만 쿠키는 공유됨
+function getTokenFromCookie(): string | null {
+  const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 export default function AuthRestorer() {
   const { isLoggedIn, setAuth, logout, setRestoring } = useAuthStore();
 
   useEffect(() => {
     const restoreAuth = async () => {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
+      if (isLoggedIn) {
         setRestoring(false);
         return;
       }
-      if (isLoggedIn) {
+
+      // localStorage 우선, 없으면 쿠키에서 읽기 (iOS PWA 대응)
+      let token = localStorage.getItem('accessToken');
+      if (!token) {
+        token = getTokenFromCookie();
+        if (token) {
+          // 쿠키에서 찾았으면 localStorage에도 동기화
+          localStorage.setItem('accessToken', token);
+        }
+      }
+
+      if (!token) {
         setRestoring(false);
         return;
       }
