@@ -41,12 +41,12 @@ export default function BottomNav() {
 
   return (
     <>
-      {/* 글쓰기 버튼: nav와 독립된 fixed 엘리먼트 (iOS PWA position:fixed 터치 차단 방지) */}
+      {/* 글쓰기 버튼: nav 탭바(56px) 바로 위에 위치 */}
       <Link
         href={writeTab.href}
         style={{
           position: 'fixed',
-          bottom: 'calc(56px + env(safe-area-inset-bottom) + 6px)',
+          bottom: 'calc(56px + env(safe-area-inset-bottom))',
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 51,
@@ -74,17 +74,16 @@ export default function BottomNav() {
         </span>
       </Link>
 
+      {/* 탭바: 56px 고정 + 아래 safe-area만 padding으로 추가 */}
       <nav style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         background: 'white',
         borderTop: '1px solid #E8E4DC',
-        display: 'flex',
-        alignItems: 'stretch',
         zIndex: 50,
-        paddingBottom: 'env(safe-area-inset-bottom)',
         boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
-        minHeight: 56,
       }}>
+      {/* 탭 아이콘 영역: 항상 56px */}
+      <div style={{ display: 'flex', height: 56 }}>
       {tabs.map((tab) => {
         const isActive =
           tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
@@ -146,6 +145,9 @@ export default function BottomNav() {
           </Link>
         );
       })}
+      </div>
+      {/* safe-area 여백 */}
+      <div style={{ height: 'env(safe-area-inset-bottom)', background: 'white' }} />
     </nav>
     </>
   );
