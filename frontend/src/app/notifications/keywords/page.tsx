@@ -18,14 +18,17 @@ interface Keyword {
 const MAX_KEYWORDS = 10;
 
 export default function KeywordsPage() {
-  const { user } = useAuthStore();
+  const { user, isRestoring } = useAuthStore();
   const router = useRouter();
   const qc = useQueryClient();
   const [input, setInput] = useState('');
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
+    if (!mounted || isRestoring) return;
     if (!user) router.replace('/login');
-  }, [user, router]);
+  }, [mounted, isRestoring, user, router]);
 
   const { data: keywords = [], isLoading } = useQuery({
     queryKey: ['keywords'],

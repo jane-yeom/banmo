@@ -151,15 +151,18 @@ function ApplicantProfileModal({
 
 export default function MyPage() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, logout, isRestoring } = useAuthStore();
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>('posts');
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(null);
   const [showInstall, setShowInstall] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
+    if (!mounted || isRestoring) return;
     if (!user) router.replace('/login');
-  }, [user, router]);
+  }, [mounted, isRestoring, user, router]);
 
   const { data: myPosts } = useQuery({
     queryKey: ['myPosts'],

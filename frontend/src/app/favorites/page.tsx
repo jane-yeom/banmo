@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SubHeader from '@/components/layout/SubHeader';
@@ -19,13 +19,16 @@ interface Favorite {
 }
 
 export default function FavoritesPage() {
-  const { user } = useAuthStore();
+  const { user, isRestoring } = useAuthStore();
   const router = useRouter();
   const qc = useQueryClient();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
+    if (!mounted || isRestoring) return;
     if (!user) router.replace('/login');
-  }, [user, router]);
+  }, [mounted, isRestoring, user, router]);
 
   const { data: favorites = [], isLoading } = useQuery({
     queryKey: ['favorites'],

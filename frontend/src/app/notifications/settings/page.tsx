@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import SubHeader from '@/components/layout/SubHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -88,13 +88,16 @@ function NotifRow({
 }
 
 export default function NotificationSettingsPage() {
-  const { user } = useAuthStore();
+  const { user, isRestoring } = useAuthStore();
   const router = useRouter();
   const qc = useQueryClient();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
+    if (!mounted || isRestoring) return;
     if (!user) router.replace('/login');
-  }, [user, router]);
+  }, [mounted, isRestoring, user, router]);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['notificationSettings'],

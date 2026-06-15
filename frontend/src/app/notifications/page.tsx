@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import apiClient from '@/lib/axios'
@@ -48,14 +48,17 @@ function timeAgo(date: string) {
 
 export default function NotificationsPage() {
   const router = useRouter()
-  const { isLoggedIn, user } = useAuthStore()
+  const { isLoggedIn, user, isRestoring } = useAuthStore()
   const { notifications, unreadCount, setNotifications } = useNotificationStore()
   const markAsRead    = useMarkAsRead()
   const markAllAsRead = useMarkAllAsRead()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
+    if (!mounted || isRestoring) return
     if (!isLoggedIn) router.replace('/login')
-  }, [isLoggedIn, router])
+  }, [mounted, isRestoring, isLoggedIn, router])
 
   const { isLoading } = useQuery({
     queryKey: ['notifications'],

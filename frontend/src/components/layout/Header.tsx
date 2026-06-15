@@ -30,7 +30,7 @@ function NotificationsInitializer() {
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showInstall, setShowInstall] = useState(false);
-  const { user, isLoggedIn, setAuth, logout, accessToken } = useAuthStore();
+  const { user, isLoggedIn, isRestoring, setAuth, logout, accessToken } = useAuthStore();
   const { unreadCount, setUnreadCount } = useChatStore();
   // 상단 벨 아이콘: 채팅 제외 알림만 표시
   const notifUnread = useNotificationStore(s =>
@@ -165,7 +165,7 @@ export default function Header() {
             }}>
               <Search size={22} strokeWidth={1.8} color="#555" />
             </Link>
-            {isLoggedIn && (
+            {(isLoggedIn || isRestoring) && (
               <Link href="/notifications" style={{
                 position: 'relative',
                 display: 'flex', alignItems: 'center',
