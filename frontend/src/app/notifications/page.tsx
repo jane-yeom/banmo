@@ -155,14 +155,34 @@ export default function NotificationsPage() {
                 transition: 'background 0.15s',
               }}
             >
-              <div style={{
-                width: 44, height: 44, borderRadius: '50%',
-                background: getBg(notif.type),
-                display: 'flex', alignItems: 'center',
-                justifyContent: 'center', flexShrink: 0,
-              }}>
-                {getIcon(notif.type)}
-              </div>
+              {/* 아이콘: 채팅은 발신자 아바타, 나머지는 타입 아이콘 */}
+              {notif.type === 'CHAT_MESSAGE' && notif.sender?.profileImage ? (
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={notif.sender.profileImage}
+                    alt=""
+                    style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                  <div style={{
+                    position: 'absolute', bottom: -2, right: -2,
+                    width: 18, height: 18, borderRadius: '50%',
+                    background: '#F0EDE6', border: '2px solid white',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <MessageCircle size={10} color="#1C1C1C" strokeWidth={2} />
+                  </div>
+                </div>
+              ) : (
+                <div style={{
+                  width: 44, height: 44, borderRadius: '50%',
+                  background: getBg(notif.type),
+                  display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', flexShrink: 0,
+                }}>
+                  {getIcon(notif.type)}
+                </div>
+              )}
 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
@@ -172,16 +192,18 @@ export default function NotificationsPage() {
                 }}>
                   {notif.title}
                 </div>
-                <div style={{
-                  fontSize: 13, color: '#555555',
-                  lineHeight: 1.5, marginBottom: 4,
-                  overflow: 'hidden', textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                } as React.CSSProperties}>
-                  {notif.body}
-                </div>
+                {notif.body && (
+                  <div style={{
+                    fontSize: 13, color: '#6B7280',
+                    lineHeight: 1.5, marginBottom: 4,
+                    overflow: 'hidden', textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 1,
+                    WebkitBoxOrient: 'vertical',
+                  } as React.CSSProperties}>
+                    {notif.body}
+                  </div>
+                )}
                 <div style={{ fontSize: 11, color: '#9CA3AF' }}>
                   {timeAgo(notif.createdAt)}
                 </div>

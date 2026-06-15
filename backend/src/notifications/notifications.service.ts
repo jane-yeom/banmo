@@ -173,12 +173,13 @@ export class NotificationsService {
   ): Promise<void> {
     const sender = await this.userRepo.findOne({ where: { id: senderId } });
     const nickname = sender?.nickname ?? '누군가';
+    const preview = message.length > 40 ? message.slice(0, 40) + '…' : message;
     await this.create({
       recipientId: receiverId,
       senderId,
       type: NotificationType.CHAT_MESSAGE,
-      title: `${nickname}님의 메시지`,
-      body: message.length > 30 ? message.slice(0, 30) + '…' : message,
+      title: `${nickname}님으로부터 메시지가 도착했습니다`,
+      body: preview,
       link: `/chat/${roomId}`,
     });
   }
