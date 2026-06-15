@@ -196,6 +196,7 @@ export class UsersService {
     if (dto.isAttachmentPublic !== undefined) (user as any).isAttachmentPublic = dto.isAttachmentPublic;
     if (dto.isInstrumentsPublic !== undefined) (user as any).isInstrumentsPublic = dto.isInstrumentsPublic;
     if (dto.isRegionPublic !== undefined) (user as any).isRegionPublic = dto.isRegionPublic;
+    if (dto.isProfilePublic !== undefined) (user as any).isProfilePublic = dto.isProfilePublic;
 
     const saved = await this.usersRepository.save(user);
     console.log('[Users] 저장 완료 videoUrls:', saved.videoUrls);
@@ -224,7 +225,7 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async getPublicProfiles(limit = 20): Promise<Partial<User>[]> {
+  async getPublicProfiles(limit = 20): Promise<Record<string, any>[]> {
     const users = await this.usersRepository.find({
       where: { isProfilePublic: true, isBanned: false },
       order: { updatedAt: 'DESC' },

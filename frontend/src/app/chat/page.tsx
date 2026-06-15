@@ -110,22 +110,21 @@ export default function ChatListPage() {
                 className="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors"
               >
                 {/* 상대방 아바타 */}
-                <div className="relative flex-shrink-0">
+                <div style={{ position: 'relative', flexShrink: 0, width: 48, height: 48 }}>
                   {other.profileImage ? (
-                    <Image
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
                       src={other.profileImage}
                       alt={other.nickname ?? '?'}
-                      width={48}
-                      height={48}
-                      className="rounded-full object-cover"
+                      style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
                     />
                   ) : (
-                    <div className="h-12 w-12 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-lg">
+                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#F0EDE6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1C1C1C', fontWeight: 700, fontSize: 18 }}>
                       {(other.nickname ?? '?')[0]}
                     </div>
                   )}
                   {isUnread && (
-                    <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-red-500 border-2 border-white" />
+                    <span style={{ position: 'absolute', top: -2, right: -2, width: 12, height: 12, borderRadius: '50%', background: '#EF4444', border: '2px solid white', display: 'block' }} />
                   )}
                 </div>
 

@@ -183,94 +183,112 @@ export default function ProfilePage() {
       <div className="mx-auto max-w-2xl px-4 py-8 space-y-5">
 
         {/* 프로필 카드 */}
-        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
-          <div className="h-24" style={{ background: 'linear-gradient(135deg, #1C1C1C, #4A52A0)' }} />
-          <div className="px-6 pb-6">
-            <div className="flex items-end justify-between -mt-10 mb-4">
-              <div className="flex items-end gap-4">
+        <div style={{ borderRadius: 20, background: 'white', border: '1px solid #F3F4F6', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+          {/* 배너 */}
+          <div style={{ height: 80, background: 'linear-gradient(135deg, #1C1C1C, #4A52A0)' }} />
+
+          {/* 프로필 이미지 + 닉네임 + 버튼 */}
+          <div style={{ padding: '0 20px 20px' }}>
+            {/* 이미지 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: -36 }}>
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%',
+                border: '3px solid white',
+                background: '#F0EDE6',
+                overflow: 'hidden',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              }}>
                 {user.profileImage ? (
                   <Image
                     src={user.profileImage}
                     alt={user.nickname ?? '프로필'}
-                    width={80}
-                    height={80}
-                    className="rounded-full border-4 border-white object-cover shadow"
+                    width={72} height={72}
+                    style={{ width: 72, height: 72, objectFit: 'cover', display: 'block' }}
                   />
                 ) : (
-                  <div className="h-20 w-20 rounded-full border-4 border-white bg-indigo-200 flex items-center justify-center text-indigo-700 text-3xl font-bold shadow">
+                  <span style={{ fontSize: 28, fontWeight: 700, color: '#1C1C1C' }}>
                     {(user.nickname ?? '?')[0]}
-                  </div>
+                  </span>
                 )}
-                <div className="mb-1">
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-bold text-gray-900">
-                      {user.nickname ?? '익명'}
-                    </h1>
-                    {(user as any).isVerified && (
-                      <span style={{
-                        fontSize: 11, background: '#EAF6EF',
-                        color: '#5AAB7A', border: '1px solid #5AAB7A',
-                        borderRadius: 99, padding: '2px 8px', fontWeight: 700,
-                      }}>
-                        ✓ 인증
-                      </span>
-                    )}
-                  </div>
-                  <NoteGradeBadge grade={user.noteGrade} size="md" />
-                </div>
               </div>
 
-              <div className="mt-12 flex gap-2">
+              {/* 버튼 영역 */}
+              <div style={{ display: 'flex', gap: 6, marginTop: 44 }}>
                 <button onClick={() => setShowResume(true)} style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '6px 14px',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  padding: '7px 12px',
                   background: '#1C1C1C', color: 'white',
                   border: 'none', borderRadius: 8,
                   fontSize: 12, fontWeight: 600,
-                  cursor: 'pointer',
+                  cursor: 'pointer', whiteSpace: 'nowrap',
                 }}>
-                  <FileText size={14} />
-                  이력서 보기
+                  <FileText size={13} /> 이력서 보기
                 </button>
                 {isMyProfile && (
-                  <Link
-                    href="/profile/edit"
-                    className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100 transition-colors"
-                    style={{ display: 'flex', alignItems: 'center' }}
-                  >
+                  <Link href="/profile/edit" style={{
+                    display: 'flex', alignItems: 'center',
+                    padding: '7px 12px',
+                    background: '#F7F4ED', color: '#1C1C1C',
+                    border: '1px solid #E8E4DC', borderRadius: 8,
+                    fontSize: 12, fontWeight: 600,
+                    textDecoration: 'none', whiteSpace: 'nowrap',
+                  }}>
                     프로필 편집
                   </Link>
                 )}
               </div>
             </div>
 
-            {/* 기본 정보 */}
-            <div className="flex flex-wrap gap-3 mb-4 text-sm text-gray-600">
-              {user.region && (
-                <span className="flex items-center gap-1">📍 {user.region}</span>
+            {/* 닉네임 + 인증 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, marginBottom: 4 }}>
+              <h1 style={{ fontSize: 18, fontWeight: 700, color: '#1C1C1C', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '60%' }}>
+                {user.nickname ?? '익명'}
+              </h1>
+              {(user as any).isVerified && (
+                <span style={{
+                  fontSize: 11, background: '#EAF6EF',
+                  color: '#5AAB7A', border: '1px solid #5AAB7A',
+                  borderRadius: 99, padding: '2px 8px', fontWeight: 700,
+                  whiteSpace: 'nowrap', flexShrink: 0,
+                }}>✓ 인증</span>
               )}
-              <span className="flex items-center gap-1">
-                ⭐ 신뢰점수 {user.trustScore.toFixed(1)}
+            </div>
+
+            {/* 등급 + 기본정보 한 줄 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'nowrap', overflow: 'hidden' }}>
+              <NoteGradeBadge grade={user.noteGrade} size="sm" />
+              {user.region && (
+                <span style={{ fontSize: 12, color: '#6B7280', whiteSpace: 'nowrap', flexShrink: 0 }}>📍 {user.region}</span>
+              )}
+              <span style={{ fontSize: 12, color: '#6B7280', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                ⭐ {user.trustScore.toFixed(1)}
               </span>
             </div>
 
-            {/* 악기 */}
+            {/* 악기 태그 */}
             {instruments.length > 0 && (
-              <div className="mb-4 flex flex-wrap gap-1.5">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
                 {instruments.map((inst) => (
-                  <span
-                    key={inst}
-                    className="rounded-full bg-indigo-50 border border-indigo-200 px-3 py-0.5 text-xs text-indigo-700 font-medium"
-                  >
-                    🎵 {inst}
-                  </span>
+                  <span key={inst} style={{
+                    background: '#F0EDE6', color: '#1C1C1C',
+                    border: '1px solid #E8E4DC',
+                    borderRadius: 99, padding: '4px 10px',
+                    fontSize: 12, fontWeight: 500,
+                  }}>🎵 {inst}</span>
                 ))}
               </div>
             )}
 
             {/* 자기소개 */}
             {(user as any).isBioPublic !== false && user.bio && (
-              <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed bg-gray-50 rounded-xl p-4">
+              <p style={{
+                fontSize: 13, color: '#374151',
+                lineHeight: 1.7, whiteSpace: 'pre-wrap',
+                background: '#F7F4ED', borderRadius: 10,
+                padding: '10px 14px', margin: 0,
+              }}>
                 {user.bio}
               </p>
             )}

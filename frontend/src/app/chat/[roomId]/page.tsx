@@ -39,12 +39,12 @@ function Avatar({ src, nickname }: { src: string | null; nickname: string | null
         alt={nickname ?? '?'}
         width={32}
         height={32}
-        className="rounded-full object-cover flex-shrink-0"
+        style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block' }}
       />
     );
   }
   return (
-    <div className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ background: '#F0EDE6', color: '#1C1C1C' }}>
+    <div style={{ width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0, background: '#F0EDE6', color: '#1C1C1C' }}>
       {(nickname ?? '?')[0]}
     </div>
   );
