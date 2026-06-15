@@ -5,10 +5,11 @@ import { initFirebase, requestNotificationPermission, onForegroundMessage } from
 import apiClient from '@/lib/axios';
 
 export function useFCM() {
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, isRestoring } = useAuthStore();
 
   useEffect(() => {
-    if (!isLoggedIn) return;
+    // isRestoring 완료 후에만 실행 (iOS PWA 콜드 스타트 대응)
+    if (isRestoring || !isLoggedIn) return;
 
     let cleanup: (() => void) | undefined;
 
@@ -35,5 +36,5 @@ export function useFCM() {
     return () => {
       cleanup?.();
     };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isRestoring]);
 }

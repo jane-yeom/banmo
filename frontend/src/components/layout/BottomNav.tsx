@@ -39,19 +39,14 @@ export default function BottomNav() {
 
   const writeTab = tabs.find((t) => t.highlight)!;
 
-  // iOS PWA에서 position:fixed 엘리먼트 밖으로 나온 자식은 터치 이벤트 차단됨
-  // → 글쓰기 버튼을 nav와 별개의 독립 fixed 엘리먼트로 분리
-  const navHeight = 56;
-  const btnSize = 52;
-
   return (
     <>
-      {/* 글쓰기 버튼: nav와 독립된 fixed 엘리먼트 (iOS PWA 터치 이슈 방지) */}
+      {/* 글쓰기 버튼: nav와 독립된 fixed 엘리먼트 (iOS PWA position:fixed 터치 차단 방지) */}
       <Link
         href={writeTab.href}
         style={{
           position: 'fixed',
-          bottom: `calc(${navHeight}px + env(safe-area-inset-bottom) + 4px)`,
+          bottom: 'calc(56px + env(safe-area-inset-bottom) + 6px)',
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 51,
@@ -64,7 +59,7 @@ export default function BottomNav() {
         }}
       >
         <div style={{
-          width: btnSize, height: btnSize,
+          width: 50, height: 50,
           background: '#1C1C1C',
           borderRadius: '50%',
           display: 'flex',
@@ -79,16 +74,17 @@ export default function BottomNav() {
         </span>
       </Link>
 
-    <nav style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0,
-      background: 'white',
-      borderTop: '1px solid #E8E4DC',
-      display: 'flex',
-      zIndex: 50,
-      height: navHeight,
-      paddingBottom: 'env(safe-area-inset-bottom)',
-      boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
-    }}>
+      <nav style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        background: 'white',
+        borderTop: '1px solid #E8E4DC',
+        display: 'flex',
+        alignItems: 'stretch',
+        zIndex: 50,
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
+        minHeight: 56,
+      }}>
       {tabs.map((tab) => {
         const isActive =
           tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);

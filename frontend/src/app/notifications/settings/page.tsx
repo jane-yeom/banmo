@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
+import { requestNotificationPermission } from '@/lib/firebase';
 import {
   IconChat, IconNewApplicant, IconResult,
   IconKeyword, IconComment, IconFavorite, IconNotice,
@@ -128,7 +129,36 @@ export default function NotificationSettingsPage() {
       <SubHeader title="알림 설정" />
 
       <div style={{ maxWidth: 512, margin: '0 auto', padding: '8px 16px 40px' }}>
-        <p style={{ fontSize: 13, color: '#888', margin: '12px 0 4px' }}>받고 싶은 알림을 선택하세요</p>
+        {/* 푸시알림 권한 요청 버튼 */}
+        <div style={{
+          background: '#F0EDE6', borderRadius: 14, padding: '14px 16px',
+          marginBottom: 16, marginTop: 12,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#1C1C1C', marginBottom: 2 }}>푸시 알림</div>
+            <div style={{ fontSize: 12, color: '#6B7280' }}>앱 종료 시에도 알림을 받습니다</div>
+          </div>
+          <button
+            onClick={async () => {
+              const token = await requestNotificationPermission();
+              if (token) {
+                await apiClient.post('/notifications/fcm-token', { token }).catch(() => {});
+                toast.success('푸시 알림이 활성화됐습니다');
+              } else {
+                toast.error('알림 권한을 허용해주세요\n(설정 → Safari → 알림 허용)');
+              }
+            }}
+            style={{
+              padding: '8px 16px', background: '#1C1C1C', color: 'white',
+              border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600,
+              cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+            }}
+          >
+            알림 허용
+          </button>
+        </div>
+        <p style={{ fontSize: 13, color: '#888', margin: '0 0 4px' }}>받고 싶은 알림을 선택하세요</p>
 
         {isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
