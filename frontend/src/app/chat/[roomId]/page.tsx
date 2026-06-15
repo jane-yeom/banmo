@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { useChatMessages } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
+import { useNotificationStore } from '@/store/notification.store';
 import { getSocket } from '@/lib/socket';
 import apiClient from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
@@ -55,6 +56,7 @@ export default function ChatRoomPage() {
   const router = useRouter();
   const { user, accessToken } = useAuthStore();
   const { decrementUnread, setUnreadCount } = useChatStore();
+  const { notifications, markAsRead: markNotifAsRead } = useNotificationStore();
   const qc = useQueryClient();
 
   const { data: initialMessages } = useChatMessages(roomId);
@@ -111,6 +113,19 @@ export default function ChatRoomPage() {
     if (!mounted) return;
     if (!user) { router.push('/login'); return; }
   }, [mounted, user, router]);
+
+  // 채팅방 입장 시 해당 방의 채팅 알림 자동 읽음 처리
+  useEffect(() => {
+    if (!roomId) return;
+    const chatLink = `/chat/${roomId}`;
+    const unreadChatNotifs = notifications.filter(
+      n => n.type === 'CHAT_MESSAGE' && n.link === chatLink && !n.isRead
+    );
+    unreadChatNotifs.forEach(n => {
+      markNotifAsRead(n.id);
+      apiClient.patch(`/notifications/${n.id}/read`).catch(() => {});
+    });
+  }, [roomId, notifications, markNotifAsRead]);
 
   // 채팅방 정보 로드
   useEffect(() => {

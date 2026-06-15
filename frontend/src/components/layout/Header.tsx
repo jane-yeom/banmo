@@ -32,8 +32,10 @@ export default function Header() {
   const [showInstall, setShowInstall] = useState(false);
   const { user, isLoggedIn, setAuth, logout, accessToken } = useAuthStore();
   const { unreadCount, setUnreadCount } = useChatStore();
-  const notifUnread = useNotificationStore(s => s.unreadCount);
-  const totalUnread = notifUnread + unreadCount;
+  // 상단 벨 아이콘: 채팅 제외 알림만 표시
+  const notifUnread = useNotificationStore(s =>
+    s.notifications.filter(n => !n.isRead && n.type !== 'CHAT_MESSAGE').length
+  );
   const qc = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -171,7 +173,7 @@ export default function Header() {
                 color: '#6B7280',
               }}>
                 <Bell size={22} strokeWidth={1.8} />
-                {totalUnread > 0 && (
+                {notifUnread > 0 && (
                   <span style={{
                     position: 'absolute', top: 0, right: 0,
                     background: '#EF4444', color: 'white',
@@ -179,7 +181,7 @@ export default function Header() {
                     fontSize: 10, fontWeight: 700,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    {totalUnread > 9 ? '9+' : totalUnread}
+                    {notifUnread > 9 ? '9+' : notifUnread}
                   </span>
                 )}
               </Link>
