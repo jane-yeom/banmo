@@ -4,12 +4,19 @@ import { useEffect } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 
 export default function AuthRestorer() {
-  const { isLoggedIn, setAuth, logout } = useAuthStore();
+  const { isLoggedIn, setAuth, logout, setRestoring } = useAuthStore();
 
   useEffect(() => {
     const restoreAuth = async () => {
       const token = localStorage.getItem('accessToken');
-      if (!token || isLoggedIn) return;
+      if (!token) {
+        setRestoring(false);
+        return;
+      }
+      if (isLoggedIn) {
+        setRestoring(false);
+        return;
+      }
 
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -23,6 +30,8 @@ export default function AuthRestorer() {
         localStorage.removeItem('accessToken');
         document.cookie = 'accessToken=;max-age=0;path=/';
         logout();
+      } finally {
+        setRestoring(false);
       }
     };
 

@@ -54,7 +54,7 @@ function Avatar({ src, nickname }: { src: string | null; nickname: string | null
 export default function ChatRoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const router = useRouter();
-  const { user, accessToken } = useAuthStore();
+  const { user, accessToken, isRestoring } = useAuthStore();
   const { decrementUnread, setUnreadCount } = useChatStore();
   const { notifications, markAsRead: markNotifAsRead } = useNotificationStore();
   const qc = useQueryClient();
@@ -110,9 +110,9 @@ export default function ChatRoomPage() {
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || isRestoring) return;
     if (!user) { router.push('/login'); return; }
-  }, [mounted, user, router]);
+  }, [mounted, isRestoring, user, router]);
 
   // 채팅방 입장 시 해당 방의 채팅 알림 자동 읽음 처리
   useEffect(() => {

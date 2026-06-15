@@ -27,20 +27,19 @@ function formatTime(dateStr: string | null): string {
 
 export default function ChatListPage() {
   const router = useRouter();
-  const { user, accessToken } = useAuthStore();
+  const { user, accessToken, isRestoring } = useAuthStore();
   const { data: rooms, isLoading } = useChatRooms();
   const { setUnreadCount } = useChatStore();
   const qc = useQueryClient();
 
-  // Zustand persist는 첫 렌더 후 비동기로 localStorage에서 rehydrate.
-  // mounted 체크 없이 바로 !user 판단하면 항상 로그인 페이지로 튕김.
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
+  // auth 복원 완료(isRestoring=false) 후에만 로그인 여부 판단
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || isRestoring) return;
     if (!user) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
-  }, [mounted, user, router]);
+  }, [mounted, isRestoring, user, router]);
 
   // 소켓 연결 + roomUpdated 이벤트로 목록 갱신
   useEffect(() => {

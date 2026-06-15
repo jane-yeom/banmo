@@ -16,8 +16,10 @@ interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
   isLoggedIn: boolean;
+  isRestoring: boolean;  // 앱 시작 시 auth 복원 중 여부
   setAuth: (user: AuthUser, accessToken: string) => void;
   logout: () => void;
+  setRestoring: (v: boolean) => void;
 }
 
 function setCookie(token: string) {
@@ -36,6 +38,8 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       accessToken: null,
       isLoggedIn: false,
+      isRestoring: true,  // 앱 시작 시 true, AuthRestorer 완료 후 false
+      setRestoring: (v) => set({ isRestoring: v }),
       setAuth: (user, accessToken) => {
         if (typeof window !== 'undefined') {
           localStorage.setItem('accessToken', accessToken);
