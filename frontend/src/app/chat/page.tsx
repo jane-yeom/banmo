@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import SubHeader from '@/components/layout/SubHeader';
+import BottomNav from '@/components/layout/BottomNav';
 import { useChatRooms } from '@/hooks/useChat';
 import { useAuthStore } from '@/store/auth.store';
 import { useChatStore } from '@/store/chat.store';
@@ -165,6 +166,7 @@ export default function ChatListPage() {
         </div>
       )}
     </div>
+      <BottomNav />
     </>
   );
 }

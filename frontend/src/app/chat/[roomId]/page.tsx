@@ -261,7 +261,7 @@ export default function ChatRoomPage() {
         padding: '12px 16px',
         display: 'flex', alignItems: 'center', gap: 12,
       }}>
-        <button onClick={() => router.push('/chat')} style={{
+        <button onClick={() => router.back()} style={{
           background: 'none', border: 'none',
           cursor: 'pointer', padding: 4,
           display: 'flex', alignItems: 'center',
@@ -595,8 +595,9 @@ export default function ChatRoomPage() {
         </div>
       </div>
 
-      {/* 입력창 */}
-      <div className="flex-shrink-0 border-t border-gray-100 bg-white px-4 py-3 safe-area-bottom">
+      {/* 입력창 - 키보드 올라오면 자연스럽게 따라올라감 (BottomNav 없음) */}
+      <div className="flex-shrink-0 border-t border-gray-100 bg-white px-4 py-3"
+        style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className="mx-auto flex items-end gap-2 max-w-3xl">
           <button
             onClick={() => imageRef.current?.click()}
