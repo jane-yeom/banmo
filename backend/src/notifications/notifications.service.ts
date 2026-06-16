@@ -178,7 +178,7 @@ export class NotificationsService {
       recipientId: receiverId,
       senderId,
       type: NotificationType.CHAT_MESSAGE,
-      title: `${nickname}님으로부터 메시지가 도착했습니다`,
+      title: `${nickname}님의 메시지`,
       body: preview,
       link: `/chat/${roomId}`,
     });
