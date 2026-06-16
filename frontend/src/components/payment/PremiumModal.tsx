@@ -88,15 +88,15 @@ export default function PremiumModal({ postId, postTitle, onClose, onSuccess }: 
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
-        <div className="rounded-t-2xl bg-gradient-to-r from-violet-600 to-violet-800 px-6 py-5 text-white">
+        <div className="rounded-t-2xl px-6 py-5 text-white" style={{ background: '#1C1C1C' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-violet-200 mb-1">상위노출 신청</p>
+              <p className="text-xs mb-1" style={{ color: '#ECEAE4' }}>상위노출 신청</p>
               <h2 className="text-lg font-bold">👑 프리미엄 공고</h2>
             </div>
             <button onClick={onClose} className="text-white/70 hover:text-white text-xl">✕</button>
           </div>
-          <p className="mt-2 text-sm text-violet-100 truncate">📋 {postTitle}</p>
+          <p className="mt-2 text-sm truncate" style={{ color: '#ECEAE4' }}>📋 {postTitle}</p>
         </div>
 
         <div className="p-6">
@@ -117,8 +117,8 @@ export default function PremiumModal({ postId, postTitle, onClose, onSuccess }: 
                 key={p.type}
                 className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-all ${
                   selected === p.type
-                    ? 'border-violet-600 bg-violet-50'
-                    : 'border-gray-200 hover:border-violet-300'
+                    ? 'border-[#1C1C1C] bg-[#F7F4ED]'
+                    : 'border-gray-200 hover:border-[#1C1C1C]'
                 }`}
               >
                 <input
@@ -130,10 +130,10 @@ export default function PremiumModal({ postId, postTitle, onClose, onSuccess }: 
                   className="hidden"
                 />
                 <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                  selected === p.type ? 'border-violet-600' : 'border-gray-300'
+                  selected === p.type ? 'border-[#1C1C1C]' : 'border-gray-300'
                 }`}>
                   {selected === p.type && (
-                    <div className="h-2.5 w-2.5 rounded-full bg-violet-600" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-[#1C1C1C]" />
                   )}
                 </div>
                 <div className="flex-1">
@@ -141,7 +141,7 @@ export default function PremiumModal({ postId, postTitle, onClose, onSuccess }: 
                     <span className="font-semibold text-gray-900">{p.label}</span>
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       p.badge === '추천'
-                        ? 'bg-violet-100 text-violet-700'
+                        ? 'bg-[#ECEAE4] text-[#1C1C1C]'
                         : p.badge === '최고가성비'
                         ? 'bg-green-100 text-green-700'
                         : 'bg-gray-100 text-gray-500'
@@ -168,7 +168,7 @@ export default function PremiumModal({ postId, postTitle, onClose, onSuccess }: 
           <button
             onClick={handlePayment}
             disabled={loading}
-            className="w-full rounded-xl bg-violet-700 py-4 text-base font-bold text-white hover:bg-violet-800 transition-colors disabled:opacity-60"
+            className="w-full rounded-xl py-4 text-base font-bold text-white transition-colors disabled:opacity-60" style={{ background: '#1C1C1C' }}
           >
             {loading
               ? '결제창 로딩 중...'

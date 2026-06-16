@@ -39,7 +39,7 @@ export default function Pagination({ page, totalPages, onChange }: PaginationPro
           onClick={() => onChange(p)}
           className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
             p === page
-              ? 'bg-violet-600 border-violet-600 text-white font-semibold'
+              ? 'bg-[#1C1C1C] border-[#1C1C1C] text-white font-semibold'
               : 'border-gray-200 text-gray-600 hover:bg-gray-50'
           }`}
         >

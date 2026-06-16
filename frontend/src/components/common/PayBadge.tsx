@@ -25,7 +25,7 @@ export default function PayBadge({ payType, payMin, payMax }: PayBadgeProps) {
 
   const colorClass = isLow
     ? 'bg-red-50 text-red-600 border border-red-200'
-    : 'bg-violet-50 text-violet-700 border border-violet-200';
+    : 'bg-[#F7F4ED] text-[#1C1C1C] border border-[#ECEAE4]';
 
   return (
     <span className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-semibold ${colorClass}`}>

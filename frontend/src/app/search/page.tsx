@@ -65,8 +65,8 @@ function SearchContent() {
   };
 
   const categoryLabel: Record<string, string> = {
-    JOB_OFFER: '반주자구인', JOB_SEEK: '반주자구직',
-    LESSON_OFFER: '레슨구인', LESSON_SEEK: '레슨구직',
+    JOB_OFFER: '반주자 구함', JOB_SEEK: '반주 지원',
+    LESSON_OFFER: '레슨 구함', LESSON_SEEK: '레슨 지원',
     PERFORMANCE: '공연도우미', AFTERSCHOOL: '방과후교사',
     PROMO_CONCERT: '공연홍보', PROMO_SPACE: '연습실대여',
     TRADE_LESSON: '레슨양도', TRADE_SPACE: '연습실양도',

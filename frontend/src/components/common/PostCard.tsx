@@ -1,8 +1,8 @@
 const CATEGORY_LABEL: Record<string, string> = {
-  JOB_OFFER: '반주자구인', JOB_SEEK: '반주자구직',
-  LESSON_OFFER: '레슨구인', LESSON_SEEK: '레슨구직',
+  JOB_OFFER: '반주자 구함', JOB_SEEK: '반주 지원',
+  LESSON_OFFER: '레슨 구함', LESSON_SEEK: '레슨 지원',
   PERFORMANCE: '공연도우미', AFTERSCHOOL: '방과후',
-  ACADEMY_OFFER: '학원선생님구인', ACADEMY_SEEK: '학원선생님구직',
+  ACADEMY_OFFER: '학원 채용', ACADEMY_SEEK: '학원 취업',
   PROMO_CONCERT: '연주회홍보', PROMO_SPACE: '연습실대여',
   TRADE_LESSON: '레슨양도', TRADE_SPACE: '연습실양도',
   TRADE_TICKET: '티켓양도', TRADE_INSTRUMENT: '중고악기',
@@ -28,7 +28,7 @@ export default function PostCard({
   region,
   pay,
   noteGrade,
-  categoryColor = 'bg-violet-100 text-violet-700',
+  categoryColor = 'bg-[#ECEAE4] text-[#1C1C1C]',
   isPremium = false,
 }: PostCardProps) {
   const categoryLabel = CATEGORY_LABEL[category] ?? category;
@@ -50,12 +50,12 @@ export default function PostCard({
           <span className="text-xs text-amber-600 font-medium">{NOTE_GRADE_LABEL[noteGrade]}</span>
         )}
       </div>
-      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-violet-700 transition-colors">
+      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2 transition-colors">
         {title}
       </h3>
       <div className="flex items-center justify-between text-xs text-gray-500">
-        <span>📍 {region}</span>
-        {pay && <span className="font-semibold text-violet-600">{pay}</span>}
+        <span>{region}</span>
+        {pay && <span className="font-bold text-[#1C1C1C]">{pay}</span>}
       </div>
     </div>
   );

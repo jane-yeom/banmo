@@ -28,10 +28,10 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const CATEGORIES = [
-  { value: 'JOB_OFFER',        label: '반주자 구인' },
-  { value: 'JOB_SEEK',         label: '반주자 구직' },
-  { value: 'LESSON_OFFER',     label: '레슨 구인' },
-  { value: 'LESSON_SEEK',      label: '레슨 구직' },
+  { value: 'JOB_OFFER',        label: '반주자 구함' },
+  { value: 'JOB_SEEK',         label: '반주 지원' },
+  { value: 'LESSON_OFFER',     label: '레슨 구함' },
+  { value: 'LESSON_SEEK',      label: '레슨 지원' },
   { value: 'PERFORMANCE',      label: '공연 도우미' },
   { value: 'AFTERSCHOOL',      label: '방과후 교사' },
   { value: 'PROMO_CONCERT',    label: '연주회 홍보' },
@@ -223,7 +223,7 @@ export default function JobEditPage() {
             {CATEGORIES.map((cat) => (
               <label key={cat.value} className="cursor-pointer">
                 <input type="radio" value={cat.value} {...register('category')} className="sr-only peer" />
-                <span className="block rounded-lg border border-gray-200 px-2 py-2 text-center text-xs peer-checked:border-violet-700 peer-checked:bg-violet-50 peer-checked:text-violet-700 peer-checked:font-semibold transition-colors">
+                <span className="block rounded-lg border border-gray-200 px-2 py-2 text-center text-xs peer-checked:border-[#1C1C1C] peer-checked:bg-[#F7F4ED] peer-checked:text-[#1C1C1C] peer-checked:font-semibold transition-colors">
                   {cat.label}
                 </span>
               </label>
@@ -250,8 +250,8 @@ export default function JobEditPage() {
                 onClick={() => toggleInstrument(inst)}
                 className={`rounded-full border px-3 py-1 text-sm transition-colors ${
                   selectedInstruments.includes(inst)
-                    ? 'border-violet-700 bg-violet-700 text-white'
-                    : 'border-gray-200 text-gray-600 hover:border-violet-400'
+                    ? 'border-[#1C1C1C] bg-[#1C1C1C] text-white'
+                    : 'border-gray-200 text-gray-600 hover:border-[#1C1C1C]'
                 }`}
               >
                 {inst}
@@ -288,7 +288,7 @@ export default function JobEditPage() {
             {(['NEGOTIABLE', 'HOURLY', 'PER_SESSION', 'MONTHLY'] as const).map((type) => (
               <label key={type} className="cursor-pointer flex-1">
                 <input type="radio" value={type} {...register('payType')} className="sr-only peer" />
-                <span className="block rounded-lg border border-gray-200 py-2 text-center text-xs peer-checked:border-violet-700 peer-checked:bg-violet-50 peer-checked:text-violet-700 peer-checked:font-semibold transition-colors">
+                <span className="block rounded-lg border border-gray-200 py-2 text-center text-xs peer-checked:border-[#1C1C1C] peer-checked:bg-[#F7F4ED] peer-checked:text-[#1C1C1C] peer-checked:font-semibold transition-colors">
                   {type === 'NEGOTIABLE' ? '협의' : type === 'HOURLY' ? '시급' : type === 'PER_SESSION' ? '회당' : '월급'}
                 </span>
               </label>
@@ -353,7 +353,7 @@ export default function JobEditPage() {
                 type="button"
                 onClick={() => imageInputRef.current?.click()}
                 disabled={imageUploading}
-                className="flex items-center gap-2 rounded-xl border-2 border-dashed border-gray-200 px-4 py-3 text-sm text-gray-500 hover:border-violet-300 hover:text-violet-600 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 rounded-xl border-2 border-dashed border-gray-200 px-4 py-3 text-sm text-gray-500 hover:border-[#1C1C1C] hover:text-[#1C1C1C] transition-colors disabled:opacity-50"
               >
                 {imageUploading ? '업로드 중...' : '+ 이미지 추가 (jpg, png, webp · 최대 10MB)'}
               </button>
@@ -384,7 +384,7 @@ export default function JobEditPage() {
           <button
             type="submit"
             disabled={submitting || imageUploading}
-            className="flex-1 rounded-xl bg-violet-700 py-4 text-base font-semibold text-white hover:bg-violet-800 transition-colors disabled:opacity-60"
+            className="flex-1 rounded-xl bg-[#1C1C1C] py-4 text-base font-semibold text-white hover:bg-black transition-colors disabled:opacity-60"
           >
             {submitting ? '저장 중...' : '수정 완료'}
           </button>

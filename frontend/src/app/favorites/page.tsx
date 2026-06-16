@@ -64,7 +64,7 @@ export default function FavoritesPage() {
           <p className="text-sm text-gray-300 mt-1">공고 상세 페이지에서 하트를 눌러 찜하세요</p>
           <Link
             href="/jobs"
-            className="mt-4 rounded-lg bg-indigo-700 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-800 transition-colors"
+            className="mt-4 rounded-lg bg-[#1C1C1C] px-4 py-2 text-sm font-medium text-white hover:bg-black transition-colors"
           >
             공고 보러가기
           </Link>

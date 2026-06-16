@@ -72,6 +72,7 @@ export default function ChatRoomPage() {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
+  const inputBarRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
@@ -113,23 +114,35 @@ export default function ChatRoomPage() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
-  // 키보드 올라올 때 컨테이너 높이를 visualViewport에 맞춤 (iOS/Android 공통)
+  // 키보드 올라올 때 입력창을 visualViewport 기준으로 올림 (iOS/Android 공통)
+  // 컨테이너 전체 리사이즈보다 입력창 translateY가 더 안정적
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el || !window.visualViewport) return;
-    const resize = () => {
-      const vv = window.visualViewport!;
-      el.style.height = `${vv.height}px`;
-      el.style.top = `${vv.offsetTop}px`;
+    const bar = inputBarRef.current;
+    if (!bar) return;
+    const update = () => {
+      const vv = window.visualViewport;
+      if (!vv) return;
+      // 레이아웃 뷰포트 하단과 비주얼 뷰포트 하단의 차이 = 키보드 높이
+      const keyboardH = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      bar.style.transform = `translateY(-${keyboardH}px)`;
     };
-    resize();
-    window.visualViewport!.addEventListener('resize', resize);
-    window.visualViewport!.addEventListener('scroll', resize);
+    update();
+    window.visualViewport?.addEventListener('resize', update);
+    window.visualViewport?.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
     return () => {
-      window.visualViewport!.removeEventListener('resize', resize);
-      window.visualViewport!.removeEventListener('scroll', resize);
+      window.visualViewport?.removeEventListener('resize', update);
+      window.visualViewport?.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
     };
-  }, [mounted]);
+  }, []);
+
+  // 키보드 열릴 때 메시지 목록 최하단 유지
+  useEffect(() => {
+    const onResize = () => { scrollToBottom(false); };
+    window.visualViewport?.addEventListener('resize', onResize);
+    return () => { window.visualViewport?.removeEventListener('resize', onResize); };
+  }, [scrollToBottom]);
 
   useEffect(() => {
     if (!mounted || isRestoring) return;
@@ -308,7 +321,7 @@ export default function ChatRoomPage() {
 
 
   return (
-    <div ref={containerRef} style={{ position: 'fixed', left: 0, right: 0, top: 0, height: '100dvh', display: 'flex', flexDirection: 'column', background: '#F9FAFB' }} onClick={() => showMenu && setShowMenu(false)}>
+    <div ref={containerRef} style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#F9FAFB' }} onClick={() => showMenu && setShowMenu(false)}>
       {showReviewModal && otherId && (
         <ReviewModal
           revieweeId={otherId}
@@ -708,9 +721,15 @@ export default function ChatRoomPage() {
         </div>
       </div>
 
-      {/* 입력창 - visualViewport로 키보드 바로 위 고정 */}
-      <div className="flex-shrink-0 border-t border-gray-100 bg-white px-4 py-3"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 4px)' }}>
+      {/* 입력창 - translateY로 키보드 바로 위에 붙음 */}
+      <div
+        ref={inputBarRef}
+        className="flex-shrink-0 border-t border-gray-100 bg-white px-4 py-3"
+        style={{
+          paddingBottom: 'calc(env(safe-area-inset-bottom) + 4px)',
+          willChange: 'transform', // 레이어 분리로 translateY 성능 개선
+        }}
+      >
         <div className="mx-auto flex items-end gap-2 max-w-3xl">
           <button
             onClick={() => imageRef.current?.click()}

@@ -12,10 +12,10 @@ import InstrumentSelect from '@/components/common/InstrumentSelect';
 const DRAFT_KEY = 'draft_jobs';
 
 const JOB_CATEGORIES = [
-  { value: 'JOB_OFFER', label: '반주자 구인' },
-  { value: 'JOB_SEEK', label: '반주자 구직' },
-  { value: 'LESSON_OFFER', label: '레슨 구인' },
-  { value: 'LESSON_SEEK', label: '레슨 구직' },
+  { value: 'JOB_OFFER', label: '반주자 구함' },
+  { value: 'JOB_SEEK', label: '반주 지원' },
+  { value: 'LESSON_OFFER', label: '레슨 구함' },
+  { value: 'LESSON_SEEK', label: '레슨 지원' },
   { value: 'ACADEMY_OFFER', label: '학원 선생님 구인' },
   { value: 'ACADEMY_SEEK', label: '학원 선생님 구직' },
   { value: 'PERFORMANCE', label: '공연도우미 구인' },

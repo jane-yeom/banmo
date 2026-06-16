@@ -32,8 +32,8 @@ const STATUS_LABEL: Record<AppStatus, { label: string; color: string }> = {
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
-  JOB_OFFER: '반주자구인', JOB_SEEK: '반주자구직',
-  LESSON_OFFER: '레슨구인', LESSON_SEEK: '레슨구직',
+  JOB_OFFER: '반주자 구함', JOB_SEEK: '반주 지원',
+  LESSON_OFFER: '레슨 구함', LESSON_SEEK: '레슨 지원',
   PERFORMANCE: '공연도우미', AFTERSCHOOL: '방과후',
   PROMO_CONCERT: '연주회홍보', PROMO_SPACE: '연습실대여',
   TRADE_LESSON: '레슨양도', TRADE_SPACE: '연습실양도',
@@ -84,7 +84,7 @@ function ApplicantProfileModal({
         </div>
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#ECEAE4] border-t-[#1C1C1C]" />
           </div>
         ) : profile ? (
           <>
@@ -253,7 +253,7 @@ export default function MyPage() {
 
       {/* 프로필 헤더 */}
       <div className="mb-6 flex items-center gap-4">
-        <div className="h-14 w-14 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 text-2xl font-bold flex-shrink-0 overflow-hidden">
+        <div className="h-14 w-14 rounded-full bg-[#ECEAE4] flex items-center justify-center text-[#1C1C1C] text-2xl font-bold flex-shrink-0 overflow-hidden">
           {user.profileImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={user.profileImage} alt="프로필" className="h-14 w-14 rounded-full object-cover" />
@@ -264,7 +264,7 @@ export default function MyPage() {
         <div className="flex-1">
           <h1 className="text-xl font-bold text-gray-900">{user.nickname ?? '사용자'}</h1>
           <div className="flex flex-wrap items-center gap-1 text-sm">
-            <Link href={`/profile/${user.id}`} className="text-indigo-600 hover:underline">
+            <Link href={`/profile/${user.id}`} className="text-[#1C1C1C] hover:underline">
               프로필 보기
             </Link>
             <span className="text-gray-300">·</span>
@@ -366,7 +366,7 @@ export default function MyPage() {
           <div className="flex justify-end">
             <Link
               href="/jobs/write"
-              className="rounded-lg bg-indigo-700 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-800"
+              className="rounded-lg bg-[#1C1C1C] px-4 py-2 text-sm font-medium text-white hover:bg-black"
             >
               + 공고 작성
             </Link>
@@ -390,7 +390,7 @@ export default function MyPage() {
               <div key={app.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <Link href={`/jobs/${app.postId}`} className="font-semibold text-gray-900 hover:text-indigo-700 truncate block">
+                    <Link href={`/jobs/${app.postId}`} className="font-semibold text-gray-900 hover:text-[#1C1C1C] truncate block">
                       {app.post?.title ?? '삭제된 공고'}
                     </Link>
                     <p className="mt-0.5 text-xs text-gray-400">
@@ -420,14 +420,14 @@ export default function MyPage() {
             const s = STATUS_LABEL[app.status];
             return (
               <div key={app.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                <div className="mb-2 text-xs text-indigo-600 font-medium truncate" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div className="mb-2 text-xs text-[#1C1C1C] font-medium truncate" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <ClipboardList size={12} strokeWidth={1.8} /> {app.post?.title ?? '공고'}
                 </div>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <button
                       onClick={() => app.applicant?.id && setSelectedApplicantId(app.applicant.id)}
-                      className="font-medium text-gray-900 hover:text-indigo-700 transition-colors text-left"
+                      className="font-medium text-gray-900 hover:text-[#1C1C1C] transition-colors text-left"
                     >
                       {app.applicant?.nickname ?? '익명'} <span className="text-xs text-gray-400 font-normal">프로필 보기 →</span>
                     </button>
@@ -564,7 +564,7 @@ function PostRow({ post }: { post: Post }) {
 
   return (
     <Link href={`/jobs/${post.id}`}>
-      <div className={`rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:border-indigo-200 transition-colors ${post.status === 'CLOSED' ? 'opacity-70' : ''}`}>
+      <div className={`rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:border-[#ECEAE4] transition-colors ${post.status === 'CLOSED' ? 'opacity-70' : ''}`}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <p className={`font-semibold truncate ${post.status === 'CLOSED' ? 'text-gray-400 line-through' : 'text-gray-900'}`}>

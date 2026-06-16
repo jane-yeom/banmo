@@ -27,6 +27,8 @@
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+a { color: inherit; }
+a:visited { color: inherit; }
 a, button, [role="button"] { touch-action: manipulation; cursor: pointer; }
 body {
   background: #F7F4ED;

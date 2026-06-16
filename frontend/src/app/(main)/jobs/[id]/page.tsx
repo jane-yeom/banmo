@@ -22,10 +22,10 @@ const ResumeViewer = dynamic(() => import('@/components/common/ResumeViewer'), {
 // import PremiumModal from '@/components/payment/PremiumModal';
 
 const CATEGORY_LABEL: Record<string, string> = {
-  JOB_OFFER: '반주자 구인', JOB_SEEK: '반주자 구직',
-  LESSON_OFFER: '레슨 구인', LESSON_SEEK: '레슨 구직',
+  JOB_OFFER: '반주자 구함', JOB_SEEK: '반주 지원',
+  LESSON_OFFER: '레슨 구함', LESSON_SEEK: '레슨 지원',
   PERFORMANCE: '공연 도우미', AFTERSCHOOL: '방과후 교사',
-  ACADEMY_OFFER: '학원선생님 구인', ACADEMY_SEEK: '학원선생님 구직',
+  ACADEMY_OFFER: '학원 채용', ACADEMY_SEEK: '학원 취업',
   PROMO_CONCERT: '연주회 홍보', PROMO_SPACE: '연습실 대여',
   TRADE_LESSON: '레슨 양도', TRADE_SPACE: '연습실 양도',
   TRADE_TICKET: '티켓 양도', TRADE_INSTRUMENT: '중고 악기',
@@ -87,7 +87,7 @@ function ApplyModal({
           onChange={(e) => setMessage(e.target.value)}
           rows={5}
           placeholder="지원 메시지를 입력하세요. (선택사항)"
-          className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400 resize-none"
+          className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#1C1C1C] resize-none"
         />
         {applyMutation.isError && (
           <p className="mt-2 text-xs text-red-500">
@@ -114,7 +114,7 @@ function ApplyModal({
           <button
             onClick={() => applyMutation.mutate()}
             disabled={applyMutation.isPending}
-            className="flex-1 rounded-xl bg-indigo-700 py-2.5 text-sm font-semibold text-white hover:bg-indigo-800 disabled:opacity-60"
+            className="flex-1 rounded-xl bg-[#1C1C1C] py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-60"
           >
             {applyMutation.isPending ? '지원 중...' : '지원 완료'}
           </button>
@@ -278,7 +278,7 @@ export default function JobDetailPage() {
       <div className="flex flex-col items-center justify-center py-32 text-gray-400">
         <span className="text-5xl mb-3">😢</span>
         <p>공고를 찾을 수 없습니다.</p>
-        <Link href="/jobs" className="mt-4 text-indigo-600 hover:underline">목록으로</Link>
+        <Link href="/jobs" className="mt-4 text-[#1C1C1C] hover:underline">목록으로</Link>
       </div>
     );
 
