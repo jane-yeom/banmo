@@ -51,12 +51,11 @@ export class FcmService {
       const admin = require('firebase-admin');
       await admin.messaging().send({
         token,
-        notification: {
+        // notification 필드를 제거해야 Android Chrome이 서비스워커 onBackgroundMessage를 호출함
+        // notification 필드가 있으면 Android Chrome이 자동으로 알림을 표시하고 SW를 우회함
+        data: {
           title: notification.title,
           body: notification.body,
-        },
-        // data 필드: 서비스워커에서 배지 카운트 수신용 (문자열만 허용)
-        data: {
           link: notification.link ?? '/',
           badgeCount: String(notification.badgeCount ?? 1),
         },

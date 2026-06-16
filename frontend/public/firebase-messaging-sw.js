@@ -13,8 +13,9 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  const title = payload.notification?.title || '반모 알림';
-  const body = payload.notification?.body || '';
+  // data-only 메시지를 사용하므로 payload.data에서 읽음 (notification 필드 없음)
+  const title = payload.data?.title || payload.notification?.title || '반모 알림';
+  const body = payload.data?.body || payload.notification?.body || '';
   const link = payload.data?.link || '/';
   const badgeCount = parseInt(payload.data?.badgeCount || '1', 10);
 
