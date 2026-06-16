@@ -86,9 +86,13 @@ function openInBrowser(os: Os) {
 export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
   const [os, setOs] = useState<Os>('other')
   const [step, setStep] = useState(0)
+  const [isKakao, setIsKakao] = useState(false)
 
   useEffect(() => {
     const ua = navigator.userAgent.toLowerCase()
+    if (/kakaotalk/i.test(navigator.userAgent)) {
+      setIsKakao(true)
+    }
     if (/iphone|ipad|ipod/.test(ua)) {
       setOs('ios')
     } else if (/android/.test(ua)) {
@@ -145,7 +149,48 @@ export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
           </button>
         </div>
 
-        {os === 'other' ? (
+        {isKakao ? (
+          <div style={{ textAlign: 'center', padding: '8px 0' }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🌐</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1C', marginBottom: 8 }}>
+              외부 브라우저에서 설치해주세요
+            </div>
+            <div style={{ fontSize: 14, color: '#555', marginBottom: 20, lineHeight: 1.7 }}>
+              카카오톡 내에서는 앱 설치가 불가합니다
+            </div>
+            <div style={{
+              background: '#F7F4ED', borderRadius: 14,
+              padding: '16px', textAlign: 'left', marginBottom: 16,
+            }}>
+              {os === 'ios' ? (
+                <>
+                  <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>🍎 iPhone</div>
+                  <div style={{ fontSize: 13, color: '#555', lineHeight: 1.8 }}>
+                    1. 우측 하단 <strong>···</strong> 버튼 탭<br />
+                    2. <strong>"Safari로 열기"</strong> 선택<br />
+                    3. 하단 공유(📤) → "홈 화면에 추가"
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>🤖 Android</div>
+                  <div style={{ fontSize: 13, color: '#555', lineHeight: 1.8 }}>
+                    1. 우측 상단 <strong>···</strong> 버튼 탭<br />
+                    2. <strong>"기본 브라우저로 열기"</strong> 선택<br />
+                    3. 우측 상단 ⋮ → "앱 설치"
+                  </div>
+                </>
+              )}
+            </div>
+            <div style={{
+              background: '#FEF3C7', borderRadius: 10,
+              padding: '10px 14px',
+              fontSize: 12, color: '#92400E',
+            }}>
+              💡 주소창에 <strong>banmo.kr</strong> 을 직접 입력해도 됩니다
+            </div>
+          </div>
+        ) : os === 'other' ? (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>📱</div>
             <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>
