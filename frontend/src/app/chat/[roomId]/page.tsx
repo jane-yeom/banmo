@@ -69,6 +69,8 @@ export default function ChatRoomPage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [opponent, setOpponent] = useState<any>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
@@ -110,6 +112,24 @@ export default function ChatRoomPage() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
+  // 키보드 올라올 때 컨테이너 높이를 visualViewport에 맞춤 (iOS/Android 공통)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !window.visualViewport) return;
+    const resize = () => {
+      const vv = window.visualViewport!;
+      el.style.height = `${vv.height}px`;
+      el.style.top = `${vv.offsetTop}px`;
+    };
+    resize();
+    window.visualViewport!.addEventListener('resize', resize);
+    window.visualViewport!.addEventListener('scroll', resize);
+    return () => {
+      window.visualViewport!.removeEventListener('resize', resize);
+      window.visualViewport!.removeEventListener('scroll', resize);
+    };
+  }, [mounted]);
+
   useEffect(() => {
     if (!mounted || isRestoring) return;
     if (!user) { router.push('/login'); return; }
@@ -148,9 +168,15 @@ export default function ChatRoomPage() {
     if (initialMessages) setMessages(initialMessages);
   }, [initialMessages]);
 
-  // 스크롤 하단 이동
+  // 스크롤 하단 이동 - scrollTop 방식이 scrollIntoView보다 신뢰성 높음
   const scrollToBottom = useCallback((smooth = true) => {
-    bottomRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    const el = messagesRef.current;
+    if (!el) return;
+    if (smooth) {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
   }, []);
 
   useEffect(() => {
@@ -270,7 +296,7 @@ export default function ChatRoomPage() {
 
 
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: '#F9FAFB' }} onClick={() => showMenu && setShowMenu(false)}>
+    <div ref={containerRef} style={{ position: 'fixed', left: 0, right: 0, top: 0, height: '100dvh', display: 'flex', flexDirection: 'column', background: '#F9FAFB' }} onClick={() => showMenu && setShowMenu(false)}>
       {showReviewModal && otherId && (
         <ReviewModal
           revieweeId={otherId}
@@ -531,7 +557,7 @@ export default function ChatRoomPage() {
       )}
 
       {/* 메시지 목록 */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div ref={messagesRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         <div className="mx-auto max-w-3xl space-y-4">
           {messages.length === 0 && (
             <div className="flex justify-center py-8">
@@ -621,9 +647,9 @@ export default function ChatRoomPage() {
         </div>
       </div>
 
-      {/* 입력창 - 키보드 올라오면 자연스럽게 따라올라감 (BottomNav 없음) */}
+      {/* 입력창 - visualViewport로 키보드 바로 위 고정 */}
       <div className="flex-shrink-0 border-t border-gray-100 bg-white px-4 py-3"
-        style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 4px)' }}>
         <div className="mx-auto flex items-end gap-2 max-w-3xl">
           <button
             onClick={() => imageRef.current?.click()}
