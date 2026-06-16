@@ -74,14 +74,13 @@ type Os = 'ios' | 'android' | 'other'
 
 /** OS에 맞는 외부 브라우저로 banmo.kr 열기 */
 function openInBrowser(os: Os) {
-  if (os === 'android') {
-    // Android: Chrome intent → 설치 안됐으면 기본 브라우저로 폴백
-    const intentUrl = `intent://${BANMO_URL.replace('https://', '')}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(BANMO_URL)};end`
-    window.location.href = intentUrl
-  } else {
-    // iOS: Safari가 기본 브라우저 — _blank로 열면 Safari에서 열림
-    window.open(BANMO_URL, '_blank', 'noopener,noreferrer')
-  }
+  const a = document.createElement('a')
+  a.href = BANMO_URL
+  a.target = '_blank'
+  a.rel = 'noopener noreferrer'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
 }
 
 export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {

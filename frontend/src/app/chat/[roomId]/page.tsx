@@ -225,12 +225,12 @@ export default function ChatRoomPage() {
 
   const sendMessage = useCallback(() => {
     const content = input.trim();
-    if (!content || !connected) return;
-    const socket = getSocket(accessToken!);
+    if (!content || !accessToken) return;
+    const socket = getSocket(accessToken);
     socket.emit('sendMessage', { roomId, content });
     setInput('');
     inputRef.current?.focus();
-  }, [input, connected, accessToken, roomId]);
+  }, [input, accessToken, roomId]);
 
   const handleImageSend = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -653,7 +653,7 @@ export default function ChatRoomPage() {
           />
           <button
             onClick={sendMessage}
-            disabled={!input.trim() || !connected}
+            disabled={!input.trim()}
             style={{
               width: 40, height: 40, borderRadius: 10,
               background: input.trim() ? '#1C1C1C' : '#E8E4DC',
