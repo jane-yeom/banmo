@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { X, ExternalLink } from 'lucide-react'
+import { X } from 'lucide-react'
 
 interface InstallGuideModalProps {
   onClose: () => void
@@ -8,110 +8,36 @@ interface InstallGuideModalProps {
 
 const BANMO_URL = 'https://banmo.kr'
 
-const iosSteps = [
-  {
-    icon: '🧭',
-    title: 'Safari로 접속',
-    desc: 'Safari 브라우저로\nbanmo.kr 에 접속해주세요',
-    tip: '크롬 등 다른 브라우저에서는 설치가 안 돼요',
-    hasBrowserBtn: true,
-  },
-  {
-    icon: '📤',
-    title: '공유 버튼 탭',
-    desc: '하단 가운데 공유 버튼(📤)을\n탭해주세요',
-    tip: '주소창 아래 툴바에 있어요',
-    hasBrowserBtn: false,
-  },
-  {
-    icon: '➕',
-    title: '"홈 화면에 추가" 탭',
-    desc: '스크롤을 내려\n"홈 화면에 추가"를 탭해주세요',
-    tip: '아이콘과 함께 표시돼요',
-    hasBrowserBtn: false,
-  },
-  {
-    icon: '✅',
-    title: '추가 완료!',
-    desc: '우측 상단 "추가"를 탭하면\n홈 화면에 반모 아이콘이 생겨요!',
-    tip: '이제 앱처럼 사용할 수 있어요 🎉',
-    hasBrowserBtn: false,
-  },
-]
-
-const androidSteps = [
-  {
-    icon: '🌐',
-    title: '기본 브라우저로 접속',
-    desc: '기본 브라우저(Chrome 등)로\nbanmo.kr 에 접속해주세요',
-    tip: '삼성 인터넷, Chrome 모두 지원돼요',
-    hasBrowserBtn: true,
-  },
-  {
-    icon: '⋮',
-    title: '메뉴 버튼 탭',
-    desc: '주소창 오른쪽\n점 세개(⋮) 버튼을 탭해주세요',
-    tip: '화면 우측 상단에 있어요',
-    hasBrowserBtn: false,
-  },
-  {
-    icon: '📲',
-    title: '"앱 설치" 선택',
-    desc: '메뉴에서 "앱 설치" 또는\n"홈 화면에 추가"를 탭해주세요',
-    tip: '"앱 설치"가 없으면 "홈 화면에 추가"를 선택하세요',
-    hasBrowserBtn: false,
-  },
-  {
-    icon: '✅',
-    title: '설치 완료!',
-    desc: '"설치" 버튼을 탭하면\n홈 화면에 반모 아이콘이 생겨요!',
-    tip: '이제 앱처럼 사용할 수 있어요 🎉',
-    hasBrowserBtn: false,
-  },
-]
-
 type Os = 'ios' | 'android' | 'other'
-
-/** OS에 맞는 외부 브라우저로 banmo.kr 열기 */
-function openInBrowser(os: Os) {
-  const a = document.createElement('a')
-  a.href = BANMO_URL
-  a.target = '_blank'
-  a.rel = 'noopener noreferrer'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-}
 
 export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
   const [os, setOs] = useState<Os>('other')
-  const [step, setStep] = useState(0)
-  const [isKakao, setIsKakao] = useState(false)
+  const [isIosNonSafari, setIsIosNonSafari] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    const ua = navigator.userAgent.toLowerCase()
-    if (/kakaotalk/i.test(navigator.userAgent)) {
-      setIsKakao(true)
-    }
-    if (/iphone|ipad|ipod/.test(ua)) {
+    const ua = navigator.userAgent
+    const uaLower = ua.toLowerCase()
+    if (/iphone|ipad|ipod/.test(uaLower)) {
       setOs('ios')
-    } else if (/android/.test(ua)) {
+      const isSafari = /safari/i.test(ua) && !/chrome|crios|fxios|kakaotalk/i.test(ua)
+      if (!isSafari) setIsIosNonSafari(true)
+    } else if (/android/.test(uaLower)) {
       setOs('android')
-    } else {
-      setOs('other')
     }
   }, [])
 
-  const steps = os === 'ios' ? iosSteps : androidSteps
-  const currentStep = steps[step]
+  const copyUrl = () => {
+    navigator.clipboard.writeText(BANMO_URL).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   const osLabel =
-    os === 'ios' ? 'iPhone / iPad 기준' :
-    os === 'android' ? 'Android 기준' :
-    'PC에서는 모바일로 접속해주세요'
-
-  const browserBtnLabel =
-    os === 'ios' ? 'Safari에서 열기 →' : '브라우저에서 열기 →'
+    os === 'ios' ? 'iPhone / iPad' :
+    os === 'android' ? 'Android' :
+    '모바일에서 접속해주세요'
 
   return (
     <div
@@ -136,230 +62,186 @@ export default function InstallGuideModal({ onClose }: InstallGuideModalProps) {
         }}
       >
         {/* 헤더 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#1C1C1C' }}>앱 설치 방법</div>
-            <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{osLabel}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#1C1C1C' }}>반모 앱 설치</div>
+            <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{osLabel} 기준</div>
           </div>
-          <button
-            onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-          >
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
             <X size={22} color="#9CA3AF" />
           </button>
         </div>
 
-        {isKakao ? (
-          <div style={{ textAlign: 'center', padding: '8px 0' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🌐</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1C', marginBottom: 8 }}>
-              외부 브라우저에서 설치해주세요
-            </div>
-            <div style={{ fontSize: 14, color: '#555', marginBottom: 20, lineHeight: 1.7 }}>
-              카카오톡 내에서는 앱 설치가 불가합니다
-            </div>
+        {/* iOS - Safari가 아닌 브라우저 (Chrome, 카카오 등) */}
+        {os === 'ios' && isIosNonSafari && (
+          <div>
             <div style={{
-              background: '#F7F4ED', borderRadius: 14,
-              padding: '16px', textAlign: 'left', marginBottom: 16,
+              background: '#FFF3CD', borderRadius: 12,
+              padding: '12px 14px', marginBottom: 20,
+              fontSize: 13, color: '#856404', lineHeight: 1.6,
             }}>
-              {os === 'ios' ? (
-                <>
-                  <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>🍎 iPhone</div>
-                  <div style={{ fontSize: 13, color: '#555', lineHeight: 1.8 }}>
-                    1. 우측 하단 <strong>···</strong> 버튼 탭<br />
-                    2. <strong>"Safari로 열기"</strong> 선택<br />
-                    3. 하단 공유(📤) → "홈 화면에 추가"
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>🤖 Android</div>
-                  <div style={{ fontSize: 13, color: '#555', lineHeight: 1.8 }}>
-                    1. 우측 상단 <strong>···</strong> 버튼 탭<br />
-                    2. <strong>"기본 브라우저로 열기"</strong> 선택<br />
-                    3. 우측 상단 ⋮ → "앱 설치"
-                  </div>
-                </>
-              )}
-            </div>
-            <div style={{
-              background: '#FEF3C7', borderRadius: 10,
-              padding: '10px 14px',
-              fontSize: 12, color: '#92400E',
-            }}>
-              💡 주소창에 <strong>banmo.kr</strong> 을 직접 입력해도 됩니다
-            </div>
-          </div>
-        ) : os === 'other' ? (
-          <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📱</div>
-            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>
-              스마트폰에서 설치해주세요
-            </div>
-            <div style={{
-              background: '#F7F4ED', borderRadius: 14,
-              padding: '20px', marginBottom: 16,
-              textAlign: 'left',
-            }}>
-              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>
-                🍎 iPhone
-              </div>
-              <div style={{ fontSize: 13, color: '#555', lineHeight: 1.7, marginBottom: 16 }}>
-                1. Safari로 banmo.kr 접속<br/>
-                2. 하단 공유 버튼(📤) 탭<br/>
-                3. "홈 화면에 추가" 탭<br/>
-                4. "추가" 탭
-              </div>
-              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>
-                🤖 Android
-              </div>
-              <div style={{ fontSize: 13, color: '#555', lineHeight: 1.7 }}>
-                1. Chrome으로 banmo.kr 접속<br/>
-                2. 우측 상단 ⋮ 탭<br/>
-                3. "앱 설치" 또는 "홈 화면에 추가" 탭<br/>
-                4. "설치" 탭
-              </div>
-            </div>
-            <p style={{ fontSize: 12, color: '#9CA3AF', lineHeight: 1.6 }}>
-              스마트폰으로 QR 코드를 스캔하거나<br/>
-              주소창에 banmo.kr 을 직접 입력해주세요
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* 스텝 인디케이터 */}
-            <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
-              {steps.map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    flex: 1, height: 4, borderRadius: 2,
-                    background: i <= step ? '#1C1C1C' : '#E5E7EB',
-                    transition: 'background 0.2s',
-                  }}
-                />
-              ))}
+              ⚠️ iPhone에서 앱 설치는 <strong>Safari</strong>에서만 가능합니다.
+              아래 주소를 복사해 Safari에서 열어주세요.
             </div>
 
-            {/* 현재 스텝 카드 */}
+            {/* URL 복사 */}
             <div style={{
-              background: '#F7F4ED', borderRadius: 16,
-              padding: '28px 20px', textAlign: 'center',
-              marginBottom: 20,
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: '#1C1C1C', borderRadius: 12,
+              padding: '12px 16px', marginBottom: 20,
             }}>
-              <div style={{ fontSize: 52, marginBottom: 16 }}>{currentStep.icon}</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1C', marginBottom: 10 }}>
-                {step + 1}단계: {currentStep.title}
-              </div>
-              <div style={{
-                fontSize: 14, color: '#555', lineHeight: 1.8,
-                whiteSpace: 'pre-line', marginBottom: 14,
-              }}>
-                {currentStep.desc}
-              </div>
-              <div style={{
-                background: 'white', borderRadius: 10,
-                padding: '10px 14px',
-                fontSize: 12, color: '#888', lineHeight: 1.6,
-                border: '1px solid #E8E4DC',
-              }}>
-                💡 {currentStep.tip}
-              </div>
+              <span style={{ flex: 1, fontSize: 15, color: 'white', fontWeight: 600 }}>banmo.kr</span>
+              <button
+                onClick={copyUrl}
+                style={{
+                  background: copied ? '#22C55E' : 'white',
+                  color: copied ? 'white' : '#1C1C1C',
+                  border: 'none', borderRadius: 8,
+                  padding: '6px 16px', fontSize: 13,
+                  fontWeight: 700, cursor: 'pointer',
+                  transition: 'all 0.2s', whiteSpace: 'nowrap',
+                }}
+              >
+                {copied ? '복사됨 ✓' : '주소 복사'}
+              </button>
+            </div>
 
-              {/* 브라우저 바로 열기 버튼 (1단계에만 표시) */}
-              {currentStep.hasBrowserBtn && (
-                <button
-                  onClick={() => openInBrowser(os)}
-                  style={{
-                    marginTop: 16,
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    padding: '10px 20px',
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { num: '1', text: '위 주소 복사 버튼을 눌러주세요' },
+                { num: '2', text: '홈 화면 또는 앱 목록에서 Safari를 열어주세요' },
+                { num: '3', text: '주소창을 탭하고 복사한 주소를 붙여넣기 후 이동해주세요' },
+                { num: '4', text: '아래 단계에 따라 홈 화면에 추가해주세요 👇' },
+              ].map(item => (
+                <div key={item.num} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 12,
+                  background: '#F7F4ED', borderRadius: 12, padding: '12px 14px',
+                }}>
+                  <div style={{
+                    width: 24, height: 24, borderRadius: '50%',
                     background: '#1C1C1C', color: 'white',
-                    border: 'none', borderRadius: 10,
-                    fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                  }}
-                >
-                  <ExternalLink size={15} strokeWidth={2} />
-                  {browserBtnLabel}
-                </button>
-              )}
-            </div>
-
-            {/* 스텝 목록 (미니) */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
-              {steps.map((s, i) => (
-                <button
-                  key={i}
-                  onClick={() => setStep(i)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
-                    padding: '10px 14px', borderRadius: 12,
-                    border: `1.5px solid ${i === step ? '#1C1C1C' : '#E8E4DC'}`,
-                    background: i === step ? '#1C1C1C' : 'white',
-                    cursor: 'pointer', textAlign: 'left',
-                  }}
-                >
-                  <span style={{ fontSize: 18, flexShrink: 0 }}>{s.icon}</span>
-                  <span style={{
-                    fontSize: 13, fontWeight: 600,
-                    color: i === step ? 'white' : i < step ? '#9CA3AF' : '#1C1C1C',
-                    textDecoration: i < step ? 'line-through' : 'none',
-                  }}>
-                    {i + 1}. {s.title}
-                  </span>
-                  {i < step && (
-                    <span style={{ marginLeft: 'auto', fontSize: 14 }}>✓</span>
-                  )}
-                </button>
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 700, flexShrink: 0,
+                  }}>{item.num}</div>
+                  <span style={{ fontSize: 13, color: '#333', lineHeight: 1.6 }}>{item.text}</span>
+                </div>
               ))}
             </div>
 
-            {/* 이전 / 다음 버튼 */}
-            <div style={{ display: 'flex', gap: 10 }}>
-              {step > 0 && (
-                <button
-                  onClick={() => setStep(s => s - 1)}
-                  style={{
-                    flex: 1, padding: '14px',
-                    background: 'white', border: '1.5px solid #E8E4DC',
-                    borderRadius: 12, fontSize: 15, fontWeight: 600,
-                    color: '#555', cursor: 'pointer',
-                  }}
-                >
-                  ← 이전
-                </button>
-              )}
-              {step < steps.length - 1 ? (
-                <button
-                  onClick={() => setStep(s => s + 1)}
-                  style={{
-                    flex: 1, padding: '14px',
-                    background: '#1C1C1C', border: 'none',
-                    borderRadius: 12, fontSize: 15, fontWeight: 700,
-                    color: 'white', cursor: 'pointer',
-                  }}
-                >
-                  다음 →
-                </button>
-              ) : (
-                <button
-                  onClick={() => openInBrowser(os)}
-                  style={{
-                    flex: 1, padding: '14px',
-                    background: '#1C1C1C', border: 'none',
-                    borderRadius: 12, fontSize: 15, fontWeight: 700,
-                    color: 'white', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  }}
-                >
-                  <ExternalLink size={16} strokeWidth={2} />
-                  {os === 'ios' ? 'Safari에서 설치하기 🎉' : '브라우저에서 설치하기 🎉'}
-                </button>
-              )}
+            <div style={{ height: 1, background: '#E8E4DC', margin: '20px 0' }} />
+            <div style={{ fontSize: 13, color: '#888', fontWeight: 600, marginBottom: 12 }}>
+              📤 Safari에서 홈 화면 추가하는 방법
             </div>
-          </>
+            <IosSteps />
+          </div>
+        )}
+
+        {/* iOS - Safari */}
+        {os === 'ios' && !isIosNonSafari && (
+          <div>
+            <div style={{
+              background: '#E8F5E9', borderRadius: 12,
+              padding: '12px 14px', marginBottom: 20,
+              fontSize: 13, color: '#2E7D32',
+            }}>
+              ✅ Safari에서 바로 설치할 수 있어요!
+            </div>
+            <IosSteps />
+          </div>
+        )}
+
+        {/* Android */}
+        {os === 'android' && (
+          <div>
+            <div style={{
+              background: '#E8F5E9', borderRadius: 12,
+              padding: '12px 14px', marginBottom: 20,
+              fontSize: 13, color: '#2E7D32',
+            }}>
+              ✅ Chrome 또는 삼성 인터넷에서 바로 설치할 수 있어요!
+            </div>
+            <AndroidSteps />
+          </div>
+        )}
+
+        {/* PC / 기타 */}
+        {os === 'other' && (
+          <div>
+            <div style={{
+              background: '#F7F4ED', borderRadius: 14,
+              padding: '20px', marginBottom: 16, textAlign: 'left',
+            }}>
+              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>🍎 iPhone 설치 방법</div>
+              <IosSteps />
+              <div style={{ height: 1, background: '#E8E4DC', margin: '16px 0' }} />
+              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>🤖 Android 설치 방법</div>
+              <AndroidSteps />
+            </div>
+          </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function IosSteps() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {[
+        { num: '1', icon: '🧭', title: 'Safari로 banmo.kr 접속', desc: 'Safari 주소창에 banmo.kr 을 입력하고 이동해주세요.' },
+        { num: '2', icon: '📤', title: '하단 공유 버튼 탭', desc: '화면 하단 가운데에 있는 공유 버튼(네모에 화살표)을 탭해주세요.' },
+        { num: '3', icon: '➕', title: '"홈 화면에 추가" 선택', desc: '공유 메뉴를 아래로 스크롤해서 "홈 화면에 추가"를 탭해주세요.' },
+        { num: '4', icon: '✅', title: '"추가" 탭하면 완료!', desc: '오른쪽 상단 "추가"를 탭하면 홈 화면에 반모 아이콘이 생겨요 🎉' },
+      ].map(item => (
+        <div key={item.num} style={{
+          display: 'flex', alignItems: 'flex-start', gap: 12,
+          background: '#F7F4ED', borderRadius: 12, padding: '12px 14px',
+        }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            background: '#1C1C1C', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 12, fontWeight: 700, flexShrink: 0, marginTop: 1,
+          }}>{item.num}</div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#1C1C1C', marginBottom: 2 }}>
+              {item.icon} {item.title}
+            </div>
+            <div style={{ fontSize: 12, color: '#666', lineHeight: 1.6 }}>{item.desc}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function AndroidSteps() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {[
+        { num: '1', icon: '🌐', title: 'Chrome으로 banmo.kr 접속', desc: 'Chrome 또는 삼성 인터넷 주소창에 banmo.kr 을 입력하고 이동해주세요.' },
+        { num: '2', icon: '⋮', title: '우측 상단 메뉴 버튼 탭', desc: '주소창 오른쪽 점 세 개(⋮) 버튼을 탭해주세요.' },
+        { num: '3', icon: '📲', title: '"앱 설치" 또는 "홈 화면에 추가" 선택', desc: '메뉴에서 "앱 설치"를 탭해주세요. 없으면 "홈 화면에 추가"를 선택하세요.' },
+        { num: '4', icon: '✅', title: '"설치" 탭하면 완료!', desc: '설치 버튼을 탭하면 홈 화면에 반모 아이콘이 생겨요 🎉' },
+      ].map(item => (
+        <div key={item.num} style={{
+          display: 'flex', alignItems: 'flex-start', gap: 12,
+          background: '#F7F4ED', borderRadius: 12, padding: '12px 14px',
+        }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            background: '#1C1C1C', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 12, fontWeight: 700, flexShrink: 0, marginTop: 1,
+          }}>{item.num}</div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#1C1C1C', marginBottom: 2 }}>
+              {item.icon} {item.title}
+            </div>
+            <div style={{ fontSize: 12, color: '#666', lineHeight: 1.6 }}>{item.desc}</div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
