@@ -72,6 +72,7 @@ export default function ChatRoomPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
+  const initialScrollDone = useRef(false);
 
   // 상대방 정보 (room에서 파생)
   const otherId = room
@@ -153,7 +154,11 @@ export default function ChatRoomPage() {
   }, []);
 
   useEffect(() => {
-    scrollToBottom(messages.length < 30);
+    if (messages.length === 0) return;
+    // 초기 로드는 즉시 스크롤, 이후 새 메시지는 smooth
+    const smooth = initialScrollDone.current;
+    if (!initialScrollDone.current) initialScrollDone.current = true;
+    scrollToBottom(smooth);
   }, [messages, scrollToBottom]);
 
   // Socket.io 연결
