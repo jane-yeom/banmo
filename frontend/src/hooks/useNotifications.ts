@@ -54,7 +54,9 @@ export function useNotifications() {
       addNotification(notification);
       qc.invalidateQueries({ queryKey: ['notifications'] });
 
-      // 토스트 알림 표시
+      // CHAT_MESSAGE는 FCM 시스템 알림이 따로 오므로 토스트 생략 (중복 방지)
+      if (notification.type === 'CHAT_MESSAGE') return;
+
       const icon = TYPE_ICON[notification.type] ?? '🔔';
       toast(`${icon} ${notification.title}${notification.body ? `\n${notification.body}` : ''}`, {
         duration: 4000,

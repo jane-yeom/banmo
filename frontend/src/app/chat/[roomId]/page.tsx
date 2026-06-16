@@ -15,7 +15,7 @@ import { useNotificationStore } from '@/store/notification.store';
 import { getSocket } from '@/lib/socket';
 import apiClient from '@/lib/axios';
 import { uploadImage } from '@/lib/upload';
-import { ChatMessage } from '@/types';
+import { ChatMessage, ChatRoom } from '@/types';
 
 interface RoomInfo {
   id: string;
@@ -171,8 +171,14 @@ export default function ChatRoomPage() {
       setConnected(true);
       socket.emit('joinRoom', roomId);
       socket.emit('markAsRead', roomId);
-      // 이 방의 읽지 않은 수 초기화 → 전체 count 갱신
       qc.invalidateQueries({ queryKey: ['chatRooms'] });
+      // 채팅방 진입 즉시 unreadCount 갱신
+      apiClient.get<ChatRoom[]>('/chat/rooms').then(({ data }) => {
+        const { setUnreadCount } = useChatStore.getState();
+        const userId = useAuthStore.getState().user?.id;
+        const count = data.filter((r) => !r.isRead && r.lastSenderId !== userId).length;
+        setUnreadCount(count);
+      }).catch(() => {});
     };
 
     const onDisconnect = () => setConnected(false);

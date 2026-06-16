@@ -60,15 +60,19 @@ export default function Header() {
       setUnreadCount(count);
     }).catch(() => {});
     const socket = getSocket(accessToken);
-    const handleRoomUpdated = () => {
+    const refreshUnread = () => {
       qc.invalidateQueries({ queryKey: ['chatRooms'] });
       apiClient.get<ChatRoom[]>('/chat/rooms').then(({ data }) => {
         const count = data.filter((r) => !r.isRead && r.lastSenderId !== user.id).length;
         setUnreadCount(count);
       }).catch(() => {});
     };
-    socket.on('roomUpdated', handleRoomUpdated);
-    return () => { socket.off('roomUpdated', handleRoomUpdated); };
+    socket.on('roomUpdated', refreshUnread);
+    socket.on('messagesRead', refreshUnread);
+    return () => {
+      socket.off('roomUpdated', refreshUnread);
+      socket.off('messagesRead', refreshUnread);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, accessToken]);
 
