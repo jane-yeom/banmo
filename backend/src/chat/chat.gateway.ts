@@ -20,10 +20,12 @@ interface AuthSocket extends Socket {
 @WebSocketGateway({
   cors: {
     origin: [
-      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'http://localhost:3000',
+      'https://banmo.kr',
+      'https://www.banmo.kr',
       'https://frontend-production-9843d.up.railway.app',
-      '*',
-    ],
+      process.env.FRONTEND_URL,
+    ].filter(Boolean),
     credentials: true,
   },
   transports: ['websocket', 'polling'],
