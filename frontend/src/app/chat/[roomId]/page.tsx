@@ -66,6 +66,7 @@ export default function ChatRoomPage() {
   const [connected, setConnected] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<{ file: File; url: string } | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [opponent, setOpponent] = useState<any>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -264,9 +265,21 @@ export default function ChatRoomPage() {
     inputRef.current?.focus();
   }, [input, accessToken, roomId]);
 
-  const handleImageSend = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 파일 선택 시 미리보기만 열기 (아직 업로드 안 함)
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const url = URL.createObjectURL(file);
+    setImagePreview({ file, url });
+    if (imageRef.current) imageRef.current.value = '';
+  };
+
+  // 미리보기에서 확인 후 실제 전송
+  const confirmImageSend = async () => {
+    if (!imagePreview) return;
+    const { file, url: previewUrl } = imagePreview;
+    setImagePreview(null);
+    URL.revokeObjectURL(previewUrl);
     setImageUploading(true);
     try {
       const url = await uploadImage(file);
@@ -276,7 +289,6 @@ export default function ChatRoomPage() {
       toast.error('이미지 전송 실패');
     } finally {
       setImageUploading(false);
-      if (imageRef.current) imageRef.current.value = '';
     }
   };
 
@@ -304,6 +316,55 @@ export default function ChatRoomPage() {
           postId={room?.postId ?? undefined}
           onClose={() => setShowReviewModal(false)}
         />
+      )}
+
+      {/* 이미지 미리보기 모달 */}
+      {imagePreview && (
+        <div
+          onClick={() => { URL.revokeObjectURL(imagePreview.url); setImagePreview(null); }}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+            {/* 미리보기 이미지 */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imagePreview.url}
+              alt="미리보기"
+              style={{ maxWidth: '100%', maxHeight: '60vh', borderRadius: 16, objectFit: 'contain' }}
+            />
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>이 사진을 전송하시겠습니까?</p>
+            {/* 버튼 */}
+            <div style={{ display: 'flex', gap: 12, width: '100%' }}>
+              <button
+                onClick={() => { URL.revokeObjectURL(imagePreview.url); setImagePreview(null); }}
+                style={{
+                  flex: 1, padding: '14px',
+                  background: 'rgba(255,255,255,0.15)', color: 'white',
+                  border: 'none', borderRadius: 14,
+                  fontSize: 15, fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={confirmImageSend}
+                style={{
+                  flex: 1, padding: '14px',
+                  background: '#1C1C1C', color: 'white',
+                  border: 'none', borderRadius: 14,
+                  fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                전송
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       {/* 채팅방 헤더 */}
       <div style={{
@@ -670,7 +731,7 @@ export default function ChatRoomPage() {
             ref={imageRef}
             type="file"
             accept="image/*"
-            onChange={handleImageSend}
+            onChange={handleImageSelect}
             style={{ display: 'none' }}
           />
           <textarea
