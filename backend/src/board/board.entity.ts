@@ -6,6 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  AfterLoad,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 
@@ -46,7 +47,16 @@ export class Board {
   commentCount: number;
 
   @Column({ name: 'tags', type: 'text', nullable: true })
-  tags: string;
+  tags: string | string[];
+
+  @AfterLoad()
+  parseTags() {
+    if (typeof this.tags === 'string') {
+      this.tags = this.tags ? this.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+    } else if (!this.tags) {
+      this.tags = [];
+    }
+  }
 
   @Column({ name: 'like_count', default: 0 })
   likeCount: number;

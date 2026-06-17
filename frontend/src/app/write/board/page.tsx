@@ -82,11 +82,15 @@ function WriteBoardContent() {
     setTags(prev => prev.filter(t => t !== tag));
   };
 
+  const submittingRef = useRef<boolean>(false);
+
   const handleSubmit = () => {
+    if (submittingRef.current) return;
     if (!title.trim() || !content.trim()) {
       toast.error('제목과 내용을 입력해주세요.');
       return;
     }
+    submittingRef.current = true;
     createPost.mutate(
       { type, title, content, isAnonymous, tags },
       {
@@ -100,6 +104,7 @@ function WriteBoardContent() {
           }
         },
         onError: (error: any) => {
+          submittingRef.current = false;
           const msg = error?.response?.data?.message || '게시글 등록에 실패했습니다.';
           toast.error(Array.isArray(msg) ? msg.join(', ') : msg);
         },
