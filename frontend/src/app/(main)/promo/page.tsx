@@ -8,7 +8,7 @@ import type { Post } from '@/types';
 import { Music, Building2, MapPin } from 'lucide-react';
 
 const TABS = [
-  { value: 'PROMO_CONCERT', label: '공연홍보', Icon: Music },
+  { value: 'PROMO_CONCERT', label: '공연/연주회', Icon: Music },
   { value: 'PROMO_SPACE',   label: '연습실 대여', Icon: Building2 },
 ];
 

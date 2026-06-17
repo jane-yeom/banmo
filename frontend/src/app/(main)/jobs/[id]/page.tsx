@@ -282,6 +282,27 @@ export default function JobDetailPage() {
       </div>
     );
 
+  // 비로그인 차단 — 목록은 볼 수 있지만 상세는 로그인 필요
+  if (!isRestoring && !user)
+    return (
+      <div className="flex flex-col items-center justify-center py-32 px-8 text-center">
+        <span className="text-5xl mb-4">🔒</span>
+        <p className="text-lg font-bold text-gray-800 mb-2">로그인이 필요해요</p>
+        <p className="text-sm text-gray-500 mb-6">공고 상세 내용은 회원만 볼 수 있습니다.</p>
+        <Link
+          href={`/login?redirect=/jobs/${id}`}
+          style={{
+            background: '#1C1C1C', color: 'white',
+            padding: '12px 32px', borderRadius: 12,
+            fontSize: 14, fontWeight: 700, textDecoration: 'none',
+          }}
+        >
+          로그인하기
+        </Link>
+        <Link href="/jobs" className="mt-4 text-sm text-gray-400 hover:underline">목록으로 돌아가기</Link>
+      </div>
+    );
+
   const isOwner = user?.id === post.author.id;
   const canApply = APPLY_CATEGORIES.has(post.category);
 
@@ -364,7 +385,7 @@ export default function JobDetailPage() {
         {/* 제목 + 찜 버튼 */}
         <div className="flex items-start gap-3 mb-4">
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900">{post.title}</h1>
+            <h1 className={`text-2xl font-bold ${post.status === 'CLOSED' ? 'text-gray-400 line-through' : 'text-gray-900'}`}>{post.title}</h1>
             {(post as any).isEdited && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
                 <span>수정됨</span>
@@ -392,18 +413,33 @@ export default function JobDetailPage() {
           )}
         </div>
 
+        {/* 마감된 공고 안내 */}
+        {post.status === 'CLOSED' && (
+          <div style={{
+            background: '#F3F4F6', border: '1px solid #E5E7EB',
+            borderRadius: 12, padding: '12px 16px', marginBottom: 20,
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            <span style={{ fontSize: 13, color: '#9CA3AF' }}>이 공고는 마감되었습니다. 더 이상 지원을 받지 않습니다.</span>
+          </div>
+        )}
+
         {/* 페이 */}
-        <div className="mb-6 rounded-2xl p-5" style={{ background: '#F0EDE6', border: '1px solid #E8E4DC' }}>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: '#1C1C1C' }}>급여 조건</p>
+        <div className="mb-6 rounded-2xl p-5" style={{
+          background: post.status === 'CLOSED' ? '#F9FAFB' : '#F0EDE6',
+          border: `1px solid ${post.status === 'CLOSED' ? '#E5E7EB' : '#E8E4DC'}`,
+          opacity: post.status === 'CLOSED' ? 0.6 : 1,
+        }}>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: post.status === 'CLOSED' ? '#9CA3AF' : '#1C1C1C' }}>급여 조건</p>
           {(post as any).payText ? (
-            <p className="text-sm font-semibold text-gray-800">{(post as any).payText}</p>
+            <p className={`text-sm font-semibold ${post.status === 'CLOSED' ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{(post as any).payText}</p>
           ) : (
             <PayBadge payType={post.payType} payMin={post.payMin} payMax={post.payMax ?? undefined} />
           )}
         </div>
 
         {/* 기본 정보 */}
-        <div className="mb-6 grid grid-cols-2 gap-3">
+        <div className="mb-6 grid grid-cols-2 gap-3" style={{ opacity: post.status === 'CLOSED' ? 0.5 : 1 }}>
           <InfoItem icon={MapPin} label="지역" value={post.region ?? '미정'} />
           <InfoItem icon={Music} label="악기" value={post.instruments?.join(', ') || '미정'} />
           <InfoItem icon={Eye} label="조회수" value={`${post.viewCount.toLocaleString()}회`} />
@@ -411,9 +447,12 @@ export default function JobDetailPage() {
         </div>
 
         {/* 상세 내용 */}
-        <div className="mb-8 rounded-xl border border-gray-100 bg-white p-5">
+        <div className="mb-8 rounded-xl border bg-white p-5" style={{
+          borderColor: post.status === 'CLOSED' ? '#E5E7EB' : '#F3F4F6',
+          opacity: post.status === 'CLOSED' ? 0.5 : 1,
+        }}>
           <p className="mb-3 text-sm font-semibold text-gray-500">상세 내용</p>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{post.content}</p>
+          <p className={`text-sm whitespace-pre-wrap leading-relaxed ${post.status === 'CLOSED' ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{post.content}</p>
         </div>
 
         {/* 이미지 */}

@@ -37,7 +37,7 @@ function HeroBanner() {
       Icon: Star,
       title: '공연을 홍보해보세요',
       sub: '연주회, 공연 소식을\n많은 분들께 알려보세요',
-      btn: '공연 홍보 보기',
+      btn: '공연/연주회 보기',
       href: '/promo',
     },
   ];
@@ -174,7 +174,7 @@ function SectionCard({ post }: { post: any }) {
     PERFORMANCE: '공연도우미', AFTERSCHOOL: '방과후교사',
     ACADEMY_OFFER: '학원 채용', ACADEMY_SEEK: '학원 취업',
     ETC: '기타',
-    PROMO_CONCERT: '공연홍보', PROMO_SPACE: '연습실대여',
+    PROMO_CONCERT: '공연/연주회', PROMO_SPACE: '연습실대여',
     TRADE_LESSON: '레슨양도', TRADE_SPACE: '연습실양도',
     TRADE_TICKET: '티켓양도', TRADE_INSTRUMENT: '중고악기',
   };
@@ -288,8 +288,7 @@ function QuickMenu() {
     { Icon: BookOpen, label: '레슨\n구직', href: '/jobs?category=LESSON_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
     { Icon: School, label: '학원선생님\n구인', href: '/jobs?category=ACADEMY_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
     { Icon: GraduationCap, label: '학원선생님\n구직', href: '/jobs?category=ACADEMY_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: Star, label: '공연\n홍보', href: '/promo?category=PROMO_CONCERT', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: MessageSquare, label: '자유\n게시판', href: '/board?type=FREE', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: Star, label: '공연\n연주회', href: '/promo?category=PROMO_CONCERT', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
   ];
 
   return (
@@ -395,9 +394,6 @@ function ProfileCard({ profile }: { profile: any }) {
 export default function HomePage() {
   const [jobPosts, setJobPosts] = useState<any[]>([]);
   const [promoPosts, setPromoPosts] = useState<any[]>([]);
-  const [hotBoards, setHotBoards] = useState<any[]>([]);
-  const [recentBoards, setRecentBoards] = useState<any[]>([]);
-  const [popularTags, setPopularTags] = useState<any[]>([]);
   const [publicProfiles, setPublicProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -407,12 +403,9 @@ export default function HomePage() {
         const JOB_CATS = 'JOB_OFFER,JOB_SEEK,LESSON_OFFER,LESSON_SEEK,PERFORMANCE,AFTERSCHOOL,ETC';
         const PROMO_CATS = 'PROMO_CONCERT,PROMO_SPACE';
 
-        const [jobsRes, promoRes, hotRes, recentRes, tagsRes, profilesRes] = await Promise.allSettled([
+        const [jobsRes, promoRes, profilesRes] = await Promise.allSettled([
           api.get(`/posts?limit=5&status=ACTIVE&categories=${JOB_CATS}`),
           api.get(`/posts?limit=4&status=ACTIVE&categories=${PROMO_CATS}`),
-          api.get('/board/hot'),
-          api.get('/board?type=FREE&limit=5'),
-          api.get('/board/tags/popular'),
           api.get('/users/public'),
         ]);
 
@@ -422,17 +415,6 @@ export default function HomePage() {
 
         if (jobsRes.status === 'fulfilled') setJobPosts(extract(jobsRes.value));
         if (promoRes.status === 'fulfilled') setPromoPosts(extract(promoRes.value));
-        if (hotRes.status === 'fulfilled') {
-          const d = hotRes.value.data;
-          setHotBoards(Array.isArray(d) ? d : d?.data || []);
-        }
-        if (recentRes.status === 'fulfilled') {
-          const recentAll = recentRes.value.data?.data || (Array.isArray(recentRes.value.data) ? recentRes.value.data : []);
-          setRecentBoards(recentAll.slice(0, 5));
-        }
-        if (tagsRes.status === 'fulfilled') {
-          setPopularTags(Array.isArray(tagsRes.value.data) ? tagsRes.value.data : []);
-        }
         if (profilesRes.status === 'fulfilled') {
           setPublicProfiles(Array.isArray(profilesRes.value.data) ? profilesRes.value.data : []);
         }
@@ -524,139 +506,6 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* 인기 태그 섹션 */}
-        {popularTags.length > 0 && (
-          <div style={{ marginBottom: 24 }}>
-            <div style={{
-              display: 'flex', justifyContent: 'space-between',
-              alignItems: 'center', marginBottom: 12,
-            }}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
-                🔥 지금 뜨는 이야기
-              </h2>
-              <Link href="/board?type=FREE" style={{
-                fontSize: 13, color: '#888', textDecoration: 'none',
-              }}>
-                더보기 →
-              </Link>
-            </div>
-            <div style={{
-              display: 'flex', gap: 6,
-              overflowX: 'auto', scrollbarWidth: 'none',
-            }}>
-              {popularTags.slice(0, 10).map((tag: any) => (
-                <Link
-                  key={tag.name}
-                  href={`/board?type=FREE&tag=${tag.name}`}
-                  style={{ textDecoration: 'none', flexShrink: 0 }}>
-                  <div style={{
-                    background: 'white',
-                    border: '0.5px solid #E8E4DC',
-                    borderRadius: 99, padding: '7px 14px',
-                    fontSize: 13, color: '#1C1C1C',
-                    display: 'flex', alignItems: 'center', gap: 4,
-                  }}>
-                    <span style={{ color: '#9CA3AF' }}>#</span>
-                    {tag.name}
-                    <span style={{ color: '#9CA3AF', fontSize: 11 }}>
-                      {tag.useCount}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 자유게시판 섹션 */}
-        <div style={{ marginBottom: 28 }}>
-          <SectionTitle type="board" title="자유게시판" href="/board?type=FREE" />
-
-          {/* 핫글 */}
-          {hotBoards.length > 0 && (
-            <div style={{ marginBottom: 10 }}>
-              {hotBoards.map((post: any) => (
-                <Link key={post.id} href={`/board/${post.id}`}
-                  style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    background: '#FFFBEB',
-                    border: '1px solid #FDE68A',
-                    borderRadius: 12, padding: '12px 14px',
-                    marginBottom: 6, display: 'flex',
-                    alignItems: 'center', gap: 8,
-                  }}>
-                    <span style={{
-                      background: '#F59E0B', color: 'white',
-                      fontSize: 10, fontWeight: 700,
-                      padding: '2px 7px', borderRadius: 5,
-                      flexShrink: 0,
-                    }}>🔥 핫</span>
-                    <span style={{
-                      fontSize: 14, fontWeight: 600,
-                      color: '#1A1A1A', flex: 1,
-                      overflow: 'hidden', textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}>
-                      {post.title}
-                    </span>
-                    <div style={{
-                      display: 'flex', alignItems: 'center',
-                      gap: 3, fontSize: 11, color: '#9CA3AF',
-                      flexShrink: 0,
-                    }}>
-                      <Eye size={11} />
-                      {post.viewCount}
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {/* 일반 게시글 */}
-          {recentBoards.length === 0 && !loading ? (
-            <div style={{
-              textAlign: 'center', padding: '24px',
-              color: '#9CA3AF', fontSize: 14,
-              background: 'white', borderRadius: 14,
-            }}>
-              등록된 게시글이 없습니다
-            </div>
-          ) : (
-            recentBoards.map((post: any) => (
-              <Link key={post.id} href={`/board/${post.id}`}
-                style={{ textDecoration: 'none' }}>
-                <div style={{
-                  background: 'white',
-                  border: '0.5px solid #E8E4DC',
-                  borderRadius: 12, padding: '12px 14px',
-                  marginBottom: 6, display: 'flex',
-                  alignItems: 'center', gap: 8,
-                }}>
-                  <span style={{
-                    fontSize: 14, color: '#1A1A1A',
-                    flex: 1, overflow: 'hidden',
-                    textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  }}>
-                    {post.title}
-                  </span>
-                  <div style={{
-                    display: 'flex', alignItems: 'center',
-                    gap: 8, fontSize: 11, color: '#9CA3AF',
-                    flexShrink: 0,
-                  }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <MessageSquare size={11} /> {post.commentCount || 0}
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Eye size={11} /> {post.viewCount || 0}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))
-          )}
-        </div>
       </div>
 
       <BottomNav />

@@ -18,7 +18,6 @@ import InstallGuideModal from '@/components/common/InstallGuideModal';
 const navItems = [
   { label: '구인구직', href: '/jobs' },
   { label: '공연·연습실', href: '/promo' },
-  { label: '게시판', href: '/board' },
   { label: '고객센터', href: '/support' },
 ];
 

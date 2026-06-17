@@ -11,7 +11,7 @@ import { useAdminPosts, AdminPost } from '@/hooks/useAdmin';
 const CATEGORY_LABEL: Record<string, string> = {
   JOB_OFFER: '구인', JOB_SEEK: '구직', LESSON_OFFER: '레슨제공',
   LESSON_SEEK: '레슨구함', PERFORMANCE: '연주', AFTERSCHOOL: '방과후',
-  PROMO_CONCERT: '공연홍보', PROMO_SPACE: '공간홍보',
+  PROMO_CONCERT: '공연/연주회', PROMO_SPACE: '공간홍보',
   TRADE_LESSON: '레슨교환', TRADE_SPACE: '공간교환',
   TRADE_TICKET: '티켓교환', TRADE_INSTRUMENT: '악기교환',
 };

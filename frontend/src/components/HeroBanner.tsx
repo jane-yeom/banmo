@@ -25,7 +25,7 @@ const banners = [
     icon: '🎭',
     title: '공연을 홍보해보세요',
     subtitle: '연주회, 공연 소식을 많은 분들께 알려보세요',
-    btnText: '공연 홍보 보기',
+    btnText: '공연/연주회 보기',
     href: '/promo',
   },
 ];

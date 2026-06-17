@@ -3,7 +3,7 @@ const CATEGORY_LABEL: Record<string, string> = {
   LESSON_OFFER: '레슨 구함', LESSON_SEEK: '레슨 지원',
   PERFORMANCE: '공연도우미', AFTERSCHOOL: '방과후',
   ACADEMY_OFFER: '학원 채용', ACADEMY_SEEK: '학원 취업',
-  PROMO_CONCERT: '연주회홍보', PROMO_SPACE: '연습실대여',
+  PROMO_CONCERT: '공연/연주회', PROMO_SPACE: '연습실대여',
   TRADE_LESSON: '레슨양도', TRADE_SPACE: '연습실양도',
   TRADE_TICKET: '티켓양도', TRADE_INSTRUMENT: '중고악기',
 };
