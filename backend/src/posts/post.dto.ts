@@ -56,6 +56,10 @@ export class CreatePostDto {
   @IsOptional()
   @IsString()
   date?: string;
+
+  @IsOptional()
+  @IsString()
+  venue?: string;
 }
 
 export class UpdatePostDto {
@@ -112,6 +116,14 @@ export class UpdatePostDto {
   @IsArray()
   @IsString({ each: true })
   imageUrls?: string[];
+
+  @IsOptional()
+  @IsString()
+  date?: string;
+
+  @IsOptional()
+  @IsString()
+  venue?: string;
 }
 
 export class PostFilterDto {

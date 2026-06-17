@@ -52,7 +52,7 @@ function PromoEditContent() {
           content: post.content || '',
           region: post.region || '',
           payText: post.payText || '',
-          date: post.date || '',
+          date: post.eventDate || post.date || '',
           venue: post.venue || '',
         })
         setImages(post.imageUrls || [])
@@ -94,7 +94,7 @@ function PromoEditContent() {
     if (!form.content.trim()) return alert('내용을 입력해주세요')
     setSaving(true)
     try {
-      await api.patch(`/posts/${id}`, { ...form, imageUrls: images })
+      await api.patch(`/posts/${id}`, { ...form, imageUrls: images, date: form.date || undefined, venue: form.venue || undefined })
       router.replace(`/promo/${id}`)
     } catch (e: any) {
       alert(e.response?.data?.message || '수정 실패')

@@ -109,6 +109,9 @@ export class Post {
   @Column({ nullable: true })
   eventDate: string;
 
+  @Column({ nullable: true })
+  venue: string;
+
   @Column({ type: 'timestamptz', nullable: true })
   eventDateAt: Date;
 

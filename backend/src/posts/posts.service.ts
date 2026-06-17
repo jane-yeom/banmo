@@ -43,14 +43,18 @@ export class PostsService {
       expiresAt,
     });
 
-    if (dto.category === PostCategory.PROMO_CONCERT && dto.date) {
-      post.eventDate = dto.date;
-      try {
-        const parsed = new Date(dto.date);
-        if (!isNaN(parsed.getTime())) {
-          post.eventDateAt = parsed;
+    const isPromo = [PostCategory.PROMO_CONCERT, PostCategory.PROMO_SPACE, PostCategory.PROMO_CONTEST].includes(dto.category as PostCategory);
+    if (isPromo) {
+      if (dto.date) {
+        post.eventDate = dto.date;
+        if (dto.category === PostCategory.PROMO_CONCERT) {
+          try {
+            const parsed = new Date(dto.date);
+            if (!isNaN(parsed.getTime())) post.eventDateAt = parsed;
+          } catch (e) {}
         }
-      } catch (e) {}
+      }
+      if (dto.venue) post.venue = dto.venue;
     }
 
     const saved = await this.postsRepository.save(post);
@@ -145,6 +149,8 @@ export class PostsService {
     }
 
     Object.assign(post, dto);
+    if ((dto as any).date !== undefined) post.eventDate = (dto as any).date;
+    if ((dto as any).venue !== undefined) post.venue = (dto as any).venue;
     post.isEdited = true;
     (post as any).editedAt = new Date();
     const saved = await this.postsRepository.save(post);

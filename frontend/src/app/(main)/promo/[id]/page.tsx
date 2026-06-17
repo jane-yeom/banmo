@@ -17,6 +17,25 @@ import ReportModal from '@/components/common/ReportModal';
 const CATEGORY_LABEL: Record<string, string> = {
   PROMO_CONCERT: '공연/연주회',
   PROMO_SPACE: '연습실',
+  PROMO_CONTEST: '콩쿨',
+};
+
+const PAY_LABEL: Record<string, string> = {
+  PROMO_CONCERT: '입장료',
+  PROMO_SPACE: '대여료',
+  PROMO_CONTEST: '참가비',
+};
+
+const DATE_LABEL: Record<string, string> = {
+  PROMO_CONCERT: '공연 일시',
+  PROMO_SPACE: '대여 가능 시간',
+  PROMO_CONTEST: '일정',
+};
+
+const VENUE_LABEL: Record<string, string> = {
+  PROMO_CONCERT: '공연 장소',
+  PROMO_SPACE: '주소',
+  PROMO_CONTEST: '장소',
 };
 
 export default function PromoDetailPage() {
@@ -114,20 +133,20 @@ export default function PromoDetailPage() {
 
         {/* 기본 정보 */}
         <div className="mb-6 grid grid-cols-2 gap-3">
-          <InfoItem icon={MapPin} label="지역" value={post.region ?? '미정'} />
-          <InfoItem icon={Music} label="악기" value={post.instruments?.join(', ') || '미정'} />
+          {(post as any).eventDate && (
+            <InfoItem icon={Calendar} label={DATE_LABEL[post.category] ?? '일시'} value={(post as any).eventDate} colSpan />
+          )}
+          {(post as any).venue && (
+            <InfoItem icon={MapPin} label={VENUE_LABEL[post.category] ?? '장소'} value={(post as any).venue} colSpan />
+          )}
+          {post.region && (
+            <InfoItem icon={MapPin} label="지역" value={post.region} />
+          )}
           {(post as any).payText && (
-            <InfoItem icon={Coins} label="가격" value={(post as any).payText} />
+            <InfoItem icon={Coins} label={PAY_LABEL[post.category] ?? '가격'} value={(post as any).payText} />
           )}
-          {!((post as any).payText) && post.payMin > 0 && (
-            <InfoItem
-              icon={Coins}
-              label="가격"
-              value={post.payType === 'NEGOTIABLE' ? '협의' : `${(post.payMin / 10000).toFixed(0)}만원~`}
-            />
-          )}
-          <InfoItem icon={Calendar} label="등록일" value={new Date(post.createdAt).toLocaleDateString('ko-KR')} />
           <InfoItem icon={Eye} label="조회수" value={`${post.viewCount.toLocaleString()}회`} />
+          <InfoItem icon={Calendar} label="등록일" value={new Date(post.createdAt).toLocaleDateString('ko-KR')} />
         </div>
 
         {/* 상세 내용 */}
@@ -219,9 +238,9 @@ export default function PromoDetailPage() {
   );
 }
 
-function InfoItem({ icon: Icon, label, value, color = '#1C1C1C' }: { icon: React.ElementType; label: string; value: string; color?: string }) {
+function InfoItem({ icon: Icon, label, value, color = '#1C1C1C', colSpan }: { icon: React.ElementType; label: string; value: string; color?: string; colSpan?: boolean }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="rounded-xl border border-gray-100 bg-white p-3">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, gridColumn: colSpan ? 'span 2' : undefined }} className="rounded-xl border border-gray-100 bg-white p-3">
       <div style={{
         width: 34, height: 34, background: '#FEE2E2',
         borderRadius: 10, display: 'flex',

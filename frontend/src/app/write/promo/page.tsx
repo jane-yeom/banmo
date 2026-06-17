@@ -75,8 +75,10 @@ function WritePromoContent() {
       const res = await api.post('/posts', {
         category: form.category,
         title: form.title,
-        content: `${form.date ? `[일시] ${form.date}\n` : ''}${form.venue ? `[장소] ${form.venue}\n` : ''}${form.content}`,
+        content: form.content,
         region: form.region,
+        date: form.date || undefined,
+        venue: form.venue || undefined,
         payText: form.payText || undefined,
         imageUrls: images,
         payType: 'NEGOTIABLE',
