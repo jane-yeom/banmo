@@ -520,38 +520,64 @@ export default function JobDetailPage() {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {applicants.map((app) => (
-                      <div key={app.id} style={{ background: 'white', borderRadius: 12, border: '1px solid #E5E7EB', padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <Avatar src={app.applicant.profileImage} nickname={app.applicant.nickname} size={40} />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{app.applicant.nickname ?? '익명'}</p>
-                            {app.message && (
-                              <p style={{ fontSize: 12, color: '#6B7280', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {app.message}
-                              </p>
-                            )}
-                          </div>
-                          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                            <button onClick={() => setResumeUser(app.applicant)} style={{
-                              padding: '6px 12px',
-                              background: '#1C1C1C', color: 'white',
-                              border: 'none', borderRadius: 8,
-                              fontSize: 12, fontWeight: 600,
-                              cursor: 'pointer',
-                            }}>
-                              이력서 보기
-                            </button>
-                            <Link
-                              href={`/profile/${app.applicant.id}`}
-                              style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, border: '1px solid #1C1C1C', color: '#1C1C1C', textDecoration: 'none' }}
-                            >
-                              프로필
-                            </Link>
+                    {applicants.map((app) => {
+                      const isAccepted = app.status === 'ACCEPTED';
+                      return (
+                        <div key={app.id} style={{
+                          background: isAccepted ? '#F7F4ED' : 'white',
+                          borderRadius: 12,
+                          border: isAccepted ? '1.5px solid #1C1C1C' : '1px solid #E5E7EB',
+                          padding: '14px 16px',
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <Avatar src={app.applicant.profileImage} nickname={app.applicant.nickname} size={40} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <p style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{app.applicant.nickname ?? '익명'}</p>
+                                {isAccepted && (
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: 'white', background: '#1C1C1C', borderRadius: 99, padding: '2px 8px' }}>채택됨</span>
+                                )}
+                              </div>
+                              {app.message && (
+                                <p style={{ fontSize: 12, color: '#6B7280', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {app.message}
+                                </p>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                              {!isAccepted && (
+                                <button
+                                  onClick={() => {
+                                    if (!confirm(`${app.applicant.nickname ?? '이 지원자'}님을 채택하시겠습니까?`)) return;
+                                    apiClient.patch(`/applications/${app.id}/status`, { status: 'ACCEPTED' })
+                                      .then(() => { toast.success('채택되었습니다'); qc.invalidateQueries({ queryKey: ['postApplicants', id] }); })
+                                      .catch(() => toast.error('채택에 실패했습니다'));
+                                  }}
+                                  style={{ padding: '6px 12px', background: '#1C1C1C', color: 'white', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                >
+                                  채택
+                                </button>
+                              )}
+                              <button onClick={() => setResumeUser(app.applicant)} style={{
+                                padding: '6px 12px',
+                                background: isAccepted ? '#1C1C1C' : '#F3F4F6', color: isAccepted ? 'white' : '#374151',
+                                border: 'none', borderRadius: 8,
+                                fontSize: 12, fontWeight: 600,
+                                cursor: 'pointer',
+                              }}>
+                                이력서
+                              </button>
+                              <Link
+                                href={`/profile/${app.applicant.id}`}
+                                style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, border: '1px solid #D1D5DB', color: '#374151', textDecoration: 'none' }}
+                              >
+                                프로필
+                              </Link>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
