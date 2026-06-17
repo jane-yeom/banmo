@@ -279,61 +279,14 @@ function SectionTitle({ type, title, href }: {
   );
 }
 
-// 빠른 메뉴
-function QuickMenu() {
-  const menus = [
-    { Icon: Music2, label: '반주자\n구함', href: '/jobs?category=JOB_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: Mic, label: '반주\n지원', href: '/jobs?category=JOB_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: BookOpen, label: '레슨\n구함', href: '/jobs?category=LESSON_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: BookOpen, label: '레슨\n지원', href: '/jobs?category=LESSON_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: School, label: '학원\n채용', href: '/jobs?category=ACADEMY_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: GraduationCap, label: '학원\n취업', href: '/jobs?category=ACADEMY_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: Star, label: '공연\n연주회', href: '/promo?category=PROMO_CONCERT', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-  ];
-
-  return (
-    <div style={{ marginBottom: 28 }}>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: 10,
-      }}>
-        {menus.map((m) => {
-          const { Icon } = m;
-          return (
-            <Link key={m.href} href={m.href} style={{ textDecoration: 'none' }}>
-              <div style={{
-                background: 'white',
-                borderRadius: 12,
-                padding: '12px 8px',
-                textAlign: 'center',
-                border: '0.5px solid #E8E4DC',
-                cursor: 'pointer',
-              }}>
-                <div style={{
-                  width: 34, height: 34,
-                  borderRadius: 10,
-                  background: m.iconBg,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 6px',
-                }}>
-                  <Icon size={20} strokeWidth={1.8} color={m.iconColor} />
-                </div>
-                <div style={{
-                  fontSize: 11, color: '#374151',
-                  fontWeight: 500, lineHeight: 1.4,
-                  whiteSpace: 'pre-line',
-                }}>
-                  {m.label}
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+const TABS = [
+  { key: 'offer',   label: '구해요',      cats: 'JOB_OFFER,LESSON_OFFER,ACADEMY_OFFER,PERFORMANCE,AFTERSCHOOL,ETC', href: '/jobs?type=offer' },
+  { key: 'seek',    label: '할게요',      cats: 'JOB_SEEK,LESSON_SEEK,ACADEMY_SEEK', href: '/jobs?type=seek' },
+  { key: 'board',   label: '수다방',      cats: '', href: '/board' },
+  { key: 'promo',   label: '소식',        cats: 'PROMO_CONCERT,PROMO_SPACE', href: '/promo' },
+  { key: 'profile', label: '반주자 프로필', cats: '', href: '/profiles' },
+] as const;
+type TabKey = typeof TABS[number]['key'];
 
 function ProfileCard({ profile }: { profile: any }) {
   const instruments: string[] = Array.isArray(profile.instruments) ? profile.instruments : [];
@@ -392,120 +345,154 @@ function ProfileCard({ profile }: { profile: any }) {
 }
 
 export default function HomePage() {
-  const [jobPosts, setJobPosts] = useState<any[]>([]);
-  const [promoPosts, setPromoPosts] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<TabKey>('offer');
+  const [tabPosts, setTabPosts] = useState<Record<string, any[]>>({});
   const [publicProfiles, setPublicProfiles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const extract = (res: any) =>
+    res.data?.items || res.data?.data || res.data?.posts ||
+    (Array.isArray(res.data) ? res.data : []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const JOB_CATS = 'JOB_OFFER,JOB_SEEK,LESSON_OFFER,LESSON_SEEK,PERFORMANCE,AFTERSCHOOL,ETC';
-        const PROMO_CATS = 'PROMO_CONCERT,PROMO_SPACE';
-
-        const [jobsRes, promoRes, profilesRes] = await Promise.allSettled([
-          api.get(`/posts?limit=5&status=ACTIVE&categories=${JOB_CATS}`),
-          api.get(`/posts?limit=4&status=ACTIVE&categories=${PROMO_CATS}`),
-          api.get('/users/public'),
-        ]);
-
-        const extract = (res: any) =>
-          res.data?.items || res.data?.data || res.data?.posts ||
-          (Array.isArray(res.data) ? res.data : []);
-
-        if (jobsRes.status === 'fulfilled') setJobPosts(extract(jobsRes.value));
-        if (promoRes.status === 'fulfilled') setPromoPosts(extract(promoRes.value));
-        if (profilesRes.status === 'fulfilled') {
-          setPublicProfiles(Array.isArray(profilesRes.value.data) ? profilesRes.value.data : []);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    api.get('/users/public').then((r) => {
+      setPublicProfiles(Array.isArray(r.data) ? r.data : []);
+    }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'profile') return;
+    if (tabPosts[activeTab]) return; // 캐시 있으면 재요청 안 함
+    const tab = TABS.find(t => t.key === activeTab)!;
+    if (!tab.cats) return;
+    setLoading(true);
+    api.get(`/posts?limit=10&status=ACTIVE&categories=${tab.cats}`)
+      .then(r => setTabPosts(prev => ({ ...prev, [activeTab]: extract(r) })))
+      .catch(() => setTabPosts(prev => ({ ...prev, [activeTab]: [] })))
+      .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const posts = tabPosts[activeTab] ?? [];
 
   return (
     <div style={{ minHeight: '100vh', background: '#F7F4ED' }}>
       <Header />
 
-      <div style={{
-        maxWidth: 600,
-        margin: '0 auto',
-        padding: '16px 16px 80px',
-      }}>
+      <div style={{ maxWidth: 600, margin: '0 auto', padding: '16px 16px 80px' }}>
         {/* 슬라이딩 배너 */}
         <HeroBanner />
 
-        {/* 빠른 메뉴 */}
-        <QuickMenu />
+        {/* 탭 바 */}
+        <div style={{
+          display: 'flex', gap: 6, marginBottom: 20,
+          overflowX: 'auto', scrollbarWidth: 'none',
+          paddingBottom: 2,
+        }}>
+          {TABS.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              style={{
+                flexShrink: 0,
+                padding: '8px 16px',
+                borderRadius: 99,
+                border: 'none',
+                fontSize: 14, fontWeight: 600,
+                cursor: 'pointer',
+                background: activeTab === tab.key ? '#1C1C1C' : 'white',
+                color: activeTab === tab.key ? 'white' : '#6B7280',
+                boxShadow: activeTab === tab.key ? '0 2px 8px rgba(0,0,0,0.18)' : '0 1px 3px rgba(0,0,0,0.07)',
+                transition: 'all 0.18s',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-        {/* 공개 프로필 섹션 */}
-        {publicProfiles.length > 0 && (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{
-              display: 'flex', justifyContent: 'space-between',
-              alignItems: 'center', marginBottom: 14,
-            }}>
-              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#1A1A1A', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 32, height: 32, background: '#F0EDE6', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Music2 size={18} strokeWidth={2} color="#1C1C1C" />
-                </div>
-                반주자 소개
-              </h2>
-            </div>
-            <div style={{
-              display: 'flex', gap: 10,
-              overflowX: 'auto', scrollbarWidth: 'none',
-              paddingBottom: 4,
-            }}>
-              {publicProfiles.map((profile) => (
-                <ProfileCard key={profile.id} profile={profile} />
-              ))}
-            </div>
+        {/* 탭 콘텐츠 */}
+        {activeTab === 'profile' ? (
+          <div>
+            {publicProfiles.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9CA3AF', fontSize: 14 }}>
+                등록된 반주자 프로필이 없습니다
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {publicProfiles.map((profile) => (
+                  <Link key={profile.id} href={`/profile/${profile.id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      background: 'white', borderRadius: 14,
+                      border: '1px solid #F3F4F6',
+                      padding: '14px 16px',
+                      display: 'flex', alignItems: 'center', gap: 14,
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                    }}>
+                      <div style={{
+                        width: 52, height: 52, borderRadius: '50%',
+                        background: '#F0EDE6', flexShrink: 0,
+                        overflow: 'hidden',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        border: '1.5px solid #E8E4DC',
+                      }}>
+                        {profile.profileImage ? (
+                          <Image src={profile.profileImage} alt={profile.nickname ?? '?'} width={52} height={52} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+                        ) : (
+                          <span style={{ fontSize: 20, fontWeight: 700, color: '#1C1C1C' }}>{(profile.nickname ?? '?')[0]}</span>
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                          <span style={{ fontWeight: 700, fontSize: 15, color: '#1C1C1C' }}>{profile.nickname ?? '익명'}</span>
+                          <NoteGradeBadge grade={profile.noteGrade} showLabel={false} size="sm" />
+                        </div>
+                        {profile.instruments?.length > 0 && (
+                          <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 2 }}>🎵 {profile.instruments.slice(0, 3).join(' · ')}</div>
+                        )}
+                        {profile.bio && (
+                          <div style={{ fontSize: 12, color: '#9CA3AF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.bio}</div>
+                        )}
+                      </div>
+                      {profile.region && (
+                        <div style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>{profile.region}</div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
+        ) : activeTab === 'board' ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <span style={{ fontSize: 40 }}>💬</span>
+            <p style={{ marginTop: 12, color: '#6B7280', fontSize: 15, fontWeight: 600 }}>수다방</p>
+            <p style={{ color: '#9CA3AF', fontSize: 13, marginTop: 6 }}>자유롭게 이야기를 나눠보세요</p>
+            <Link href="/board" style={{
+              display: 'inline-block', marginTop: 16,
+              padding: '10px 24px', borderRadius: 99,
+              background: '#1C1C1C', color: 'white',
+              fontSize: 14, fontWeight: 600, textDecoration: 'none',
+            }}>수다방 가기</Link>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+              <Link href={TABS.find(t => t.key === activeTab)!.href} style={{ fontSize: 13, color: '#1C1C1C', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 2 }}>
+                전체보기 <ChevronRight size={14} strokeWidth={1.8} />
+              </Link>
+            </div>
+            {loading ? (
+              [1,2,3].map(i => <div key={i} style={{ background: '#E5E7EB', borderRadius: 14, height: 80, marginBottom: 10 }} />)
+            ) : posts.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9CA3AF', fontSize: 14, background: 'white', borderRadius: 14 }}>
+                등록된 글이 없습니다
+              </div>
+            ) : (
+              posts.map((post: any) => <SectionCard key={post.id} post={post} />)
+            )}
+          </>
         )}
-
-        {/* 구인구직 섹션 */}
-        <div style={{ marginBottom: 28 }}>
-          <SectionTitle type="job" title="구인구직" href="/jobs" />
-          {loading ? (
-            [1, 2, 3].map((i) => (
-              <div key={i} style={{
-                background: '#E5E7EB', borderRadius: 14,
-                height: 80, marginBottom: 10,
-                animation: 'pulse 1.5s infinite',
-              }} />
-            ))
-          ) : jobPosts.length === 0 ? (
-            <div style={{
-              textAlign: 'center', padding: '24px',
-              color: '#9CA3AF', fontSize: 14,
-              background: 'white', borderRadius: 14,
-            }}>
-              등록된 공고가 없습니다
-            </div>
-          ) : (
-            jobPosts.map((post: any) => <SectionCard key={post.id} post={post} />)
-          )}
-        </div>
-
-        {/* 공연/연습실 섹션 */}
-        <div style={{ marginBottom: 28 }}>
-          <SectionTitle type="promo" title="공연/연습실" href="/promo" />
-          {!loading && promoPosts.length === 0 ? (
-            <div style={{
-              textAlign: 'center', padding: '24px',
-              color: '#9CA3AF', fontSize: 14,
-              background: 'white', borderRadius: 14,
-            }}>
-              등록된 공연이 없습니다
-            </div>
-          ) : (
-            promoPosts.map((post: any) => <SectionCard key={post.id} post={post} />)
-          )}
-        </div>
-
       </div>
 
       <BottomNav />

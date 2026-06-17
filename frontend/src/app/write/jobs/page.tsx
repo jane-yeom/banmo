@@ -11,17 +11,27 @@ import InstrumentSelect from '@/components/common/InstrumentSelect';
 
 const DRAFT_KEY = 'draft_jobs';
 
-const JOB_CATEGORIES = [
-  { value: 'JOB_OFFER', label: '반주자 구함' },
-  { value: 'JOB_SEEK', label: '반주 지원' },
+// 구해요 / 할게요 상위 분류
+const TOP_TYPES = [
+  { value: 'offer', label: '구해요', desc: '반주자·레슨·학원 등 구하는 글' },
+  { value: 'seek',  label: '할게요', desc: '반주·레슨·학원취업 등 제공하는 글' },
+] as const;
+
+const JOB_CATEGORIES_OFFER = [
+  { value: 'JOB_OFFER',    label: '반주자 구함' },
   { value: 'LESSON_OFFER', label: '레슨 구함' },
-  { value: 'LESSON_SEEK', label: '레슨 지원' },
-  { value: 'ACADEMY_OFFER', label: '학원 선생님 구인' },
-  { value: 'ACADEMY_SEEK', label: '학원 선생님 구직' },
-  { value: 'PERFORMANCE', label: '공연도우미 구인' },
-  { value: 'AFTERSCHOOL', label: '방과후 교사 구인' },
-  { value: 'ETC', label: '기타' },
+  { value: 'ACADEMY_OFFER',label: '학원 채용' },
+  { value: 'PERFORMANCE',  label: '공연도우미 구인' },
+  { value: 'AFTERSCHOOL',  label: '방과후 교사 구인' },
+  { value: 'ETC',          label: '기타' },
 ];
+const JOB_CATEGORIES_SEEK = [
+  { value: 'JOB_SEEK',     label: '반주 할게요' },
+  { value: 'LESSON_SEEK',  label: '레슨 할게요' },
+  { value: 'ACADEMY_SEEK', label: '학원 취업 원해요' },
+  { value: 'ETC',          label: '기타' },
+];
+const JOB_CATEGORIES = [...JOB_CATEGORIES_OFFER, ...JOB_CATEGORIES_SEEK];
 
 const REGION_MAP: Record<string, string[]> = {
   서울: ['강남구','강동구','강북구','강서구','관악구','광진구','구로구','금천구','노원구','도봉구','동대문구','동작구','마포구','서대문구','서초구','성동구','성북구','송파구','양천구','영등포구','용산구','은평구','종로구','중구','중랑구'],
@@ -75,7 +85,13 @@ function WriteJobsContent() {
   const { isLoggedIn } = useAuthStore();
   const searchParams = useSearchParams();
   const rawCategory = searchParams.get('category') ?? 'JOB_OFFER';
+  const rawType = searchParams.get('type'); // 'offer' | 'seek'
   const initialCategory = VALID_JOB_CATEGORIES.includes(rawCategory) ? rawCategory : 'JOB_OFFER';
+  const initialTopType = rawType === 'seek' ? 'seek'
+    : rawType === 'offer' ? 'offer'
+    : JOB_CATEGORIES_SEEK.some(c => c.value === initialCategory) ? 'seek' : 'offer';
+
+  const [topType, setTopType] = useState<'offer' | 'seek'>(initialTopType);
 
   type FormState = { category: string; title: string; content: string; instruments: string[]; region: string; regionCity: string; payText: string };
   const [form, setForm] = useState<FormState>(() => {
@@ -178,8 +194,29 @@ function WriteJobsContent() {
           <label style={{ fontSize: 13, fontWeight: 700, color: '#444', display: 'block', marginBottom: 10 }}>
             카테고리 <span style={{ color: '#1C1C1C' }}>*</span>
           </label>
+          {/* 구해요 / 할게요 상위 선택 */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            {TOP_TYPES.map(t => (
+              <button key={t.value} onClick={() => {
+                setTopType(t.value);
+                const defaultCat = t.value === 'offer' ? 'JOB_OFFER' : 'JOB_SEEK';
+                setForm(p => ({ ...p, category: defaultCat }));
+              }} style={{
+                flex: 1, padding: '12px 8px', borderRadius: 12,
+                border: `2px solid ${topType === t.value ? '#1C1C1C' : '#E8E4DC'}`,
+                background: topType === t.value ? '#1C1C1C' : 'white',
+                color: topType === t.value ? 'white' : '#6B7280',
+                fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}>
+                {t.label}
+                <div style={{ fontSize: 11, fontWeight: 400, marginTop: 3, opacity: 0.8 }}>{t.desc}</div>
+              </button>
+            ))}
+          </div>
+          {/* 세부 카테고리 */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {JOB_CATEGORIES.map(c => (
+            {(topType === 'offer' ? JOB_CATEGORIES_OFFER : JOB_CATEGORIES_SEEK).map(c => (
               <button key={c.value} onClick={() => setForm(p => ({ ...p, category: c.value }))}
                 style={{
                   padding: '8px 14px', borderRadius: 99,

@@ -27,7 +27,7 @@ export default function BottomNav() {
 
   const tabs: Tab[] = [
     { Icon: Home, label: '홈', href: '/' },
-    { Icon: Briefcase, label: '구인구직', href: '/jobs' },
+    { Icon: Briefcase, label: '탐색', href: '/jobs' },
     { Icon: PenLine, label: '글쓰기', href: getWriteHref(), highlight: true },
     { Icon: MessageCircle, label: '채팅', href: '/chat', showBadge: true },
     { Icon: User, label: '내정보', href: isLoggedIn ? '/mypage' : '/login' },
