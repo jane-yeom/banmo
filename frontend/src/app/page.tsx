@@ -282,12 +282,12 @@ function SectionTitle({ type, title, href }: {
 // 빠른 메뉴
 function QuickMenu() {
   const menus = [
-    { Icon: Music2, label: '반주자\n구인', href: '/jobs?category=JOB_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: Mic, label: '반주자\n구직', href: '/jobs?category=JOB_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: BookOpen, label: '레슨\n구인', href: '/jobs?category=LESSON_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: BookOpen, label: '레슨\n구직', href: '/jobs?category=LESSON_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: School, label: '학원선생님\n구인', href: '/jobs?category=ACADEMY_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
-    { Icon: GraduationCap, label: '학원선생님\n구직', href: '/jobs?category=ACADEMY_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: Music2, label: '반주자\n구함', href: '/jobs?category=JOB_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: Mic, label: '반주\n지원', href: '/jobs?category=JOB_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: BookOpen, label: '레슨\n구함', href: '/jobs?category=LESSON_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: BookOpen, label: '레슨\n지원', href: '/jobs?category=LESSON_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: School, label: '학원\n채용', href: '/jobs?category=ACADEMY_OFFER', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
+    { Icon: GraduationCap, label: '학원\n취업', href: '/jobs?category=ACADEMY_SEEK', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
     { Icon: Star, label: '공연\n연주회', href: '/promo?category=PROMO_CONCERT', iconBg: '#F0EDE6', iconColor: '#1C1C1C' },
   ];
 
