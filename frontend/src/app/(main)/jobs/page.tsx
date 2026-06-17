@@ -164,12 +164,6 @@ export default function JobsPage() {
               <SlidersHorizontal size={14} strokeWidth={2} />
               필터{activeFilters > 0 ? ` (${activeFilters})` : ''}
             </button>
-            <Link
-              href={`/write/jobs?category=${category || 'JOB_OFFER'}`}
-              style={{ padding: '7px 14px', borderRadius: 8, background: '#1C1C1C', color: 'white', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}
-            >
-              + 공고 작성
-            </Link>
           </div>
         </div>
 

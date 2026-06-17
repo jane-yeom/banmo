@@ -19,16 +19,10 @@ export default function BottomNav() {
   const { isLoggedIn } = useAuthStore();
   const { unreadCount } = useChatStore();
 
-  const getWriteHref = () => {
-    if (pathname.startsWith('/promo')) return '/write/promo?category=PROMO_CONCERT';
-    if (pathname.startsWith('/jobs')) return '/write/jobs?category=JOB_OFFER';
-    return '/write/jobs?category=JOB_OFFER';
-  };
-
   const tabs: Tab[] = [
     { Icon: Home, label: '홈', href: '/' },
     { Icon: Briefcase, label: '탐색', href: '/jobs' },
-    { Icon: PenLine, label: '글쓰기', href: getWriteHref(), highlight: true },
+    { Icon: PenLine, label: '글쓰기', href: '/write', highlight: true },
     { Icon: MessageCircle, label: '채팅', href: '/chat', showBadge: true },
     { Icon: User, label: '내정보', href: isLoggedIn ? '/mypage' : '/login' },
   ];
