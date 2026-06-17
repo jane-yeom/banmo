@@ -134,10 +134,13 @@ export default function JobDetailPage() {
   const [showApply, setShowApply] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [detailTab, setDetailTab] = useState<'info' | 'applicants'>('info');
   const [resumeUser, setResumeUser] = useState<any>(null);
   // TODO: 유료 기능 활성화시 주석 해제
   // const [showPremium, setShowPremium] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   // 지원자 목록 (공고 작성자만)
   const { data: applicants } = useQuery({
@@ -283,7 +286,7 @@ export default function JobDetailPage() {
     );
 
   // 비로그인 차단 — 목록은 볼 수 있지만 상세는 로그인 필요
-  if (!isRestoring && !user)
+  if (mounted && !user)
     return (
       <div className="flex flex-col items-center justify-center py-32 px-8 text-center">
         <span className="text-5xl mb-4">🔒</span>
