@@ -280,8 +280,8 @@ function SectionTitle({ type, title, href }: {
 }
 
 const TABS = [
-  { key: 'offer',   label: '구해요',      cats: 'JOB_OFFER,LESSON_OFFER,ACADEMY_OFFER,PERFORMANCE,AFTERSCHOOL,ETC', href: '/jobs?type=offer' },
-  { key: 'seek',    label: '할게요',      cats: 'JOB_SEEK,LESSON_SEEK,ACADEMY_SEEK', href: '/jobs?type=seek' },
+  { key: 'offer',   label: '구해요',      cats: 'JOB_OFFER,LESSON_OFFER,PERFORMANCE,AFTERSCHOOL,ETC', href: '/jobs?type=offer' },
+  { key: 'seek',    label: '할게요',      cats: 'JOB_SEEK,LESSON_SEEK', href: '/jobs?type=seek' },
   { key: 'board',   label: '수다방',      cats: '', href: '/board' },
   { key: 'promo',   label: '소식',        cats: 'PROMO_CONCERT,PROMO_SPACE', href: '/promo' },
   { key: 'profile', label: '반주자 프로필', cats: '', href: '/profiles' },
