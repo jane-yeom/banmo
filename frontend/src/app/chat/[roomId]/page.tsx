@@ -137,13 +137,6 @@ export default function ChatRoomPage() {
     };
   }, []);
 
-  // 키보드 열릴 때 메시지 목록 최하단 유지
-  useEffect(() => {
-    const onResize = () => { scrollToBottom(false); };
-    window.visualViewport?.addEventListener('resize', onResize);
-    return () => { window.visualViewport?.removeEventListener('resize', onResize); };
-  }, [scrollToBottom]);
-
   useEffect(() => {
     if (!mounted || isRestoring) return;
     if (!user) { router.push('/login'); return; }
@@ -192,6 +185,13 @@ export default function ChatRoomPage() {
       el.scrollTop = el.scrollHeight;
     }
   }, []);
+
+  // 키보드 열릴 때 메시지 목록 최하단 유지
+  useEffect(() => {
+    const onResize = () => { scrollToBottom(false); };
+    window.visualViewport?.addEventListener('resize', onResize);
+    return () => { window.visualViewport?.removeEventListener('resize', onResize); };
+  }, [scrollToBottom]);
 
   useEffect(() => {
     if (messages.length === 0) return;
