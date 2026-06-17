@@ -286,7 +286,6 @@ const TABS = [
   { key: 'promo',   label: '소식',        cats: 'PROMO_CONCERT,PROMO_SPACE', href: '/promo' },
   { key: 'profile', label: '반주자 프로필', cats: '', href: '/profiles' },
 ] as const;
-type TabKey = typeof TABS[number]['key'];
 
 function ProfileCard({ profile }: { profile: any }) {
   const instruments: string[] = Array.isArray(profile.instruments) ? profile.instruments : [];
@@ -345,35 +344,40 @@ function ProfileCard({ profile }: { profile: any }) {
 }
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<TabKey>('offer');
-  const [tabPosts, setTabPosts] = useState<Record<string, any[]>>({});
+  const [posts, setPosts] = useState<{ offer: any[]; seek: any[]; promo: any[] }>({ offer: [], seek: [], promo: [] });
   const [publicProfiles, setPublicProfiles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const extract = (res: any) =>
     res.data?.items || res.data?.data || res.data?.posts ||
     (Array.isArray(res.data) ? res.data : []);
 
   useEffect(() => {
-    api.get('/users/public').then((r) => {
-      setPublicProfiles(Array.isArray(r.data) ? r.data : []);
-    }).catch(() => {});
+    const OFFER_CATS = 'JOB_OFFER,LESSON_OFFER,PERFORMANCE,AFTERSCHOOL,ETC';
+    const SEEK_CATS  = 'JOB_SEEK,LESSON_SEEK';
+    const PROMO_CATS = 'PROMO_CONCERT,PROMO_SPACE';
+    Promise.allSettled([
+      api.get(`/posts?limit=5&status=ACTIVE&categories=${OFFER_CATS}`),
+      api.get(`/posts?limit=5&status=ACTIVE&categories=${SEEK_CATS}`),
+      api.get(`/posts?limit=5&status=ACTIVE&categories=${PROMO_CATS}`),
+      api.get('/users/public'),
+    ]).then(([offerRes, seekRes, promoRes, profilesRes]) => {
+      setPosts({
+        offer: offerRes.status === 'fulfilled' ? extract(offerRes.value) : [],
+        seek:  seekRes.status  === 'fulfilled' ? extract(seekRes.value)  : [],
+        promo: promoRes.status === 'fulfilled' ? extract(promoRes.value) : [],
+      });
+      if (profilesRes.status === 'fulfilled') {
+        setPublicProfiles(Array.isArray(profilesRes.value.data) ? profilesRes.value.data : []);
+      }
+    }).finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    if (activeTab === 'profile') return;
-    if (tabPosts[activeTab]) return; // 캐시 있으면 재요청 안 함
-    const tab = TABS.find(t => t.key === activeTab)!;
-    if (!tab.cats) return;
-    setLoading(true);
-    api.get(`/posts?limit=10&status=ACTIVE&categories=${tab.cats}`)
-      .then(r => setTabPosts(prev => ({ ...prev, [activeTab]: extract(r) })))
-      .catch(() => setTabPosts(prev => ({ ...prev, [activeTab]: [] })))
-      .finally(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
-
-  const posts = tabPosts[activeTab] ?? [];
+  const scrollToSection = (key: string) => {
+    const el = sectionRefs.current[key];
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: '#F7F4ED' }}>
@@ -383,27 +387,24 @@ export default function HomePage() {
         {/* 슬라이딩 배너 */}
         <HeroBanner />
 
-        {/* 탭 바 */}
+        {/* 앵커 탭 바 (클릭 시 해당 섹션으로 스크롤) */}
         <div style={{
-          display: 'flex', gap: 6, marginBottom: 20,
+          display: 'flex', gap: 6, marginBottom: 24,
           overflowX: 'auto', scrollbarWidth: 'none',
           paddingBottom: 2,
         }}>
           {TABS.map(tab => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => scrollToSection(tab.key)}
               style={{
                 flexShrink: 0,
                 padding: '8px 16px',
-                borderRadius: 99,
-                border: 'none',
-                fontSize: 14, fontWeight: 600,
-                cursor: 'pointer',
-                background: activeTab === tab.key ? '#1C1C1C' : 'white',
-                color: activeTab === tab.key ? 'white' : '#6B7280',
-                boxShadow: activeTab === tab.key ? '0 2px 8px rgba(0,0,0,0.18)' : '0 1px 3px rgba(0,0,0,0.07)',
-                transition: 'all 0.18s',
+                borderRadius: 99, border: 'none',
+                fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                background: 'white', color: '#374151',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                transition: 'all 0.15s',
               }}
             >
               {tab.label}
@@ -411,88 +412,102 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* 탭 콘텐츠 */}
-        {activeTab === 'profile' ? (
-          <div>
-            {publicProfiles.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9CA3AF', fontSize: 14 }}>
-                등록된 반주자 프로필이 없습니다
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {publicProfiles.map((profile) => (
-                  <Link key={profile.id} href={`/profile/${profile.id}`} style={{ textDecoration: 'none' }}>
-                    <div style={{
-                      background: 'white', borderRadius: 14,
-                      border: '1px solid #F3F4F6',
-                      padding: '14px 16px',
-                      display: 'flex', alignItems: 'center', gap: 14,
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                    }}>
-                      <div style={{
-                        width: 52, height: 52, borderRadius: '50%',
-                        background: '#F0EDE6', flexShrink: 0,
-                        overflow: 'hidden',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        border: '1.5px solid #E8E4DC',
-                      }}>
-                        {profile.profileImage ? (
-                          <Image src={profile.profileImage} alt={profile.nickname ?? '?'} width={52} height={52} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
-                        ) : (
-                          <span style={{ fontSize: 20, fontWeight: 700, color: '#1C1C1C' }}>{(profile.nickname ?? '?')[0]}</span>
-                        )}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                          <span style={{ fontWeight: 700, fontSize: 15, color: '#1C1C1C' }}>{profile.nickname ?? '익명'}</span>
-                          <NoteGradeBadge grade={profile.noteGrade} showLabel={false} size="sm" />
-                        </div>
-                        {profile.instruments?.length > 0 && (
-                          <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 2 }}>🎵 {profile.instruments.slice(0, 3).join(' · ')}</div>
-                        )}
-                        {profile.bio && (
-                          <div style={{ fontSize: 12, color: '#9CA3AF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.bio}</div>
-                        )}
-                      </div>
-                      {profile.region && (
-                        <div style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>{profile.region}</div>
-                      )}
+        {/* 구해요 섹션 */}
+        <div ref={el => { sectionRefs.current['offer'] = el; }} style={{ marginBottom: 32, scrollMarginTop: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>구해요</h2>
+            <Link href="/jobs?type=offer" style={{ fontSize: 13, color: '#1C1C1C', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 2 }}>
+              전체보기 <ChevronRight size={14} strokeWidth={1.8} />
+            </Link>
+          </div>
+          {loading ? [1,2,3].map(i => <div key={i} style={{ background: '#E5E7EB', borderRadius: 14, height: 80, marginBottom: 10 }} />)
+            : posts.offer.length === 0
+            ? <div style={{ textAlign: 'center', padding: '28px', color: '#9CA3AF', fontSize: 14, background: 'white', borderRadius: 14 }}>등록된 글이 없습니다</div>
+            : posts.offer.map((post: any) => <SectionCard key={post.id} post={post} />)
+          }
+        </div>
+
+        {/* 할게요 섹션 */}
+        <div ref={el => { sectionRefs.current['seek'] = el; }} style={{ marginBottom: 32, scrollMarginTop: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>할게요</h2>
+            <Link href="/jobs?type=seek" style={{ fontSize: 13, color: '#1C1C1C', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 2 }}>
+              전체보기 <ChevronRight size={14} strokeWidth={1.8} />
+            </Link>
+          </div>
+          {loading ? [1,2].map(i => <div key={i} style={{ background: '#E5E7EB', borderRadius: 14, height: 80, marginBottom: 10 }} />)
+            : posts.seek.length === 0
+            ? <div style={{ textAlign: 'center', padding: '28px', color: '#9CA3AF', fontSize: 14, background: 'white', borderRadius: 14 }}>등록된 글이 없습니다</div>
+            : posts.seek.map((post: any) => <SectionCard key={post.id} post={post} />)
+          }
+        </div>
+
+        {/* 수다방 섹션 */}
+        <div ref={el => { sectionRefs.current['board'] = el; }} style={{ marginBottom: 32, scrollMarginTop: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>수다방</h2>
+            <Link href="/board" style={{ fontSize: 13, color: '#1C1C1C', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 2 }}>
+              전체보기 <ChevronRight size={14} strokeWidth={1.8} />
+            </Link>
+          </div>
+          <div style={{ background: 'white', borderRadius: 14, padding: '24px', textAlign: 'center', border: '1px solid #F3F4F6' }}>
+            <span style={{ fontSize: 32 }}>💬</span>
+            <p style={{ color: '#6B7280', fontSize: 14, marginTop: 8 }}>자유롭게 이야기를 나눠보세요</p>
+            <Link href="/board" style={{ display: 'inline-block', marginTop: 12, padding: '8px 20px', borderRadius: 99, background: '#1C1C1C', color: 'white', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+              수다방 가기
+            </Link>
+          </div>
+        </div>
+
+        {/* 소식 섹션 */}
+        <div ref={el => { sectionRefs.current['promo'] = el; }} style={{ marginBottom: 32, scrollMarginTop: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>소식</h2>
+            <Link href="/promo" style={{ fontSize: 13, color: '#1C1C1C', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 2 }}>
+              전체보기 <ChevronRight size={14} strokeWidth={1.8} />
+            </Link>
+          </div>
+          {loading ? [1,2].map(i => <div key={i} style={{ background: '#E5E7EB', borderRadius: 14, height: 80, marginBottom: 10 }} />)
+            : posts.promo.length === 0
+            ? <div style={{ textAlign: 'center', padding: '28px', color: '#9CA3AF', fontSize: 14, background: 'white', borderRadius: 14 }}>등록된 소식이 없습니다</div>
+            : posts.promo.map((post: any) => <SectionCard key={post.id} post={post} />)
+          }
+        </div>
+
+        {/* 반주자 프로필 섹션 */}
+        <div ref={el => { sectionRefs.current['profile'] = el; }} style={{ marginBottom: 16, scrollMarginTop: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>반주자 프로필</h2>
+          </div>
+          {publicProfiles.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '28px', color: '#9CA3AF', fontSize: 14, background: 'white', borderRadius: 14 }}>등록된 프로필이 없습니다</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {publicProfiles.map((profile) => (
+                <Link key={profile.id} href={`/profile/${profile.id}`} style={{ textDecoration: 'none' }}>
+                  <div style={{ background: 'white', borderRadius: 14, border: '1px solid #F3F4F6', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#F0EDE6', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #E8E4DC' }}>
+                      {profile.profileImage
+                        ? <Image src={profile.profileImage} alt={profile.nickname ?? '?'} width={48} height={48} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+                        : <span style={{ fontSize: 18, fontWeight: 700, color: '#1C1C1C' }}>{(profile.nickname ?? '?')[0]}</span>
+                      }
                     </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : activeTab === 'board' ? (
-          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <span style={{ fontSize: 40 }}>💬</span>
-            <p style={{ marginTop: 12, color: '#6B7280', fontSize: 15, fontWeight: 600 }}>수다방</p>
-            <p style={{ color: '#9CA3AF', fontSize: 13, marginTop: 6 }}>자유롭게 이야기를 나눠보세요</p>
-            <Link href="/board" style={{
-              display: 'inline-block', marginTop: 16,
-              padding: '10px 24px', borderRadius: 99,
-              background: '#1C1C1C', color: 'white',
-              fontSize: 14, fontWeight: 600, textDecoration: 'none',
-            }}>수다방 가기</Link>
-          </div>
-        ) : (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-              <Link href={TABS.find(t => t.key === activeTab)!.href} style={{ fontSize: 13, color: '#1C1C1C', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 2 }}>
-                전체보기 <ChevronRight size={14} strokeWidth={1.8} />
-              </Link>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                        <span style={{ fontWeight: 700, fontSize: 15, color: '#1C1C1C' }}>{profile.nickname ?? '익명'}</span>
+                        <NoteGradeBadge grade={profile.noteGrade} showLabel={false} size="sm" />
+                      </div>
+                      {profile.instruments?.length > 0 && <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 2 }}>🎵 {profile.instruments.slice(0, 3).join(' · ')}</div>}
+                      {profile.bio && <div style={{ fontSize: 12, color: '#9CA3AF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.bio}</div>}
+                    </div>
+                    {profile.region && <div style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>{profile.region}</div>}
+                  </div>
+                </Link>
+              ))}
             </div>
-            {loading ? (
-              [1,2,3].map(i => <div key={i} style={{ background: '#E5E7EB', borderRadius: 14, height: 80, marginBottom: 10 }} />)
-            ) : posts.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9CA3AF', fontSize: 14, background: 'white', borderRadius: 14 }}>
-                등록된 글이 없습니다
-              </div>
-            ) : (
-              posts.map((post: any) => <SectionCard key={post.id} post={post} />)
-            )}
-          </>
-        )}
+          )}
+        </div>
+
       </div>
 
       <BottomNav />
