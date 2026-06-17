@@ -284,7 +284,7 @@ const TABS = [
   { key: 'seek',    label: '할게요',      cats: 'JOB_SEEK,LESSON_SEEK', href: '/jobs?type=seek' },
   { key: 'board',   label: '수다방',      cats: '', href: '/board' },
   { key: 'promo',   label: '소식',        cats: 'PROMO_CONCERT,PROMO_SPACE,PROMO_CONTEST', href: '/promo' },
-  { key: 'profile', label: '반주자 프로필', cats: '', href: '/profiles' },
+  { key: 'profile', label: '프로필', cats: '', href: '/profiles' },
 ] as const;
 
 function ProfileCard({ profile }: { profile: any }) {
@@ -474,10 +474,10 @@ export default function HomePage() {
           }
         </div>
 
-        {/* 반주자 프로필 섹션 */}
+        {/* 프로필 섹션 */}
         <div ref={el => { sectionRefs.current['profile'] = el; }} style={{ marginBottom: 16, scrollMarginTop: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>반주자 프로필</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>프로필</h2>
           </div>
           {publicProfiles.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '28px', color: '#9CA3AF', fontSize: 14, background: 'white', borderRadius: 14 }}>등록된 프로필이 없습니다</div>
