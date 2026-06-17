@@ -15,8 +15,8 @@ import { MapPin, Music, Coins, Calendar, Eye, MessageCircle, Pencil, AlertCircle
 import ReportModal from '@/components/common/ReportModal';
 
 const CATEGORY_LABEL: Record<string, string> = {
-  PROMO_CONCERT: '연주회·공연/연주회',
-  PROMO_SPACE: '연습실·공연장 대여',
+  PROMO_CONCERT: '공연/연주회',
+  PROMO_SPACE: '연습실',
 };
 
 export default function PromoDetailPage() {

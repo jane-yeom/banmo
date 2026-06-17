@@ -228,7 +228,7 @@ function WriteBoardContent() {
                 value={tagInput}
                 onChange={e => handleTagInput(e.target.value)}
                 onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+                  if ((e.key === 'Enter' || e.key === ' ') && !e.nativeEvent.isComposing) {
                     e.preventDefault();
                     addTag(tagInput);
                   }

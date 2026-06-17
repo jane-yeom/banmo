@@ -10,8 +10,9 @@ import SubHeader from '@/components/layout/SubHeader';
 import { Camera, X, MapPin, Coins, Calendar, Info } from 'lucide-react';
 
 const PROMO_CATEGORIES = [
-  { value: 'PROMO_CONCERT', label: '공연/연주회 홍보' },
-  { value: 'PROMO_SPACE', label: '연습실/공연장 대여' },
+  { value: 'PROMO_CONCERT', label: '공연/연주회' },
+  { value: 'PROMO_SPACE',   label: '연습실' },
+  { value: 'PROMO_CONTEST', label: '콩쿨' },
 ];
 
 const REGIONS = [

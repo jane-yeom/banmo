@@ -68,7 +68,7 @@ function SearchContent() {
     JOB_OFFER: '반주자 구함', JOB_SEEK: '반주 지원',
     LESSON_OFFER: '레슨 구함', LESSON_SEEK: '레슨 지원',
     PERFORMANCE: '공연도우미', AFTERSCHOOL: '방과후교사',
-    PROMO_CONCERT: '공연/연주회', PROMO_SPACE: '연습실대여',
+    PROMO_CONCERT: '공연/연주회', PROMO_SPACE: '연습실', PROMO_CONTEST: '콩쿨',
     TRADE_LESSON: '레슨양도', TRADE_SPACE: '연습실양도',
     TRADE_TICKET: '티켓양도', TRADE_INSTRUMENT: '중고악기',
   };

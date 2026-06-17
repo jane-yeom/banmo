@@ -27,20 +27,39 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-const CATEGORIES = [
-  { value: 'JOB_OFFER',        label: '반주자 구함' },
-  { value: 'JOB_SEEK',         label: '반주 지원' },
-  { value: 'LESSON_OFFER',     label: '레슨 구함' },
-  { value: 'LESSON_SEEK',      label: '레슨 지원' },
-  { value: 'PERFORMANCE',      label: '공연 도우미' },
-  { value: 'AFTERSCHOOL',      label: '방과후 교사' },
-  { value: 'PROMO_CONCERT',    label: '연주회 홍보' },
-  { value: 'PROMO_SPACE',      label: '연습실 대여' },
-  { value: 'TRADE_LESSON',     label: '레슨 양도' },
-  { value: 'TRADE_SPACE',      label: '연습실 양도' },
-  { value: 'TRADE_TICKET',     label: '티켓 양도' },
-  { value: 'TRADE_INSTRUMENT', label: '중고 악기' },
-];
+const TOP_TYPES = [
+  { value: 'offer', label: '구해요', desc: '반주자·레슨·학원 등 구하는 글' },
+  { value: 'seek',  label: '할게요', desc: '반주·레슨·학원취업 등 제공하는 글' },
+  { value: 'promo', label: '소식',   desc: '공연·연습실·콩쿨 정보' },
+] as const;
+
+const CATEGORIES_BY_TYPE: Record<string, { value: string; label: string }[]> = {
+  offer: [
+    { value: 'JOB_OFFER',    label: '반주자 구함' },
+    { value: 'LESSON_OFFER', label: '레슨 구함' },
+    { value: 'PERFORMANCE',  label: '공연도우미 구인' },
+    { value: 'AFTERSCHOOL',  label: '방과후 교사 구인' },
+    { value: 'ETC',          label: '기타' },
+  ],
+  seek: [
+    { value: 'JOB_SEEK',     label: '반주 할게요' },
+    { value: 'LESSON_SEEK',  label: '레슨 할게요' },
+    { value: 'ETC',          label: '기타' },
+  ],
+  promo: [
+    { value: 'PROMO_CONCERT', label: '공연/연주회' },
+    { value: 'PROMO_SPACE',   label: '연습실' },
+    { value: 'PROMO_CONTEST', label: '콩쿨' },
+  ],
+};
+
+function getTopType(category: string): 'offer' | 'seek' | 'promo' {
+  if (CATEGORIES_BY_TYPE.seek.some(c => c.value === category)) return 'seek';
+  if (CATEGORIES_BY_TYPE.promo.some(c => c.value === category)) return 'promo';
+  return 'offer';
+}
+
+const CATEGORIES = Object.values(CATEGORIES_BY_TYPE).flat();
 
 const INSTRUMENTS_LIST = [
   '피아노', '바이올린', '비올라', '첼로', '콘트라베이스',
@@ -102,6 +121,7 @@ export default function JobEditPage() {
   const { data: post, isLoading } = usePost(id);
 
   const [initialized, setInitialized] = useState(false);
+  const [topType, setTopType] = useState<'offer' | 'seek' | 'promo'>('offer');
   const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [imageUploading, setImageUploading] = useState(false);
@@ -146,6 +166,7 @@ export default function JobEditPage() {
       payMin: post.payMin ?? 0,
       payMax: post.payMax ?? undefined,
     });
+    setTopType(getTopType(post.category));
     setSelectedInstruments(post.instruments ?? []);
     setImageUrls(post.imageUrls ?? []);
     setInitialized(true);
@@ -219,11 +240,32 @@ export default function JobEditPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* 카테고리 */}
         <Field label="카테고리" error={errors.category?.message}>
-          <div className="grid grid-cols-3 gap-2">
-            {CATEGORIES.map((cat) => (
+          {/* 상위 분류 */}
+          <div className="flex gap-2 mb-3">
+            {TOP_TYPES.map(t => (
+              <button type="button" key={t.value}
+                onClick={() => {
+                  setTopType(t.value);
+                  setValue('category', CATEGORIES_BY_TYPE[t.value][0].value);
+                }}
+                className="flex-1 rounded-xl border-2 py-3 text-center transition-all text-sm font-bold"
+                style={{
+                  borderColor: topType === t.value ? '#1C1C1C' : '#E5E7EB',
+                  background: topType === t.value ? '#1C1C1C' : 'white',
+                  color: topType === t.value ? 'white' : '#6B7280',
+                }}
+              >
+                {t.label}
+                <div style={{ fontSize: 10, fontWeight: 400, marginTop: 2, opacity: 0.8 }}>{t.desc}</div>
+              </button>
+            ))}
+          </div>
+          {/* 세부 카테고리 */}
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES_BY_TYPE[topType].map((cat) => (
               <label key={cat.value} className="cursor-pointer">
                 <input type="radio" value={cat.value} {...register('category')} className="sr-only peer" />
-                <span className="block rounded-lg border border-gray-200 px-2 py-2 text-center text-xs peer-checked:border-[#1C1C1C] peer-checked:bg-[#F7F4ED] peer-checked:text-[#1C1C1C] peer-checked:font-semibold transition-colors">
+                <span className="block rounded-full border px-3 py-1.5 text-xs peer-checked:border-[#1C1C1C] peer-checked:bg-[#F7F4ED] peer-checked:text-[#1C1C1C] peer-checked:font-semibold transition-colors border-gray-200 text-gray-500">
                   {cat.label}
                 </span>
               </label>

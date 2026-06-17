@@ -174,7 +174,7 @@ function SectionCard({ post }: { post: any }) {
     PERFORMANCE: '공연도우미', AFTERSCHOOL: '방과후교사',
     ACADEMY_OFFER: '학원 채용', ACADEMY_SEEK: '학원 취업',
     ETC: '기타',
-    PROMO_CONCERT: '공연/연주회', PROMO_SPACE: '연습실대여',
+    PROMO_CONCERT: '공연/연주회', PROMO_SPACE: '연습실', PROMO_CONTEST: '콩쿨',
     TRADE_LESSON: '레슨양도', TRADE_SPACE: '연습실양도',
     TRADE_TICKET: '티켓양도', TRADE_INSTRUMENT: '중고악기',
   };
@@ -283,7 +283,7 @@ const TABS = [
   { key: 'offer',   label: '구해요',      cats: 'JOB_OFFER,LESSON_OFFER,PERFORMANCE,AFTERSCHOOL,ETC', href: '/jobs?type=offer' },
   { key: 'seek',    label: '할게요',      cats: 'JOB_SEEK,LESSON_SEEK', href: '/jobs?type=seek' },
   { key: 'board',   label: '수다방',      cats: '', href: '/board' },
-  { key: 'promo',   label: '소식',        cats: 'PROMO_CONCERT,PROMO_SPACE', href: '/promo' },
+  { key: 'promo',   label: '소식',        cats: 'PROMO_CONCERT,PROMO_SPACE,PROMO_CONTEST', href: '/promo' },
   { key: 'profile', label: '반주자 프로필', cats: '', href: '/profiles' },
 ] as const;
 
@@ -356,7 +356,7 @@ export default function HomePage() {
   useEffect(() => {
     const OFFER_CATS = 'JOB_OFFER,LESSON_OFFER,PERFORMANCE,AFTERSCHOOL,ETC';
     const SEEK_CATS  = 'JOB_SEEK,LESSON_SEEK';
-    const PROMO_CATS = 'PROMO_CONCERT,PROMO_SPACE';
+    const PROMO_CATS = 'PROMO_CONCERT,PROMO_SPACE,PROMO_CONTEST';
     Promise.allSettled([
       api.get(`/posts?limit=5&status=ACTIVE&categories=${OFFER_CATS}`),
       api.get(`/posts?limit=5&status=ACTIVE&categories=${SEEK_CATS}`),
