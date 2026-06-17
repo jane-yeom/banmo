@@ -344,7 +344,7 @@ function ProfileCard({ profile }: { profile: any }) {
 }
 
 export default function HomePage() {
-  const [posts, setPosts] = useState<{ offer: any[]; seek: any[]; promo: any[] }>({ offer: [], seek: [], promo: [] });
+  const [posts, setPosts] = useState<{ offer: any[]; seek: any[]; promo: any[]; board: any[] }>({ offer: [], seek: [], promo: [], board: [] });
   const [publicProfiles, setPublicProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -362,11 +362,13 @@ export default function HomePage() {
       api.get(`/posts?limit=5&status=ACTIVE&categories=${SEEK_CATS}`),
       api.get(`/posts?limit=5&status=ACTIVE&categories=${PROMO_CATS}`),
       api.get('/users/public'),
-    ]).then(([offerRes, seekRes, promoRes, profilesRes]) => {
+      api.get('/board?type=FREE&sort=latest&limit=5'),
+    ]).then(([offerRes, seekRes, promoRes, profilesRes, boardRes]) => {
       setPosts({
         offer: offerRes.status === 'fulfilled' ? extract(offerRes.value) : [],
         seek:  seekRes.status  === 'fulfilled' ? extract(seekRes.value)  : [],
         promo: promoRes.status === 'fulfilled' ? extract(promoRes.value) : [],
+        board: boardRes.status === 'fulfilled' ? (boardRes.value.data?.data || []) : [],
       });
       if (profilesRes.status === 'fulfilled') {
         setPublicProfiles(Array.isArray(profilesRes.value.data) ? profilesRes.value.data : []);
@@ -450,13 +452,45 @@ export default function HomePage() {
               전체보기 <ChevronRight size={14} strokeWidth={1.8} />
             </Link>
           </div>
-          <div style={{ background: 'white', borderRadius: 14, padding: '24px', textAlign: 'center', border: '1px solid #F3F4F6' }}>
-            <span style={{ fontSize: 32 }}>💬</span>
-            <p style={{ color: '#6B7280', fontSize: 14, marginTop: 8 }}>자유롭게 이야기를 나눠보세요</p>
-            <Link href="/board" style={{ display: 'inline-block', marginTop: 12, padding: '8px 20px', borderRadius: 99, background: '#1C1C1C', color: 'white', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-              수다방 가기
-            </Link>
-          </div>
+          {loading ? [1,2,3].map(i => <div key={i} style={{ background: '#E5E7EB', borderRadius: 14, height: 52, marginBottom: 8 }} />)
+            : posts.board.length === 0
+            ? (
+              <div style={{ background: 'white', borderRadius: 14, padding: '24px', textAlign: 'center', border: '1px solid #F3F4F6' }}>
+                <span style={{ fontSize: 32 }}>💬</span>
+                <p style={{ color: '#6B7280', fontSize: 14, marginTop: 8 }}>아직 게시글이 없어요</p>
+                <Link href="/board" style={{ display: 'inline-block', marginTop: 12, padding: '8px 20px', borderRadius: 99, background: '#1C1C1C', color: 'white', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+                  수다방 가기
+                </Link>
+              </div>
+            )
+            : (
+              <div style={{ background: 'white', borderRadius: 14, overflow: 'hidden', border: '1px solid #F3F4F6' }}>
+                {posts.board.map((post: any, idx: number) => (
+                  <Link key={post.id} href={`/board/${post.id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      padding: '12px 16px',
+                      borderBottom: idx < posts.board.length - 1 ? '1px solid #F3F4F6' : 'none',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+                    }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: 14, fontWeight: 500, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {post.title}
+                        </p>
+                        <p style={{ fontSize: 12, color: '#9CA3AF', margin: '3px 0 0', display: 'flex', gap: 6 }}>
+                          <span>{post.isAnonymous ? '익명' : (post.author?.nickname ?? '익명')}</span>
+                          <span>·</span>
+                          <span>댓글 {post.commentCount ?? 0}</span>
+                        </p>
+                      </div>
+                      <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>
+                        {new Date(post.createdAt).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )
+          }
         </div>
 
         {/* 소식 섹션 */}
