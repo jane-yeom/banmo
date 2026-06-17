@@ -142,7 +142,7 @@ export default function ChatListPage() {
 
                   {/* 연결된 공고 */}
                   {(room as any).post?.title && (
-                    <p className="text-xs text-[#888888] truncate mb-0.5">
+                    <p className="text-xs font-bold text-[#1C1C1C] truncate mb-0.5 bg-[#ECEAE4] rounded px-1.5 py-0.5 inline-block max-w-full">
                       {(room as any).post.title}
                     </p>
                   )}
